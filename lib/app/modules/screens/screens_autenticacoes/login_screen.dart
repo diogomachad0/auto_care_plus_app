@@ -1,5 +1,5 @@
-import 'package:auto_care_plus_app/shared/services/autenticacao_service/auth_service.dart';
-import 'package:auto_care_plus_app/shared/widgets/custom_loading.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/custom_loading.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {

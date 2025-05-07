@@ -1,10 +1,6 @@
-import 'package:auto_care_plus_app/shared/models/personagem.dart';
-import 'package:auto_care_plus_app/shared/services/autenticacao_service/auth_service.dart';
-import 'package:auto_care_plus_app/shared/services/personagem_service/personagem_services.dart';
-import 'package:auto_care_plus_app/shared/widgets/confirmarLogout.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
+import 'package:auto_care_plus_app/app/shared/services/personagem_service/personagem_services.dart';
 import 'package:flutter/material.dart';
-
-import 'detalhes_personagem_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required AuthService authService});

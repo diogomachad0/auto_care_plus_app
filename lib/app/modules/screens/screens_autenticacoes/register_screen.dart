@@ -1,8 +1,4 @@
-import 'package:auto_care_plus_app/shared/services/autenticacao_service/auth_service.dart';
-import 'package:auto_care_plus_app/shared/widgets/custom_input.dart';
-import 'package:auto_care_plus_app/shared/widgets/custom_input_password.dart';
-import 'package:auto_care_plus_app/shared/widgets/custom_loading.dart';
-import 'package:auto_care_plus_app/shared/widgets/error_auth.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:flutter/material.dart';
 
 

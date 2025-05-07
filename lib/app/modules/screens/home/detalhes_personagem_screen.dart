@@ -1,4 +1,4 @@
-import 'package:auto_care_plus_app/shared/models/personagem.dart';
+import 'package:auto_care_plus_app/app/shared/models/personagem.dart';
 import 'package:flutter/material.dart';
 
 class DetalhesPersonagemScreen extends StatelessWidget {

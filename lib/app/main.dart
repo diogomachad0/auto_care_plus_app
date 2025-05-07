@@ -1,8 +1,8 @@
 
-import 'package:auto_care_plus_app/modules/screens/home/home_page.dart';
-import 'package:auto_care_plus_app/modules/screens/screens_autenticacoes/login_screen.dart';
-import 'package:auto_care_plus_app/modules/screens/screens_autenticacoes/register_screen.dart';
-import 'package:auto_care_plus_app/shared/services/autenticacao_service/auth_service.dart';
+import 'package:auto_care_plus_app/app/modules/screens/home/home_page.dart';
+import 'package:auto_care_plus_app/app/modules/screens/screens_autenticacoes/login_screen.dart';
+import 'package:auto_care_plus_app/app/modules/screens/screens_autenticacoes/register_screen.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
