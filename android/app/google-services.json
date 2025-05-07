@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1017549522061",
+    "project_id": "aula-terca-6a39a",
+    "storage_bucket": "aula-terca-6a39a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017549522061:android:467a8f1971bcb459944ec4",
+        "android_client_info": {
+          "package_name": "com.example.auto_care_plus_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuRN5Lb_YjALJA88jkFdKf-1npjW0RYN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
