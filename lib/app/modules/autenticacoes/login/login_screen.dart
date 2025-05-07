@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 32.0),
                     child: Image.asset(
-                      'assets/img/logo_app.png',
+                      'assets/img/logo_white_app.png',
                       width: 180,
                     ),
                   ),
@@ -63,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                 children: [
                   FilledButton(
                     style: FilledButton.styleFrom(
+                      minimumSize: const Size(250, 40),
                       backgroundColor: colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -71,19 +72,21 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                     onPressed: () {
                       Modular.to.navigate('$entrarRoute/');
                     },
-                    child: const Text(
+                    child: Text(
                       'Entrar em minha conta',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                   TextButton(
                     onPressed: () {
                       Modular.to.navigate('$registrarRoute/');
                     },
-                    child: const Text(
+                    child: Text(
                       'Criar conta',
-                      style: TextStyle(
+                      style: textTheme.bodyMedium?.copyWith(
                         color: Colors.black,
-                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -99,9 +102,8 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
                           'ou',
-                          style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 16,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey.shade300,
                           ),
                         ),
                       ),
@@ -120,20 +122,9 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                       width: 24,
                       height: 24,
                     ),
-                    label: const Text(
+                    label: Text(
                       'Continuar com o Google',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16),
+                      style: textTheme.bodyMedium,
                     ),
                   ),
                 ],
