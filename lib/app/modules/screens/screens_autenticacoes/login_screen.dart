@@ -21,9 +21,6 @@ class LoginScreen extends StatelessWidget {
                   'assets/img/home.png',
                   fit: BoxFit.cover,
                 ),
-                Container(
-                  color: Colors.black.withOpacity(0.3), // escurecer imagem
-                ),
                 Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
