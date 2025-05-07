@@ -1,20 +1,25 @@
-
-import 'package:auto_care_plus_app/app/modules/screens/home/home_page.dart';
-import 'package:auto_care_plus_app/app/modules/screens/screens_autenticacoes/login_screen.dart';
-import 'package:auto_care_plus_app/app/modules/screens/screens_autenticacoes/register_screen.dart';
+import 'package:auto_care_plus_app/app/app_module.dart';
+import 'package:auto_care_plus_app/app/app_widget.dart';
+import 'package:auto_care_plus_app/app/modules/home/home_page.dart';
 import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 import 'shared/firebase/firebase_options.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runApp(
+    ModularApp(
+      module: AppModule(),
+      child: const AppWidget(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -41,8 +46,6 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Demo',
       initialRoute: isAuthenticated ? "/home" : "/",
       routes: {
-        "/": (context) => LoginScreen(authService: authService),
-        "/register": (context) => RegisterScreen(authService: authService),
         "/home": (context) => HomePage(authService: authService)
       },
     );
