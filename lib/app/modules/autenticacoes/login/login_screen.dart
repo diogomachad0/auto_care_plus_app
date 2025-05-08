@@ -75,6 +75,7 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                     child: Text(
                       'Entrar em minha conta',
                       style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
                         color: colorScheme.onPrimary,
                       ),
                     ),
