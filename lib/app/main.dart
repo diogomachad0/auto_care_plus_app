@@ -44,10 +44,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      initialRoute: isAuthenticated ? "/home" : "/",
-      routes: {
-        "/home": (context) => HomePage(authService: authService)
-      },
+
     );
   }
 }
