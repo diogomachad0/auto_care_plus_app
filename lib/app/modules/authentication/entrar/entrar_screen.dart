@@ -1,4 +1,5 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/password_text_field_custom.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,9 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Modular.to.pushNamed('$recuperarSenhaRoute/');
+                                  },
                                   child: Text(
                                     'Esqueci minha senha',
                                     style: textTheme.bodyMedium?.copyWith(
