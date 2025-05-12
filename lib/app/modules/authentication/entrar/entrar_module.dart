@@ -1,4 +1,4 @@
-import 'package:auto_care_plus_app/app/modules/autenticacoes/entrar/entrar_screen.dart';
+import 'package:auto_care_plus_app/app/modules/authentication/entrar/entrar_screen.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class EntrarModule extends Module {

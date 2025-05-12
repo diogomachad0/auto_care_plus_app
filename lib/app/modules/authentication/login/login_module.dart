@@ -1,7 +1,7 @@
 
-import 'package:auto_care_plus_app/app/modules/autenticacoes/entrar/entrar_module.dart';
-import 'package:auto_care_plus_app/app/modules/autenticacoes/login/login_screen.dart';
-import 'package:auto_care_plus_app/app/modules/autenticacoes/registro/registro_module.dart';
+import 'package:auto_care_plus_app/app/modules/authentication/entrar/entrar_module.dart';
+import 'package:auto_care_plus_app/app/modules/authentication/login/login_screen.dart';
+import 'package:auto_care_plus_app/app/modules/authentication/registro/registro_module.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
