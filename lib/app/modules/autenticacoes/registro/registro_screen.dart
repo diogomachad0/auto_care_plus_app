@@ -17,6 +17,26 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: colorScheme.onPrimary,
+          ),
+          onPressed: () {
+            Modular.to.navigate('/');
+          },
+        ),
+        title: Text(
+          'Cadastro de usuário',
+          style: textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+          ),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -31,30 +51,6 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
         child: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        Modular.to.navigate('/');
-                      },
-                    ),
-                    const SizedBox(width: 42),
-                    Text(
-                      'Cadastro de usuário',
-                      style: textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
@@ -93,7 +89,8 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
                                 const SizedBox(height: 32),
                                 FilledButton(
                                   style: FilledButton.styleFrom(
-                                    minimumSize: const Size(double.infinity, 46),
+                                    minimumSize:
+                                        const Size(double.infinity, 46),
                                     backgroundColor: colorScheme.primary,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
