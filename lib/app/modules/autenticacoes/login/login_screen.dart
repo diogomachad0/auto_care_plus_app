@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                 children: [
                   FilledButton(
                     style: FilledButton.styleFrom(
-                      minimumSize: const Size(250, 40),
+                      minimumSize: const Size(250, 46),
                       backgroundColor: colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),

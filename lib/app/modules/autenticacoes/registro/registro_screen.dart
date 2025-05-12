@@ -93,7 +93,7 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
                                 const SizedBox(height: 32),
                                 FilledButton(
                                   style: FilledButton.styleFrom(
-                                    minimumSize: const Size(double.infinity, 40),
+                                    minimumSize: const Size(double.infinity, 46),
                                     backgroundColor: colorScheme.primary,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
