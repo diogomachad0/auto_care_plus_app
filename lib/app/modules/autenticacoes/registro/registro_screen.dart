@@ -56,118 +56,107 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
                 ),
               ),
               Expanded(
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
-                  child: Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.8,
                     ),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Center(
-                            child: Row(
+                    child: IntrinsicHeight(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Card(
+                          elevation: 8,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Image.asset(
                                   'assets/img/logo_black_app.png',
                                   width: 200,
                                 ),
+                                const SizedBox(height: 32),
+                                const TextFieldCustom(label: 'Nome completo'),
+                                const SizedBox(height: 16),
+                                const TextFieldCustom(label: 'E-mail'),
+                                const SizedBox(height: 16),
+                                const TextFieldCustom(label: 'Telefone'),
+                                const SizedBox(height: 16),
+                                const PasswordTextFieldCustom(label: 'Senha'),
+                                const SizedBox(height: 16),
+                                const PasswordTextFieldCustom(
+                                    label: 'Confirmar senha'),
+                                const SizedBox(height: 32),
+                                FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    minimumSize: const Size(double.infinity, 40),
+                                    backgroundColor: colorScheme.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onPressed: () {},
+                                  child: Text(
+                                    'Criar conta',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Ler ', style: textTheme.bodySmall),
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: Text('Termos de Uso',
+                                          style: textTheme.bodySmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                    ),
+                                    Text(' e ', style: textTheme.bodySmall),
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: Text('Política de Privacidade',
+                                          style: textTheme.bodySmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Eu aceito os ',
+                                        style: textTheme.bodySmall),
+                                    Text('Termos',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        )),
+                                    const SizedBox(width: 4),
+                                    Switch(
+                                      value: _aceitoTermos,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _aceitoTermos = value;
+                                        });
+                                      },
+                                      activeColor: colorScheme.onSecondary,
+                                      activeTrackColor: colorScheme.primary,
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 32),
-                          const TextFieldCustom(label: 'Nome completo'),
-                          const SizedBox(height: 16),
-                          const TextFieldCustom(label: 'E-mail'),
-                          const SizedBox(height: 16),
-                          const TextFieldCustom(label: 'Telefone'),
-                          const SizedBox(height: 16),
-                          const PasswordTextFieldCustom(label: 'Senha'),
-                          const SizedBox(height: 16),
-                          const PasswordTextFieldCustom(
-                              label: 'Confirmar senha'),
-                          const SizedBox(height: 32),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(250, 40),
-                              backgroundColor: colorScheme.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            onPressed: () {},
-                            child: Text(
-                              'Criar conta',
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: colorScheme.onPrimary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Ler ',
-                                style: textTheme.bodySmall,
-                              ),
-                              GestureDetector(
-                                onTap: () {},
-                                child: Text(
-                                  'Termos de Uso',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                ' e ',
-                                style: textTheme.bodySmall,
-                              ),
-                              GestureDetector(
-                                onTap: () {},
-                                child: Text(
-                                  'Política de Privacidade',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Eu aceito os ',
-                                style: textTheme.bodySmall,
-                              ),
-                              Text(
-                                'Termos',
-                                style: textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Switch(
-                                value: _aceitoTermos,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _aceitoTermos = value;
-                                  });
-                                },
-                                activeColor: colorScheme.onSecondary,
-                                activeTrackColor: colorScheme.primary,
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
