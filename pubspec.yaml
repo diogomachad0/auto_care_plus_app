@@ -48,6 +48,7 @@ dependencies:
   oktoast: ^3.4.0
   image_picker: ^1.1.2
   flutter_shakemywidget: ^1.0.5+1
+  fl_chart: ^0.66.0
 
 dev_dependencies:
   flutter_test:
