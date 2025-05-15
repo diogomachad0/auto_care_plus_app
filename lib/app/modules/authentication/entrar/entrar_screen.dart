@@ -93,7 +93,9 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Modular.to.navigate('$homeRoute/');
+                                  },
                                   child: Text(
                                     'Entrar',
                                     style: textTheme.bodyMedium?.copyWith(
