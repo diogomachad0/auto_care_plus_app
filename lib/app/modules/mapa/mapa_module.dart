@@ -6,7 +6,6 @@ class MapaModule extends Module {
   void routes(RouteManager r) {
     r.child(Modular.initialRoute, child: (context) => const MapaScreen());
 
-
     super.routes(r);
   }
 }

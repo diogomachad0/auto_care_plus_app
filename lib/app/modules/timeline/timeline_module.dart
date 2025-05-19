@@ -6,7 +6,6 @@ class TimelineModule extends Module {
   void routes(RouteManager r) {
     r.child(Modular.initialRoute, child: (context) => const TimelineScreen());
 
-
     super.routes(r);
   }
 }
