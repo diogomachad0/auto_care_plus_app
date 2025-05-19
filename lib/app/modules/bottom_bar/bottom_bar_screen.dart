@@ -90,6 +90,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
       bottomNavigationBar: StylishBottomBar(
         option: AnimatedBarOptions(
           iconStyle: IconStyle.Default,
+          padding: const EdgeInsets.all(6),
         ),
         hasNotch: true,
         backgroundColor: colorScheme.primary,
@@ -99,36 +100,36 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
             icon: const Icon(
               Icons.menu_rounded,
               color: Colors.white,
-              size: 40,
+              size: 36,
             ),
             title: Text(
               'Menu',
-              style: textTheme.bodyLarge?.copyWith(
+              style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
               ),
             ),
             selectedIcon: Icon(
               Icons.menu_rounded,
               color: colorScheme.secondary,
-              size: 40,
+              size: 36,
             ),
           ),
           BottomBarItem(
               icon: const Icon(
                 Icons.home_rounded,
                 color: Colors.white,
-                size: 40,
+                size: 36,
               ),
               title: Text(
                 'Início',
-                style: textTheme.bodyLarge?.copyWith(
+                style: textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
                 ),
               ),
               selectedIcon: Icon(
                 Icons.home_rounded,
                 color: colorScheme.secondary,
-                size: 40,
+                size: 36,
               )),
           BottomBarItem(
             icon: const Icon(
@@ -137,7 +138,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
             ),
             title: Text(
               '',
-              style: textTheme.bodyLarge?.copyWith(
+              style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
               ),
             ),
@@ -146,35 +147,35 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
               icon: const Icon(
                 Icons.timeline_rounded,
                 color: Colors.white,
-                size: 40,
+                size: 36,
               ),
               title: Text(
                 'Atividade',
-                style: textTheme.bodyLarge?.copyWith(
+                style: textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
                 ),
               ),
               selectedIcon: Icon(
                 Icons.timeline_rounded,
                 color: colorScheme.secondary,
-                size: 40,
+                size: 36,
               )),
           BottomBarItem(
             icon: const Icon(
               Icons.location_on_sharp,
               color: Colors.white,
-              size: 40,
+              size: 36,
             ),
             title: Text(
               'Mapa',
-              style: textTheme.bodyLarge?.copyWith(
+              style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
               ),
             ),
             selectedIcon: Icon(
               Icons.location_on_sharp,
               color: colorScheme.secondary,
-              size: 40,
+              size: 32,
             ),
           ),
         ],
