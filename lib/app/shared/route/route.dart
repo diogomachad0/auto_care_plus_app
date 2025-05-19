@@ -11,3 +11,7 @@ const configuracaoRoute = 'configuracao';
 const homeRoute = 'home';
 
 const menuRoute = 'menu';
+
+const atividadeRoute = 'atividade';
+
+const mapaRoute = 'mapa';
