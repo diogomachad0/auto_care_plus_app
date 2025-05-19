@@ -44,10 +44,10 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
         _showActionSheet();
         break;
       case 3:
-        Modular.to.navigate('');
+        Modular.to.navigate('../$timeLineRoute');
         break;
       case 4:
-        Modular.to.navigate('');
+        Modular.to.navigate('../$mapaRoute');
         break;
     }
   }
