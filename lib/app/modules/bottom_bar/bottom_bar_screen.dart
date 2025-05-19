@@ -69,17 +69,21 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
     return Scaffold(
       extendBody: true,
       body: const RouterOutlet(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() => selectedIndex = 2);
-          _showActionSheet();
-        },
-        backgroundColor: colorScheme.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Icon(
-          Icons.add,
-          color: colorScheme.onPrimary,
-          size: 40,
+      floatingActionButton: SizedBox(
+        width: 70,
+        height: 70,
+        child: FloatingActionButton(
+          onPressed: () {
+            setState(() => selectedIndex = 2);
+            _showActionSheet();
+          },
+          backgroundColor: colorScheme.primary,
+          elevation: 8,
+          child: Icon(
+            Icons.add_rounded,
+            color: colorScheme.onPrimary,
+            size: 40,
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
