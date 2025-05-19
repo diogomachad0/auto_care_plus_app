@@ -12,7 +12,7 @@ class EntrarModule extends Module {
 
     r.module('/$recuperarSenhaRoute', module: RecuperarSenhaModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
     r.module('/$homeRoute', module: HomeModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
-    r.module('/$configuracaoRoute', module: BottomBarModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
+    r.module('/$bottomBarRoute', module: BottomBarModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
 
     super.routes(r);

@@ -6,7 +6,7 @@ const registrarRoute = 'registrar';
 
 const recuperarSenhaRoute = 'recuperarSenha';
 
-const configuracaoRoute = 'configuracao';
+const bottomBarRoute = 'bottomBar';
 
 const homeRoute = 'home';
 
