@@ -12,6 +12,6 @@ const homeRoute = 'home';
 
 const menuRoute = 'menu';
 
-const atividadeRoute = 'atividade';
+const timeLineRoute = 'timeline';
 
 const mapaRoute = 'mapa';
