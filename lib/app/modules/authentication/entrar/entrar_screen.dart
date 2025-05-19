@@ -94,7 +94,7 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                     ),
                                   ),
                                   onPressed: () {
-                                    Modular.to.navigate('$homeRoute/');
+                                    Modular.to.navigate('$configuracaoRoute/$homeRoute');
                                   },
                                   child: Text(
                                     'Entrar',
