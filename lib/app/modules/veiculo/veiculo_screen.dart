@@ -1,4 +1,5 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -47,7 +48,8 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
               color: colorScheme.onPrimary,
             ),
             onPressed: () {
-              Modular.to.navigate('/');
+              Navigator.pop(context);
+              //todo: arrumar depois
             },
           ),
           Text(
