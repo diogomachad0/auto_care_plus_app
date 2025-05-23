@@ -50,6 +50,8 @@ dependencies:
   flutter_shakemywidget: ^1.0.5+1
   fl_chart: ^0.66.0
   stylish_bottom_bar: 1.0.3
+  timeline_tile: ^2.0.0
+  intl: ^0.18.0
 
 
 dev_dependencies:
@@ -81,6 +83,7 @@ flutter:
     - assets/img/google_icon.png
     - assets/img/logo_white_app.png
     - assets/img/logo_black_app.png
+    - assets/img/banners/rafiki.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
