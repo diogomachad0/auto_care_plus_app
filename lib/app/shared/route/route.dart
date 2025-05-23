@@ -19,3 +19,7 @@ const mapaRoute = 'mapa';
 const veiculoRoute = 'veiculo';
 
 const adicionarVeiculoRoute = 'adicionarVeiculo';
+
+const lembreteRoute = 'lembrete';
+
+const adicioanarLembreteRoute = 'adicionarLembrete';
