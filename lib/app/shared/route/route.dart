@@ -17,3 +17,5 @@ const timeLineRoute = 'timeline';
 const mapaRoute = 'mapa';
 
 const veiculoRoute = 'veiculo';
+
+const adicionarVeiculoRoute = 'adicionarVeiculo';
