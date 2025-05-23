@@ -1,5 +1,7 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -30,7 +32,10 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       _buildMenuListItem(
                         title: 'Meus veículos',
                         subtitle: 'Gerencie seus veículos cadastrados',
-                        onTap: () {},
+                        onTap: () {
+                          Modular.to.pushNamed(veiculoRoute);
+
+                        },
                         isFirst: true,
                       ),
                       _buildMenuListItem(
