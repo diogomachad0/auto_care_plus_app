@@ -41,7 +41,10 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       _buildMenuListItem(
                         title: 'Lembretes',
                         subtitle: 'Gerencie seus lembretes que você criou',
-                        onTap: () {},
+                        onTap: () {
+                          Modular.to.pushNamed(lembreteRoute);
+
+                        },
                       ),
                       _buildMenuListItemWithSwitch(
                         title: 'Notificações',
