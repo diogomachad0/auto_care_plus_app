@@ -33,7 +33,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Meus veículos',
                         subtitle: 'Gerencie seus veículos cadastrados',
                         onTap: () {
-                          Modular.to.pushNamed(veiculoRoute);
+                          Modular.to.navigate(veiculoRoute);
 
                         },
                         isFirst: true,
@@ -42,7 +42,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Lembretes',
                         subtitle: 'Gerencie seus lembretes que você criou',
                         onTap: () {
-                          Modular.to.pushNamed(lembreteRoute);
+                          Modular.to.navigate(lembreteRoute);
 
                         },
                       ),
@@ -60,7 +60,9 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Contato',
                         subtitle:
                             'Dúvidas? Entre em contato conosco através do nosso suporte!',
-                        onTap: () {},
+                        onTap: () {
+                          Modular.to.navigate(contatoRoute);
+                        },
                       ),
                       _buildMenuListItem(
                         title: 'Sobre',
