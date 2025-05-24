@@ -1,8 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/lembrete/submodules/adicionar_lembrete/adicionar_lembrete_widget.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
-import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
 class LembreteScreen extends StatefulWidget {
   const LembreteScreen({super.key});
