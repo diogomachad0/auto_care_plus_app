@@ -85,6 +85,7 @@ flutter:
     - assets/img/banners/rafiki.png
     - assets/img/banners/bro.png
     - assets/img/banners/amico.png
+    - assets/img/banners/pana.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
