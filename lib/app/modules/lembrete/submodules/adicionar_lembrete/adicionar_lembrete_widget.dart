@@ -1,19 +1,20 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class AdicionarLembreteWidget extends StatefulWidget {
   final Function(String titulo, String data, bool notificar)? onSave;
 
-  const AdicionarLembreteWidget({
-    Key? key,
-    this.onSave,
-  }) : super(key: key);
+  const AdicionarLembreteWidget({super.key, this.onSave});
 
   @override
-  State<AdicionarLembreteWidget> createState() => _AdicionarLembreteWidgetState();
+  State<AdicionarLembreteWidget> createState() =>
+      _AdicionarLembreteWidgetState();
 }
 
-class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with ThemeMixin {
+class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
+    with ThemeMixin {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _dataController = TextEditingController();
   bool _notificar = false;
@@ -39,23 +40,19 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Adicionar um novo lembrete',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: textTheme.titleMedium,
             ),
             const SizedBox(height: 24),
             TextFieldCustom(
-              label: 'Título da tarefa',
+              label: 'Título do lembrete',
               controller: _tituloController,
             ),
             const SizedBox(height: 16),
             TextFieldCustom(
               label: 'Data',
               controller: _dataController,
-              readOnly: true,
               onTap: () => _selectDate(context),
             ),
             const SizedBox(height: 24),
@@ -72,12 +69,9 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Notificar lembretes?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: textTheme.bodyMedium,
         ),
         Switch(
           value: _notificar,
@@ -87,9 +81,8 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
             });
           },
           activeColor: Colors.white,
-          activeTrackColor: const Color(0xFF0288D1), // Blue color for the track
+          activeTrackColor: colorScheme.primary,
           inactiveThumbColor: Colors.white,
-          inactiveTrackColor: Colors.grey[300],
         ),
       ],
     );
@@ -110,12 +103,9 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
               ),
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
-              ),
+              style: textTheme.bodyMedium,
             ),
           ),
         ),
@@ -130,20 +120,19 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
                   _notificar,
                 );
               }
-              Navigator.of(context).pop();
+              Modular.to.pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0288D1), // Blue color
+              backgroundColor: colorScheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: const Text(
+            child: Text(
               'Salvar',
-              style: TextStyle(
+              style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -162,13 +151,14 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: const Color(0xFF0288D1), // Blue color
+              primary: colorScheme.primary,
             ),
           ),
           child: child!,
         );
       },
     );
+
     if (picked != null) {
       setState(() {
         _dataController.text = "${picked.day.toString().padLeft(2, '0')}/"
@@ -179,60 +169,12 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
   }
 }
 
-// Enhanced TextFieldCustom to support controller and onTap
-class TextFieldCustom extends StatefulWidget{
-  final String label;
-  final TextEditingController? controller;
-  final bool readOnly;
-  final VoidCallback? onTap;
-
-  const TextFieldCustom({
-    super.key,
-    required this.label,
-    this.controller,
-    this.readOnly = false,
-    this.onTap,
-  });
-
-  @override
-  State<TextFieldCustom> createState() => _TextFieldCustomState();
-}
-
-class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin{
-  @override
-  Widget build(BuildContext context){
-    return TextField(
-      controller: widget.controller,
-      readOnly: widget.readOnly,
-      onTap: widget.onTap,
-      decoration: InputDecoration(
-        labelText: widget.label,
-        labelStyle: textTheme.bodyMedium?.copyWith(
-          color: Colors.grey,
-        ),
-        filled: true,
-        fillColor: Colors.grey[200],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 8,
-        ),
-      ),
-    );
-  }
-}
-
-// Example of how to show the dialog
 void showAdicionarLembreteDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AdicionarLembreteWidget(
         onSave: (titulo, data, notificar) {
-          // Handle saving the reminder
           print('Título: $titulo, Data: $data, Notificar: $notificar');
         },
       );
