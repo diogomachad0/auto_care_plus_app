@@ -23,3 +23,5 @@ const adicionarVeiculoRoute = 'adicionarVeiculo';
 const lembreteRoute = 'lembrete';
 
 const adicioanarLembreteRoute = 'adicionarLembrete';
+
+const contatoRoute = 'contato';
