@@ -4,16 +4,19 @@ import 'package:flutter_modular/flutter_modular.dart';
 
 class DialogInfo extends StatefulWidget {
   final String message;
+  final String title;
 
-  const DialogInfo({super.key, required this.message});
+  const DialogInfo({super.key, required this.message, required this.title});
 
   @override
   State<DialogInfo> createState() => _DialogInfoState();
 
-  static Future<void> show(BuildContext context, String message) async {
+  static Future<void> show(
+      BuildContext context, String title, String message) async {
     await showDialog(
       context: context,
       builder: (context) => DialogInfo(
+        title: title,
         message: message,
       ),
     );
@@ -54,12 +57,20 @@ class _DialogInfoState extends State<DialogInfo>
           ScaleTransition(
             scale: _animation,
             child: Icon(
-              Icons.info_outline_rounded,
-              color: colorScheme.secondary,
+              Icons.info_rounded,
+              color: colorScheme.primary,
               size: 70,
             ),
           ),
           const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              widget.title,
+              style: textTheme.titleMedium,
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             widget.message,
             style: textTheme.bodyMedium,
