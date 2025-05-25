@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -118,7 +119,9 @@ class _SobreScreenState extends State<SobreScreen> with ThemeMixin {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 32),
       child: ElevatedButton.icon(
-        onPressed: () {},
+        onPressed: () {
+          DialogInfo.show(context, 'Quem é a AutoCare+?','A AutoCare+ é um aplicativo criado para ajudar você a cuidar melhor do seu veículo. Com ele, é possível registrar e acompanhar manutenções, controlar os gastos com abastecimentos e serviços, criar lembretes para revisões e manter todo o histórico do seu carro em um só lugar.O AutoCare+ foi pensado para trazer mais organização, praticidade e segurança para o seu dia a dia!');
+        },
         icon: const Icon(
           Icons.info_outline_rounded,
           color: Colors.white,
