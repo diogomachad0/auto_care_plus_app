@@ -31,5 +31,6 @@ class BottomBarModule extends Module {
     r.child('/$lembreteRoute', child: (context) => const LembreteScreen());
     r.child('/$contatoRoute', child: (context) => const ContatoScreen());
     r.child('/$sobreRoute', child: (context) => const SobreScreen());
+    r.child('/$contaRoute', child: (context) => const ContatoScreen());
   }
 }
