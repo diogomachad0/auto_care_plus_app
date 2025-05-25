@@ -98,7 +98,7 @@ class _LembreteScreenState extends State<LembreteScreen> with ThemeMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Aqui você gerência seus lembretes!',
+            'Todos os seus lembretes em um só lugar!',
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
               color: colorScheme.onPrimary,

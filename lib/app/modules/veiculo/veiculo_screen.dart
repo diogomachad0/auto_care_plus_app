@@ -94,7 +94,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Aqui estão os seus veículos cadastrados!',
+            'Seus veículos cadastrados estão aqui!',
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
               color: colorScheme.onPrimary,
