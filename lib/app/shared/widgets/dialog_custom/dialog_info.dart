@@ -59,7 +59,7 @@ class _DialogInfoState extends State<DialogInfo>
               size: 70,
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           Text(
             widget.message,
             style: textTheme.bodyMedium,

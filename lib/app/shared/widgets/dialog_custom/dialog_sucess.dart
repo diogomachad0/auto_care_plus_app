@@ -59,7 +59,7 @@ class _DialogSucessState extends State<DialogSucess>
               size: 70,
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           Text(
             widget.message,
             style: textTheme.bodyMedium,

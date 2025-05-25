@@ -53,7 +53,7 @@ class _DialogErrorState extends State<DialogError>
               size: 70,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Text('Ops!', style: Theme.of(context).textTheme.titleMedium),
         ],
       ),
