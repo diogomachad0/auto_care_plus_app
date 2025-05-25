@@ -27,3 +27,5 @@ const adicioanarLembreteRoute = 'adicionarLembrete';
 const contatoRoute = 'contato';
 
 const sobreRoute = 'sobre';
+
+const contaRoute = 'conta';
