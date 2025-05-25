@@ -1,5 +1,7 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class AdicionarVeiculoScreen extends StatefulWidget {
   const AdicionarVeiculoScreen({Key? key}) : super(key: key);
@@ -64,7 +66,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
               color: colorScheme.onPrimary,
             ),
             onPressed: () {
-              Navigator.pop(context);
+              Modular.to.navigate(veiculoRoute);
               //todo: arrumar depois
             },
           ),
@@ -149,7 +151,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
         const SizedBox(height: 12),
 
         // Observations Text Area
-        _buildObservationsField(),
+        _buildObservationsField(context),
         const SizedBox(height: 24),
       ],
     );
@@ -199,7 +201,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
     );
   }
 
-  Widget _buildObservationsField() {
+  Widget _buildObservationsField(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[200],
@@ -209,10 +211,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
         maxLines: 4,
         decoration: InputDecoration(
           labelText: 'Observações',
-          labelStyle: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
+          labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
           filled: true,
           fillColor: Colors.grey[200],
           border: OutlineInputBorder(

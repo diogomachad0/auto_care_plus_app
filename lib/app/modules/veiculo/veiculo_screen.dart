@@ -65,7 +65,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
               size: 36,
             ),
             onPressed: () {
-              Modular.to.navigate('$adicionarVeiculoRoute/');
+              Modular.to.navigate(adicionarVeiculoRoute);
             },
           ),
         ],
