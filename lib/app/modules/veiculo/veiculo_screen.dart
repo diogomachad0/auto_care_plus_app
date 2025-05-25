@@ -48,7 +48,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
               color: colorScheme.onPrimary,
             ),
             onPressed: () {
-              Navigator.pop(context);
+              Modular.to.navigate(menuRoute);
               //todo: arrumar depois
             },
           ),

@@ -1,6 +1,9 @@
 import 'package:auto_care_plus_app/app/modules/lembrete/submodules/adicionar_lembrete/adicionar_lembrete_widget.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+
+import '../../shared/route/route.dart';
 
 class LembreteScreen extends StatefulWidget {
   const LembreteScreen({super.key});
@@ -58,7 +61,7 @@ class _LembreteScreenState extends State<LembreteScreen> with ThemeMixin {
               color: colorScheme.onPrimary,
             ),
             onPressed: () {
-              Navigator.pop(context);
+              Modular.to.navigate(menuRoute);
               //todo: arrumar depois
             },
           ),
