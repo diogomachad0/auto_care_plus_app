@@ -1,0 +1,75 @@
+import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+
+class DialogError extends StatefulWidget {
+  final String message;
+
+  const DialogError(this.message, {super.key});
+
+  @override
+  State<DialogError> createState() => _DialogErrorState();
+
+  static Future<void> show(
+      BuildContext context, String message, StackTrace s) async {
+    debugPrintStack(label: message, stackTrace: s);
+
+    await showDialog(
+      context: context,
+      builder: (context) => DialogError(message),
+    );
+  }
+}
+
+class _DialogErrorState extends State<DialogError>
+    with ThemeMixin, SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..forward();
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.elasticOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ScaleTransition(
+            scale: _animation,
+            child: const Icon(
+              Icons.error,
+              color: Colors.red,
+              size: 70,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text('Ops!', style: Theme.of(context).textTheme.titleMedium),
+        ],
+      ),
+      content: Text(widget.message.replaceAll('Exception: ', ''),
+          style: textTheme.bodyMedium),
+      actions: [
+        FilledButton(
+          style: FilledButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          onPressed: () => Modular.to.pop(),
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
