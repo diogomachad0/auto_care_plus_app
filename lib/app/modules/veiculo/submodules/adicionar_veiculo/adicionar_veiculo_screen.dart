@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AdicionarVeiculoScreen extends StatefulWidget {
-  const AdicionarVeiculoScreen({Key? key}) : super(key: key);
+  const AdicionarVeiculoScreen({super.key});
 
   @override
   State<AdicionarVeiculoScreen> createState() => _AdicionarVeiculoScreenState();
@@ -185,7 +185,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
           });
         },
         dropdownColor: Colors.white,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.black87,
           fontSize: 14,
         ),
