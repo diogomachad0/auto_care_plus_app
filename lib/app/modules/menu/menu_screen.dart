@@ -34,7 +34,6 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         subtitle: 'Gerencie seus veículos cadastrados',
                         onTap: () {
                           Modular.to.navigate(veiculoRoute);
-
                         },
                         isFirst: true,
                       ),
@@ -43,7 +42,6 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         subtitle: 'Gerencie seus lembretes que você criou',
                         onTap: () {
                           Modular.to.navigate(lembreteRoute);
-
                         },
                       ),
                       _buildMenuListItemWithSwitch(
@@ -68,7 +66,9 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Sobre',
                         subtitle: 'Um pouco sobre o ',
                         highlightedText: 'AUTO CARE+',
-                        onTap: () {},
+                        onTap: () {
+                          Modular.to.navigate(sobreRoute);
+                        },
                         isLast: true,
                       ),
                     ]),

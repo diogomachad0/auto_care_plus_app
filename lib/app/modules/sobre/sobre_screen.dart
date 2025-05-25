@@ -25,6 +25,35 @@ class _SobreScreenState extends State<SobreScreen> with ThemeMixin {
             children: [
               _buildAppBar(),
               const SizedBox(height: 32),
+              Expanded(
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/img/logo_white_app.png',
+                      width: 300,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTagline(),
+                    const SizedBox(height: 64),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildVersionInfo(),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: _buildQuemSomosButton(),
+                          ),
+                          _buildPrivacyText(),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    _buildFooter(),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -59,6 +88,87 @@ class _SobreScreenState extends State<SobreScreen> with ThemeMixin {
           ),
           const SizedBox(width: 48),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTagline() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Text(
+        'Cuidar do seu carro nunca foi tão fácil!',
+        textAlign: TextAlign.center,
+        style: textTheme.bodyLarge?.copyWith(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVersionInfo() {
+    return Text(
+      'Auto Care+ - 1.0.0',
+      style: textTheme.bodyLarge?.copyWith(
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildQuemSomosButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 32),
+      child: ElevatedButton.icon(
+        onPressed: () {},
+        icon: const Icon(
+          Icons.info_outline_rounded,
+          color: Colors.white,
+        ),
+        label: Text(
+          'Quem somos',
+          style: textTheme.bodyMedium?.copyWith(
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrivacyText() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Text(
+        'Política de privacidade e termos de uso',
+        textAlign: TextAlign.center,
+        style: textTheme.bodyLarge?.copyWith(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          '© 2025 AutoCare+. Todos os direitos reservados.',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
