@@ -28,7 +28,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: colorScheme.secondary, // Dark blue background color
+          color: colorScheme.secondary,
         ),
         child: SafeArea(
           child: Column(
@@ -95,7 +95,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
       child: Column(
         children: [
           Image.asset(
-            'assets/img/banners/bro.png', // You'll need to add this image
+            'assets/img/banners/bro.png',
             height: 180,
           ),
           const SizedBox(height: 12),
@@ -115,10 +115,8 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
   Widget _buildForm() {
     return Column(
       children: [
-        // Vehicle Name
         const TextFieldCustom(label: 'Nome do veículo'),
         const SizedBox(height: 12),
-
         const Row(
           children: [
             Expanded(
@@ -131,8 +129,6 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
           ],
         ),
         const SizedBox(height: 12),
-
-        // License Plate and Mileage Row
         const Row(
           children: [
             Expanded(
@@ -145,12 +141,8 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
           ],
         ),
         const SizedBox(height: 12),
-
-        // Fuel Type Dropdown
         _buildFuelTypeDropdown(),
         const SizedBox(height: 12),
-
-        // Observations Text Area
         _buildObservationsField(context),
         const SizedBox(height: 24),
       ],
@@ -211,7 +203,10 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen>
         maxLines: 4,
         decoration: InputDecoration(
           labelText: 'Observações',
-          labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          labelStyle: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: Colors.grey),
           filled: true,
           fillColor: Colors.grey[200],
           border: OutlineInputBorder(
