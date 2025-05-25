@@ -1,4 +1,5 @@
 import 'package:auto_care_plus_app/app/modules/bottom_bar/bottom_bar_screen.dart';
+import 'package:auto_care_plus_app/app/modules/conta/conta_screen.dart';
 import 'package:auto_care_plus_app/app/modules/contato/contato_screen.dart';
 import 'package:auto_care_plus_app/app/modules/home/home_module.dart';
 import 'package:auto_care_plus_app/app/modules/lembrete/lembrete_screen.dart';
@@ -31,6 +32,6 @@ class BottomBarModule extends Module {
     r.child('/$lembreteRoute', child: (context) => const LembreteScreen());
     r.child('/$contatoRoute', child: (context) => const ContatoScreen());
     r.child('/$sobreRoute', child: (context) => const SobreScreen());
-    r.child('/$contaRoute', child: (context) => const ContatoScreen());
+    r.child('/$contaRoute', child: (context) => const ContaScreen());
   }
 }
