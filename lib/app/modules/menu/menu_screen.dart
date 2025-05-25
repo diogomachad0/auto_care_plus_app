@@ -90,7 +90,9 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       _buildMenuListItem(
                         title: 'Minha conta',
                         subtitle: 'Gerencie os dados da conta',
-                        onTap: () {},
+                        onTap: () {
+                          Modular.to.navigate(contaRoute);
+                        },
                         isFirst: true,
                       ),
                       _buildMenuListItem(
