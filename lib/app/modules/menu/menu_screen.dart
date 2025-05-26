@@ -1,6 +1,7 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_conta.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -129,7 +130,16 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Sair',
                         subtitle: 'Logout do App',
                         icon: Icons.logout,
-                        onTap: () {},
+                        onTap: () {
+                          ConfirmarBottomSheet.show(
+                            context: context,
+                            titulo: 'Atenção',
+                            mensagem:
+                            'Você realmente quer fazer logout?',
+                            textoConfirmar: 'Sair',
+                            onConfirmar: () {},
+                          );
+                        },
                         isLast: true,
                       ),
                     ]),
