@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_conta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -98,7 +99,31 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       _buildMenuListItem(
                         title: 'Altere de conta',
                         subtitle: 'Troque entre contas cadastradas',
-                        onTap: () {},
+                        onTap: () {
+                          //todo: mockado para testes front end
+                          final accounts = [
+                            UserAccount(
+                              id: '1',
+                              name: 'Diogo Machado',
+                              email: 'example@gmail.com',
+                            ),
+                            UserAccount(
+                              id: '2',
+                              name: 'João Matos',
+                              email: 'example@gmail.com',
+                            ),
+                          ];
+
+                          BottomSheetConta.show(
+                            context: context,
+                            accounts: accounts,
+                            activeAccountId: '1',
+                            onAccountSelected: (account) {},
+                            onAddAccount: () {
+                              //todo: logica para adicionar nova conta
+                            },
+                          );
+                        },
                       ),
                       _buildMenuListItemWithIcon(
                         title: 'Sair',
