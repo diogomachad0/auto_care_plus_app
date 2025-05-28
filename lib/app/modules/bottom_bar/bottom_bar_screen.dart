@@ -41,7 +41,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
         Modular.to.navigate('../$homeRoute');
         break;
       case 2:
-        _showActionSheet();
+        Modular.to.navigate('../$atividadeRoute');
         break;
       case 3:
         Modular.to.navigate('../$timeLineRoute');
@@ -50,18 +50,6 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
         Modular.to.navigate('../$mapaRoute');
         break;
     }
-  }
-
-  void _showActionSheet() {
-    showModalBottomSheet(
-      showDragHandle: false,
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => const CustomActionSheet(),
-    ).then((value) {
-      //todo: falta implementar
-    });
   }
 
   @override
@@ -74,8 +62,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
         height: 70,
         child: FloatingActionButton(
           onPressed: () {
-            setState(() => selectedIndex = 2);
-            _showActionSheet();
+            Modular.to.navigate('../$atividadeRoute');
           },
           backgroundColor: colorScheme.primary,
           elevation: 8,
