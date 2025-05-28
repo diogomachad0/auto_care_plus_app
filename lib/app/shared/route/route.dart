@@ -29,3 +29,5 @@ const contatoRoute = 'contato';
 const sobreRoute = 'sobre';
 
 const contaRoute = 'conta';
+
+const atividadeRoute = 'atividade';
