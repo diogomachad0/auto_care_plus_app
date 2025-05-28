@@ -1,3 +1,5 @@
+import 'package:auto_care_plus_app/app/modules/atividade/atividade_module.dart';
+import 'package:auto_care_plus_app/app/modules/atividade/atividade_screen.dart';
 import 'package:auto_care_plus_app/app/modules/bottom_bar/bottom_bar_screen.dart';
 import 'package:auto_care_plus_app/app/modules/conta/conta_screen.dart';
 import 'package:auto_care_plus_app/app/modules/contato/contato_screen.dart';
@@ -24,6 +26,7 @@ class BottomBarModule extends Module {
         ModuleRoute('/$homeRoute', module: HomeModule()),
         ModuleRoute('/$mapaRoute', module: MapaModule()),
         ModuleRoute('/$timeLineRoute', module: TimelineModule()),
+        ModuleRoute('/$atividadeRoute', module: AtividadeModule()),
         ChildRoute('/$menuRoute', child: (context) => const MenuScreen()),
       ],
     );
