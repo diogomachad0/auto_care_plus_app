@@ -1,57 +1,36 @@
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:mobx/mobx.dart';
+import 'package:geolocator/geolocator.dart';
 
 part 'mapa_controller.g.dart';
 
-class MapaController = _MapaController with _$MapaController;
+class MapaController = _MapaControllerBase with _$MapaController;
 
-abstract class _MapaController with Store {
+abstract class _MapaControllerBase with Store {
   @observable
-  double lat = 0.0;
-
-  @observable
-  double long = 0.0;
-
-  @observable
-  String erro = '';
-
-  mapaController() {
-    getPosicao();
-  }
+  LatLng? myPosition;
 
   @action
-  getPosicao() async {
+  Future<void> mapaController() async {
     try {
-      Position posicao = await _posicaoAtual();
-      lat = posicao.latitude;
-      long = posicao.longitude;
+      Position position = await _determinePosition();
+      myPosition = LatLng(position.latitude, position.longitude);
+      print('Localização atual: $myPosition');
     } catch (e) {
-      erro = e.toString();
+      print('Erro ao obter localização: $e');
     }
   }
 
-  @action
-  Future<Position> _posicaoAtual() async {
-    LocationPermission permissao;
-
-    bool ativado = await Geolocator.isLocationServiceEnabled();
-    if (!ativado) {
-      return Future.error('Serviço de localização desativado.');
-    }
-
-    permissao = await Geolocator.checkPermission();
-
-    if (permissao == LocationPermission.denied) {
-      permissao = await Geolocator.requestPermission();
-
-      if (permissao == LocationPermission.denied) {
-        return Future.error('Permissão de localização negada.');
+  Future<Position> _determinePosition() async {
+    LocationPermission permission;
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Permissão negada');
       }
     }
-    if (permissao == LocationPermission.deniedForever) {
-      return Future.error('Permissão de localização negada. Solicite novamente.');
-    }
-
     return await Geolocator.getCurrentPosition();
   }
 }
