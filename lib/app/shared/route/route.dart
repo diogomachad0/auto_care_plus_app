@@ -31,3 +31,5 @@ const sobreRoute = 'sobre';
 const contaRoute = 'conta';
 
 const atividadeRoute = 'atividade';
+
+const filtroRoute = 'filtro';
