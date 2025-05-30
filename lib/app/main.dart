@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/app_module.dart';
 import 'package:auto_care_plus_app/app/app_widget.dart';
+import 'package:auto_care_plus_app/app/shared/database/local/database_local.dart';
 import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await DatabaseLocal().getDb();
 
   runApp(
     ModularApp(
