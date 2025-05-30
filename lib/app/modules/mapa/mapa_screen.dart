@@ -1,11 +1,16 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+
 import 'mapa_controller.dart';
 
+const MAPBOX_ACCESS_TOKEN =
+    'pk.eyJ1IjoiZGlvZ29tYWNoYWRvIiwiYSI6ImNtYjc2dXkwaDA3NGUyam4wMnJ4cHJyc2MifQ.UCZ3qN_mb80hb82sa6jmog';
+
 class MapaScreen extends StatefulWidget {
-  const MapaScreen({super.key});
+  MapaScreen({super.key});
 
   @override
   State<MapaScreen> createState() => _MapaScreenState();
@@ -16,8 +21,8 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
 
   @override
   void initState() {
-    controller.mapaController();
     super.initState();
+    controller.mapaController();
   }
 
   @override
@@ -45,22 +50,49 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           ),
         ),
       ),
-      body: Center(
-        child: Observer(
-          builder: (context) {
-            String mensagem = controller.erro.isEmpty
-                ? 'Latitude: ${controller.lat} | Longitude: ${controller.long}'
-                : controller.erro;
-
-            return Text(
-              mensagem,
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.primary,
+      body: Observer(
+        builder: (_) {
+          if (controller.myPosition == null) {
+            return Center(
+                child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colorScheme.secondary,
+            ));
+          }
+          return FlutterMap(
+            options: MapOptions(
+              center: controller.myPosition,
+              minZoom: 5,
+              zoom: 18,
+              maxZoom: 20,
+              interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+            ),
+            nonRotatedChildren: [
+              TileLayer(
+                urlTemplate:
+                    'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
+                additionalOptions: const {
+                  'accessToken': MAPBOX_ACCESS_TOKEN,
+                  'id': 'mapbox/streets-v12',
+                },
               ),
-              textAlign: TextAlign.center,
-            );
-          },
-        ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: controller.myPosition!,
+                    builder: (context) {
+                      return const Icon(
+                        Icons.person_pin,
+                        color: Colors.blueAccent,
+                        size: 40,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
