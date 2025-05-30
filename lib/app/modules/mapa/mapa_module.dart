@@ -12,7 +12,7 @@ class MapaModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const MapaScreen());
+    r.child(Modular.initialRoute, child: (context) => MapaScreen());
 
     super.routes(r);
   }
