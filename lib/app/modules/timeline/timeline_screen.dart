@@ -1,3 +1,4 @@
+import 'package:auto_care_plus_app/app/modules/timeline/submodules/filtro_widget.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -79,28 +80,38 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colorScheme.primary,
-                colorScheme.secondary,
-              ],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
+        appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.secondary,
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
             ),
           ),
-        ),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Atividade',
-          style: textTheme.titleLarge?.copyWith(
-            color: Colors.white,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          title: Text(
+            'Atividade',
+            style: textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+            ),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings, color: Colors.white),
+              onPressed: () {
+                showFiltroWidget(context);
+
+              },
+              tooltip: 'Configurações',
+            ),
+          ],
         ),
-      ),
       body: Column(
         children: [
           _buildMonthHeader(),
