@@ -17,6 +17,22 @@ mixin _$VeiculoController on _VeiculoControllerBase, Store {
               name: '_VeiculoControllerBase.veiculosFiltrados'))
       .value;
 
+  late final _$searchTextAtom =
+      Atom(name: '_VeiculoControllerBase.searchText', context: context);
+
+  @override
+  String get searchText {
+    _$searchTextAtom.reportRead();
+    return super.searchText;
+  }
+
+  @override
+  set searchText(String value) {
+    _$searchTextAtom.reportWrite(value, super.searchText, () {
+      super.searchText = value;
+    });
+  }
+
   late final _$veiculoAtom =
       Atom(name: '_VeiculoControllerBase.veiculo', context: context);
 
@@ -49,28 +65,28 @@ mixin _$VeiculoController on _VeiculoControllerBase, Store {
     });
   }
 
-  late final _$searchTextAtom =
-      Atom(name: '_VeiculoControllerBase.searchText', context: context);
+  late final _$loadByIdAsyncAction =
+      AsyncAction('_VeiculoControllerBase.loadById', context: context);
 
   @override
-  String get searchText {
-    _$searchTextAtom.reportRead();
-    return super.searchText;
+  Future<void> loadById(String id) {
+    return _$loadByIdAsyncAction.run(() => super.loadById(id));
   }
 
+  late final _$saveAsyncAction =
+      AsyncAction('_VeiculoControllerBase.save', context: context);
+
   @override
-  set searchText(String value) {
-    _$searchTextAtom.reportWrite(value, super.searchText, () {
-      super.searchText = value;
-    });
+  Future<void> save() {
+    return _$saveAsyncAction.run(() => super.save());
   }
 
   @override
   String toString() {
     return '''
+searchText: ${searchText},
 veiculo: ${veiculo},
 veiculos: ${veiculos},
-searchText: ${searchText},
 veiculosFiltrados: ${veiculosFiltrados}
     ''';
   }

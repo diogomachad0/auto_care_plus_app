@@ -31,11 +31,14 @@ abstract class _VeiculoControllerBase with Store {
   Future<void> load() async {
     final list = await _service.getAll();
 
+    veiculos.clear();
+
     for (var veiculo in list) {
       veiculos.add(VeiculoStoreFactory.fromModel(veiculo));
     }
   }
 
+  @action
   Future<void> loadById(String id) async {
     final model = await _service.getById(id);
     if (model != null) {
@@ -43,8 +46,11 @@ abstract class _VeiculoControllerBase with Store {
     }
   }
 
+  @action
   Future<void> save() async {
     await _service.saveOrUpdate(veiculo.toModel());
+
+    await load();
   }
 
   Future<void> delete(VeiculoStore veiculo) async {
