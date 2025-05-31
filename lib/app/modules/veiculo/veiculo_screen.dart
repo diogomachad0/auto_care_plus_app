@@ -47,7 +47,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                           children: [
                             Image.asset(
                               'assets/img/banners/rafiki.png',
-                              height: 200,
+                              width: 330,
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -57,7 +57,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                                 color: colorScheme.onPrimary,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 16),
                           ],
                         ),
                         Visibility(
