@@ -41,22 +41,22 @@ class VeiculoRepository extends TableRepositoryLocal<VeiculoModel>
       );
 
   @override
-  Map<String, dynamic> toMap(VeiculoModel entity) => {
-        getIdColumnName: entity.base.id,
+  Map<String, dynamic> toMap(VeiculoModel model) => {
+        getIdColumnName: model.base.id,
         BaseRepository.dataHoraCriado:
-            entity.base.dataHoraCriado?.toIso8601String() ??
+            model.base.dataHoraCriado?.toIso8601String() ??
                 DateTime.now().toIso8601String(),
         BaseRepository.dataHoraDeletado:
-            entity.base.dataHoraDeletado?.toIso8601String(),
+            model.base.dataHoraDeletado?.toIso8601String(),
         BaseRepository.dataHoraUltimaAlteracao:
-            entity.base.dataHoraUltimaAlteracao?.toIso8601String(),
-        'modelo': entity.modelo,
-        'marca': entity.marca,
-        'placa': entity.placa,
-        'ano': entity.ano,
-        'quilometragem': entity.quilometragem,
-        'tipo_combustivel': entity.tipoCombustivel,
-        'observacoes': entity.observacoes,
+            model.base.dataHoraUltimaAlteracao?.toIso8601String(),
+        'modelo': model.modelo,
+        'marca': model.marca,
+        'placa': model.placa,
+        'ano': model.ano,
+        'quilometragem': model.quilometragem,
+        'tipo_combustivel': model.tipoCombustivel,
+        'observacoes': model.observacoes,
       };
 
   @override
