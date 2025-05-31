@@ -1,7 +1,9 @@
+import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class VeiculoScreen extends StatefulWidget {
@@ -12,6 +14,14 @@ class VeiculoScreen extends StatefulWidget {
 }
 
 class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
+  final controller = Modular.get<VeiculoController>();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +37,78 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
               _buildAppBar(),
               _buildSearchBar(),
               Expanded(
-                child: _buildEmptyState(),
+                child: Observer(
+                  builder: (_) {
+                    final veiculos = controller.veiculos;
+
+                    return ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        // Imagem e texto sempre no topo
+                        Column(
+                          children: [
+                            Image.asset(
+                              'assets/img/banners/rafiki.png',
+                              height: 200,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Seus veículos cadastrados estão aqui!',
+                              textAlign: TextAlign.center,
+                              style: textTheme.bodyLarge?.copyWith(
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+
+                        // Lista de veículos em cards
+                        if (veiculos.isNotEmpty)
+                          ...veiculos.map(
+                                (veiculoModel) => Card(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: ListTile(
+                                title: Text(
+                                  veiculoModel.modelo,
+                                  style: textTheme.bodyLarge,
+                                ),
+                                subtitle:
+                                Text('${veiculoModel.marca} - ${veiculoModel.placa}'),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete_forever_rounded),
+                                  color: Colors.redAccent,
+                                  onPressed: () => controller.delete(veiculoModel),
+                                ),
+                                onTap: () {
+                                  Modular.to.pushNamed(
+                                    editarVeiculoRoute,
+                                    arguments: veiculoModel,
+                                  );
+                                },
+                              ),
+                            ),
+                          )
+                        else
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 32),
+                              child: Text(
+                                'Nenhum veículo cadastrado.',
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -49,7 +130,6 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
             ),
             onPressed: () {
               Modular.to.navigate(menuRoute);
-              //todo: arrumar depois
             },
           ),
           Text(
@@ -94,7 +174,8 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Seus veículos cadastrados estão aqui!',
+            'Seus veículos cadastrados estão aqui!'
+            ,
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
               color: colorScheme.onPrimary,
