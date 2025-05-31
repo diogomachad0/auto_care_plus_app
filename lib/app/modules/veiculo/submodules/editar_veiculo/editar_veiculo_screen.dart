@@ -23,7 +23,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
   void initState() {
     super.initState();
 
-    final id = Modular.args.data; // <- pega o argumento passado
+    final id = Modular.args.data;
     _loadVeiculo(id);
   }
 
@@ -61,12 +61,25 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                       children: [
                         _buildIllustration(),
                         _buildForm(),
-                        ElevatedButton(
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 46),
+                            backgroundColor: colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           onPressed: () async {
                             await controller.save();
                             Modular.to.pop(true);
                           },
-                          child: const Text('Salvar alterações'),
+                          child: Text(
+                            'Salvar alterações',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
                         )
                       ],
                     ),
@@ -90,17 +103,17 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
             icon: Icon(Icons.arrow_back_ios, color: colorScheme.onPrimary),
             onPressed: () => Modular.to.navigate(veiculoRoute),
           ),
-          Text(
-            'Editar veículo',
-            style: textTheme.titleLarge?.copyWith(color: Colors.white),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Editar veículo',
+                style: textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
-          IconButton(
-            icon: Icon(Icons.delete_forever_rounded, color: colorScheme.onPrimary, size: 36),
-            onPressed: () async {
-              //await controller.delete(controller.veiculo.toModel());
-              Modular.to.navigate(veiculoRoute);
-            },
-          ),
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -111,14 +124,17 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         children: [
-          Image.asset('assets/img/banners/bro.png', height: 180),
-          const SizedBox(height: 12),
+          Image.asset(
+            'assets/img/banners/bro.png',
+            width: 330,
+          ),
+          const SizedBox(height: 16),
           Text(
             'Edite as informações do seu veículo aqui!',
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(color: colorScheme.onPrimary),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -133,7 +149,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
             initialValue: controller.veiculo.modelo,
             onChanged: (v) => controller.veiculo.modelo = v,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -143,7 +159,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                   onChanged: (v) => controller.veiculo.marca = v,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: TextFieldCustom(
                   label: 'Ano',
@@ -153,7 +169,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -163,7 +179,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                   onChanged: (v) => controller.veiculo.placa = v,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: TextFieldCustom(
                   label: 'Quilometragem',
@@ -173,11 +189,11 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildFuelTypeDropdown(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildObservationsField(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -193,7 +209,8 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
         builder: (_) => DropdownButtonFormField<String>(
           value: controller.veiculo.tipoCombustivel,
           decoration: InputDecoration(
-            labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+
+            labelStyle: textTheme.bodySmall,
             filled: true,
             fillColor: Colors.grey[200],
             border: OutlineInputBorder(
@@ -205,7 +222,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
           items: fuelTypes.map((fuel) => DropdownMenuItem(value: fuel, child: Text(fuel))).toList(),
           onChanged: (value) => controller.veiculo.tipoCombustivel = value!,
           dropdownColor: Colors.white,
-          style: const TextStyle(color: Colors.black87, fontSize: 14),
+          style: textTheme.bodySmall,
         ),
       ),
     );
