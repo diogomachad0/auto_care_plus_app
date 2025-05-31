@@ -85,11 +85,15 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                                 ),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(10),
-                                  onTap: () {
-                                    Modular.to.pushNamed(
+                                  onTap: () async {
+                                    final updated = await Modular.to.pushNamed<bool>(
                                       editarVeiculoRoute,
-                                      arguments: veiculoModel,
+                                      arguments: veiculoModel.base.id,
                                     );
+
+                                    if (updated == true) {
+                                      await controller.load();
+                                    }
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 0, bottom: 8, left: 8, right: 8),
