@@ -2,8 +2,8 @@ import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class AdicionarVeiculoScreen extends StatefulWidget {
   const AdicionarVeiculoScreen({super.key});
@@ -15,13 +15,7 @@ class AdicionarVeiculoScreen extends StatefulWidget {
 class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with ThemeMixin {
   final controller = Modular.get<VeiculoController>();
 
-  final List<String> fuelTypes = [
-    'FLEX',
-    'GASOLINA',
-    'ETANOL',
-    'DIESEL',
-    'ELÉTRICO'
-  ];
+  final List<String> fuelTypes = ['FLEX', 'GASOLINA', 'ETANOL', 'DIESEL', 'ELÉTRICO'];
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +36,26 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
                       children: [
                         _buildIllustration(),
                         _buildForm(),
-                        ElevatedButton(
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 46),
+                            backgroundColor: colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           onPressed: () async {
                             await controller.save();
                             Modular.to.navigate(veiculoRoute);
                           },
-                          child: const Text('Salvar'),
-                        )
+                          child: Text(
+                            'Salvar',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -65,17 +72,20 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios, color: colorScheme.onPrimary),
             onPressed: () => Modular.to.navigate(veiculoRoute),
           ),
-          Text('Adicionar veículo', style: textTheme.titleLarge?.copyWith(color: Colors.white)),
-          IconButton(
-            icon: Icon(Icons.delete_forever_rounded, color: colorScheme.onPrimary, size: 36),
-            onPressed: () async => ()//await controller.delete(controller.veiculo.toModel()),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Adicionar veículo',
+                style: textTheme.titleLarge?.copyWith(color: Colors.white),
+              ),
+            ),
           ),
+          const SizedBox(width: 48),
         ],
       ),
     );
