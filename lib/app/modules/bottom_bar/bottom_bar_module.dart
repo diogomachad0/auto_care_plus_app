@@ -1,5 +1,4 @@
 import 'package:auto_care_plus_app/app/modules/atividade/atividade_module.dart';
-import 'package:auto_care_plus_app/app/modules/atividade/atividade_screen.dart';
 import 'package:auto_care_plus_app/app/modules/bottom_bar/bottom_bar_screen.dart';
 import 'package:auto_care_plus_app/app/modules/conta/conta_screen.dart';
 import 'package:auto_care_plus_app/app/modules/contato/contato_screen.dart';
