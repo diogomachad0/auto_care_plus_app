@@ -20,6 +20,8 @@ const veiculoRoute = 'veiculo';
 
 const adicionarVeiculoRoute = 'adicionarVeiculo';
 
+const editarVeiculoRoute = 'editarVeiculo';
+
 const lembreteRoute = 'lembrete';
 
 const adicioanarLembreteRoute = 'adicionarLembrete';
