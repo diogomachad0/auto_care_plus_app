@@ -35,11 +35,13 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
           child: Column(
             children: [
               _buildAppBar(),
-              _buildSearchBar(),
+              Observer(builder: (context) {
+                return _buildSearchBar(controller);
+              }),
               Expanded(
                 child: Observer(
                   builder: (_) {
-                    final veiculos = controller.veiculos;
+                    final veiculos = controller.veiculosFiltrados;
                     return ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
@@ -222,11 +224,12 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
     );
   }
 
-  Widget _buildSearchBar() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+  Widget _buildSearchBar(VeiculoController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: TextFieldCustom(
         label: 'Pesquisar',
+        onChanged: (value) => controller.searchText = value,
       ),
     );
   }
