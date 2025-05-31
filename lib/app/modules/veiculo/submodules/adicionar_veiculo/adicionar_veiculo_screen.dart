@@ -74,7 +74,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
           Text('Adicionar veículo', style: textTheme.titleLarge?.copyWith(color: Colors.white)),
           IconButton(
             icon: Icon(Icons.delete_forever_rounded, color: colorScheme.onPrimary, size: 36),
-            onPressed: () async => await controller.delete(controller.veiculo.toModel()),
+            onPressed: () async => ()//await controller.delete(controller.veiculo.toModel()),
           ),
         ],
       ),
