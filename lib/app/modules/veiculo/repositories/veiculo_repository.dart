@@ -4,8 +4,7 @@ import 'package:auto_care_plus_app/app/shared/repositories/base_repository.dart'
 import 'package:auto_care_plus_app/app/shared/repositories/table_repository_local.dart';
 import 'package:sqflite/sqflite.dart';
 
-class VeiculoRepository extends TableRepositoryLocal<VeiculoModel>
-    implements IVeiculoRepository {
+class VeiculoRepository extends TableRepositoryLocal<VeiculoModel> implements IVeiculoRepository {
   @override
   String get getTableName => 'veiculo';
 
@@ -43,13 +42,9 @@ class VeiculoRepository extends TableRepositoryLocal<VeiculoModel>
   @override
   Map<String, dynamic> toMap(VeiculoModel model) => {
         getIdColumnName: model.base.id,
-        BaseRepository.dataHoraCriado:
-            model.base.dataHoraCriado?.toIso8601String() ??
-                DateTime.now().toIso8601String(),
-        BaseRepository.dataHoraDeletado:
-            model.base.dataHoraDeletado?.toIso8601String(),
-        BaseRepository.dataHoraUltimaAlteracao:
-            model.base.dataHoraUltimaAlteracao?.toIso8601String(),
+        BaseRepository.dataHoraCriado: model.base.dataHoraCriado?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        BaseRepository.dataHoraDeletado: model.base.dataHoraDeletado?.toIso8601String(),
+        BaseRepository.dataHoraUltimaAlteracao: model.base.dataHoraUltimaAlteracao?.toIso8601String(),
         'modelo': model.modelo,
         'marca': model.marca,
         'placa': model.placa,
