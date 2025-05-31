@@ -104,7 +104,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
           IconButton(
             icon: Icon(Icons.delete_forever_rounded, color: colorScheme.onPrimary, size: 36),
             onPressed: () async {
-              await controller.delete(controller.veiculo.toModel());
+              //await controller.delete(controller.veiculo.toModel());
               Modular.to.navigate(veiculoRoute);
             },
           ),
