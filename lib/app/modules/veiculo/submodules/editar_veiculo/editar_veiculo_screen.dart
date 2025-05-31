@@ -56,7 +56,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
                         _buildIllustration(),
@@ -134,7 +134,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(color: colorScheme.onPrimary),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
         ],
       ),
     );

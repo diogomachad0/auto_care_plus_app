@@ -103,7 +103,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(color: colorScheme.onPrimary),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -118,7 +118,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
             initialValue: controller.veiculo.modelo,
             onChanged: (v) => controller.veiculo.modelo = v,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -128,7 +128,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
                   onChanged: (v) => controller.veiculo.marca = v,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: TextFieldCustom(
                   label: 'Ano',
@@ -138,7 +138,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -148,7 +148,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
                   onChanged: (v) => controller.veiculo.placa = v,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: TextFieldCustom(
                   label: 'Quilometragem',
@@ -158,11 +158,11 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildFuelTypeDropdown(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildObservationsField(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
         ],
       ),
     );
