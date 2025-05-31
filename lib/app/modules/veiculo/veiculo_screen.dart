@@ -40,11 +40,9 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                 child: Observer(
                   builder: (_) {
                     final veiculos = controller.veiculos;
-
                     return ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        // Imagem e texto sempre no topo
                         Column(
                           children: [
                             Image.asset(
@@ -62,48 +60,119 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                             const SizedBox(height: 24),
                           ],
                         ),
-
-                        // Lista de veículos em cards
+                        Visibility(
+                          visible: veiculos.isNotEmpty,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              'MEUS VEÍCULOS',
+                              style: textTheme.titleSmall?.copyWith(color: Colors.white),
+                            ),
+                          ),
+                        ),
                         if (veiculos.isNotEmpty)
-                          ...veiculos.map(
-                                (veiculoModel) => Card(
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                title: Text(
-                                  veiculoModel.modelo,
-                                  style: textTheme.bodyLarge,
+                          ...veiculos.asMap().entries.map(
+                            (entry) {
+                              final index = entry.key;
+                              final veiculoModel = entry.value;
+
+                              return Card(
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                subtitle:
-                                Text('${veiculoModel.marca} - ${veiculoModel.placa}'),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.delete_forever_rounded),
-                                  color: Colors.redAccent,
-                                  onPressed: () => controller.delete(veiculoModel),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () {
+                                    Modular.to.pushNamed(
+                                      editarVeiculoRoute,
+                                      arguments: veiculoModel,
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 0, bottom: 8, left: 8, right: 8),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              '${veiculoModel.modelo} (${veiculoModel.ano})',
+                                              style: textTheme.titleMedium,
+                                            ),
+                                            PopupMenuButton<String>(
+                                              icon: const Icon(
+                                                Icons.keyboard_arrow_down_rounded,
+                                                color: Colors.grey,
+                                              ),
+                                              onSelected: (value) async {
+                                                if (value == 'delete') {
+                                                  try {
+                                                    await controller.delete(controller.veiculos[index]);
+                                                  } catch (e, s) {
+                                                    // await ErrorDialog.show(context, 'Erro ao deletar veiculo \nErro: ${e.toString()}', s);
+                                                  }
+                                                }
+                                              },
+                                              itemBuilder: (BuildContext context) => [
+                                                const PopupMenuItem<String>(
+                                                  value: 'delete',
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.delete_forever_rounded, color: Colors.redAccent),
+                                                      Text('Excluir'),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Marca',
+                                                    style: textTheme.bodySmall?.copyWith(
+                                                      color: Colors.grey[500],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    veiculoModel.marca,
+                                                    style: textTheme.bodyMedium,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    'Placa',
+                                                    style: textTheme.bodySmall?.copyWith(
+                                                      color: Colors.grey[500],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    veiculoModel.placa,
+                                                    style: textTheme.bodyMedium,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                onTap: () {
-                                  Modular.to.pushNamed(
-                                    editarVeiculoRoute,
-                                    arguments: veiculoModel,
-                                  );
-                                },
-                              ),
-                            ),
-                          )
-                        else
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 32),
-                              child: Text(
-                                'Nenhum veículo cadastrado.',
-                                style: textTheme.bodyLarge?.copyWith(
-                                  color: colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
                       ],
                     );
@@ -174,8 +243,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Seus veículos cadastrados estão aqui!'
-            ,
+            'Seus veículos cadastrados estão aqui!',
             textAlign: TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
               color: colorScheme.onPrimary,
