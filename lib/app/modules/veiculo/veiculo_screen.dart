@@ -230,28 +230,4 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
       ),
     );
   }
-
-  Widget _buildEmptyState() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/img/banners/rafiki.png',
-            height: 200,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Seus veículos cadastrados estão aqui!',
-            textAlign: TextAlign.center,
-            style: textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onPrimary,
-            ),
-          ),
-          const Spacer(flex: 2),
-        ],
-      ),
-    );
-  }
 }
