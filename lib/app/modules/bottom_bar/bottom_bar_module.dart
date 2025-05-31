@@ -9,6 +9,7 @@ import 'package:auto_care_plus_app/app/modules/menu/menu_screen.dart';
 import 'package:auto_care_plus_app/app/modules/sobre/sobre_screen.dart';
 import 'package:auto_care_plus_app/app/modules/timeline/timeline_module.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/submodules/adicionar_veiculo/adicionar_veiculo_screen.dart';
+import 'package:auto_care_plus_app/app/modules/veiculo/submodules/editar_veiculo/editar_veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -31,6 +32,7 @@ class BottomBarModule extends Module {
     );
     r.child('/$veiculoRoute', child: (context) => const VeiculoScreen());
     r.child('/$adicionarVeiculoRoute', child: (context) => const AdicionarVeiculoScreen());
+    r.child('/$editarVeiculoRoute', child: (context) => EditarVeiculoScreen(id: r.args.data,));
     r.child('/$lembreteRoute', child: (context) => const LembreteScreen());
     r.child('/$contatoRoute', child: (context) => const ContatoScreen());
     r.child('/$sobreRoute', child: (context) => const SobreScreen());
