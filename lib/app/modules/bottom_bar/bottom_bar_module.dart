@@ -32,7 +32,7 @@ class BottomBarModule extends Module {
     );
     r.child('/$veiculoRoute', child: (context) => const VeiculoScreen());
     r.child('/$adicionarVeiculoRoute', child: (context) => const AdicionarVeiculoScreen());
-    r.child('/$editarVeiculoRoute', child: (context) => EditarVeiculoScreen(id: r.args.data,));
+    r.child('/$editarVeiculoRoute', child: (context) => EditarVeiculoScreen());
     r.child('/$lembreteRoute', child: (context) => const LembreteScreen());
     r.child('/$contatoRoute', child: (context) => const ContatoScreen());
     r.child('/$sobreRoute', child: (context) => const SobreScreen());
