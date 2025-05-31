@@ -10,11 +10,23 @@ abstract class _VeiculoControllerBase with Store {
   final IVeiculoService _service;
 
   @observable
+  String searchText = '';
+
+  @observable
   VeiculoStore veiculo = VeiculoStoreFactory.novo();
 
-  final veiculos = ObservableList<VeiculoStore>();
+  @observable
+  ObservableList<VeiculoStore> veiculos = ObservableList<VeiculoStore>();
 
   _VeiculoControllerBase(this._service);
+
+  @computed
+  List<VeiculoStore> get veiculosFiltrados {
+    if (searchText.isEmpty) return veiculos;
+
+    final query = searchText.toLowerCase();
+    return veiculos.where((v) => v.modelo.toLowerCase().contains(query)).toList();
+  }
 
   Future<void> load() async {
     final list = await _service.getAll();
