@@ -25,14 +25,6 @@ mixin _$VeiculoController on _VeiculoControllerBase, Store {
     });
   }
 
-  late final _$deleteAsyncAction =
-      AsyncAction('_VeiculoControllerBase.delete', context: context);
-
-  @override
-  Future<void> delete(VeiculoModel model) {
-    return _$deleteAsyncAction.run(() => super.delete(model));
-  }
-
   @override
   String toString() {
     return '''

@@ -1,4 +1,3 @@
-import 'package:auto_care_plus_app/app/modules/veiculo/models/veiculo_model.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/store/veiculo_store.dart';
 import 'package:mobx/mobx.dart';
@@ -13,20 +12,15 @@ abstract class _VeiculoControllerBase with Store {
   @observable
   VeiculoStore veiculo = VeiculoStoreFactory.novo();
 
-  final veiculos = ObservableList<VeiculoModel>();
+  final veiculos = ObservableList<VeiculoStore>();
 
   _VeiculoControllerBase(this._service);
 
   Future<void> load() async {
-    final lista = await _service.getAll();
+    final list = await _service.getAll();
 
-    veiculos
-      ..clear()
-      ..addAll(lista);
-
-    final model = lista.isNotEmpty ? lista.first : null;
-    if (model != null) {
-      veiculo = VeiculoStoreFactory.fromModel(model);
+    for (var veiculo in list) {
+      veiculos.add(VeiculoStoreFactory.fromModel(veiculo));
     }
   }
 
@@ -41,9 +35,9 @@ abstract class _VeiculoControllerBase with Store {
     await _service.saveOrUpdate(veiculo.toModel());
   }
 
-  @action
-  Future<void> delete(VeiculoModel model) async {
-    await _service.delete(model);
-    await load();
+  Future<void> delete(VeiculoStore veiculo) async {
+    await _service.delete(veiculo.toModel());
+
+    veiculos.remove(veiculo);
   }
 }
