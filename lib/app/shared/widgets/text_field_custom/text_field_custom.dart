@@ -5,12 +5,14 @@ class TextFieldCustom extends StatefulWidget {
   final String label;
   final VoidCallback? onTap;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   const TextFieldCustom({
     super.key,
     required this.label,
     this.onTap,
     this.controller,
+    this.onChanged,
   });
 
   @override
@@ -32,6 +34,7 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
       controller: _internalController,
       readOnly: widget.onTap != null,
       onTap: widget.onTap,
+      onChanged: widget.onChanged,
       decoration: InputDecoration(
         labelText: widget.label,
         labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
