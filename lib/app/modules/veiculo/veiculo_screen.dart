@@ -28,9 +28,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          color: colorScheme.secondary,
-        ),
+        color: colorScheme.secondary,
         child: SafeArea(
           child: Column(
             children: [
