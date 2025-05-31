@@ -18,7 +18,7 @@ class EditarVeiculoModule extends Module {
       super.binds(i);
     }
 
-    r.child(Modular.initialRoute, child: (context) => EditarVeiculoScreen(id: r.args.data));
+    r.child(Modular.initialRoute, child: (context) => EditarVeiculoScreen());
 
     super.routes(r);
   }
