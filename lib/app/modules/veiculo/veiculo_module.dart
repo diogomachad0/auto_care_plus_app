@@ -4,7 +4,6 @@ import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service.
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/submodules/adicionar_veiculo/adicionar_veiculo_module.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/submodules/editar_veiculo/editar_veiculo_module.dart';
-import 'package:auto_care_plus_app/app/modules/veiculo/submodules/editar_veiculo/editar_veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
