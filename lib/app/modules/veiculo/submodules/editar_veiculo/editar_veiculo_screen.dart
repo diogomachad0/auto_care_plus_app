@@ -1,15 +1,12 @@
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
-import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class EditarVeiculoScreen extends StatefulWidget {
-  final String id;
-
-  const EditarVeiculoScreen({super.key, required this.id});
+  const EditarVeiculoScreen({super.key});
 
   @override
   State<EditarVeiculoScreen> createState() => _EditarVeiculoScreenState();
@@ -18,24 +15,20 @@ class EditarVeiculoScreen extends StatefulWidget {
 class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMixin {
   final controller = Modular.get<VeiculoController>();
 
-  final List<String> fuelTypes = [
-    'FLEX',
-    'GASOLINA',
-    'ETANOL',
-    'DIESEL',
-    'ELÉTRICO'
-  ];
+  final List<String> fuelTypes = ['FLEX', 'GASOLINA', 'ETANOL', 'DIESEL', 'ELÉTRICO'];
 
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadVeiculo();
+
+    final id = Modular.args.data; // <- pega o argumento passado
+    _loadVeiculo(id);
   }
 
-  Future<void> _loadVeiculo() async {
-    await controller.loadById(widget.id);
+  Future<void> _loadVeiculo(String id) async {
+    await controller.loadById(id);
     setState(() {
       _loading = false;
     });
@@ -71,7 +64,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                         ElevatedButton(
                           onPressed: () async {
                             await controller.save();
-                            Modular.to.navigate(veiculoRoute);
+                            Modular.to.pop(true);
                           },
                           child: const Text('Salvar alterações'),
                         )
@@ -272,4 +265,3 @@ class TextFieldCustom extends StatelessWidget {
     );
   }
 }
-
