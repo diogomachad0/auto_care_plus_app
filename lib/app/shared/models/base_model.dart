@@ -24,9 +24,9 @@ class BaseModel {
   }
 
   BaseModel clone() => BaseModel(
-    id: id,
-    dataHoraCriado: dataHoraCriado,
-    dataHoraUltimaAlteracao: dataHoraCriado,
-    dataHoraDeletado: dataHoraDeletado,
-  );
+        id: id,
+        dataHoraCriado: dataHoraCriado,
+        dataHoraUltimaAlteracao: dataHoraCriado,
+        dataHoraDeletado: dataHoraDeletado,
+      );
 }
