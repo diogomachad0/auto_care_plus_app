@@ -3,6 +3,8 @@ import 'package:auto_care_plus_app/app/modules/veiculo/repositories/veiculo_repo
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/submodules/adicionar_veiculo/adicionar_veiculo_module.dart';
+import 'package:auto_care_plus_app/app/modules/veiculo/submodules/editar_veiculo/editar_veiculo_module.dart';
+import 'package:auto_care_plus_app/app/modules/veiculo/submodules/editar_veiculo/editar_veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
@@ -23,6 +25,8 @@ class VeiculoModule extends Module {
 
 
     r.module('/$adicionarVeiculoRoute', module: AdicionarVeiculoModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
+    r.module('/$editarVeiculoRoute', module: EditarVeiculoModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
+
     super.routes(r);
   }
 }
