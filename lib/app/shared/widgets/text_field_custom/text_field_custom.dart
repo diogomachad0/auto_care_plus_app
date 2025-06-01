@@ -11,6 +11,7 @@ class TextFieldCustom extends StatefulWidget {
   final bool onlyNumbers;
   final bool toUpperCase;
   final String? Function(String value)? validator;
+  final Icon? icon;
 
   const TextFieldCustom({
     super.key,
@@ -22,6 +23,7 @@ class TextFieldCustom extends StatefulWidget {
     this.onlyNumbers = false,
     this.toUpperCase = false,
     this.validator,
+    this.icon,
   });
 
   @override
@@ -86,6 +88,16 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
             filled: true,
             fillColor: Colors.grey[200],
             contentPadding: const EdgeInsets.all(8),
+            prefixIcon: widget.icon != null
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 4),
+                    child: widget.icon,
+                  )
+                : null,
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 0,
+              minHeight: 0,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
