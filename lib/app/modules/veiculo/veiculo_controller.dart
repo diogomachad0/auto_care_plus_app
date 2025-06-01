@@ -28,6 +28,13 @@ abstract class _VeiculoControllerBase with Store {
     return veiculos.where((v) => v.modelo.toLowerCase().contains(query)).toList();
   }
 
+  @computed
+  bool get isFormValid {
+    final v = veiculo;
+
+    return v.modelo.isNotEmpty && v.marca.isNotEmpty && v.placa.isNotEmpty && v.quilometragem > 0 && v.ano >= 1950 && v.ano <= 2026 && (v.tipoCombustivel.isNotEmpty);
+  }
+
   Future<void> load() async {
     final list = await _service.getAll();
 
