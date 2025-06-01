@@ -1,6 +1,7 @@
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -63,7 +64,7 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                         Visibility(
                           visible: veiculos.isNotEmpty,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 8),
+                            padding: const EdgeInsets.only(left: 10),
                             child: Text(
                               'MEUS VEÍCULOS',
                               style: textTheme.titleSmall?.copyWith(color: Colors.white),
@@ -105,26 +106,38 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
                                               style: textTheme.titleMedium,
                                             ),
                                             PopupMenuButton<String>(
-                                              icon: const Icon(
-                                                Icons.keyboard_arrow_down_rounded,
-                                                color: Colors.grey,
+                                              offset: const Offset(-2, 8),
+                                              color: colorScheme.onPrimary,
+                                              icon: const Padding(
+                                                padding: EdgeInsets.only(left: 16),
+                                                child: Icon(
+                                                  Icons.keyboard_arrow_down_rounded,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              shape: const RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(Radius.circular(16)),
                                               ),
                                               onSelected: (value) async {
                                                 if (value == 'delete') {
                                                   try {
                                                     await controller.delete(controller.veiculos[index]);
                                                   } catch (e, s) {
-                                                    // await ErrorDialog.show(context, 'Erro ao deletar veiculo \nErro: ${e.toString()}', s);
+                                                    await DialogError.show(context, 'Erro ao deletar veículo \nErro: ${e.toString()}', s);
                                                   }
                                                 }
                                               },
                                               itemBuilder: (BuildContext context) => [
-                                                const PopupMenuItem<String>(
+                                                PopupMenuItem<String>(
                                                   value: 'delete',
                                                   child: Row(
                                                     children: [
-                                                      Icon(Icons.delete_forever_rounded, color: Colors.redAccent),
-                                                      Text('Excluir'),
+                                                      Icon(Icons.delete_forever_rounded, color: colorScheme.error),
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        'Excluir',
+                                                        style: textTheme.bodyMedium,
+                                                      ),
                                                     ],
                                                   ),
                                                 ),
@@ -231,6 +244,11 @@ class _VeiculoScreenState extends State<VeiculoScreen> with ThemeMixin {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: TextFieldCustom(
         label: 'Pesquisar',
+        icon: Icon(
+          Icons.search,
+          color: colorScheme.primary,
+          size: 28,
+        ),
         onChanged: (value) => controller.searchText = value,
       ),
     );
