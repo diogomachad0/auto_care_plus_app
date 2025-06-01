@@ -209,7 +209,6 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
         builder: (_) => DropdownButtonFormField<String>(
           value: controller.veiculo.tipoCombustivel,
           decoration: InputDecoration(
-
             labelStyle: textTheme.bodySmall,
             filled: true,
             fillColor: Colors.grey[200],
