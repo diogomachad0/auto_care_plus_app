@@ -1,6 +1,7 @@
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -36,23 +37,27 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
                       children: [
                         _buildIllustration(),
                         _buildForm(),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 46),
-                            backgroundColor: colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        Observer(
+                          builder: (_) => FilledButton(
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 46),
+                              backgroundColor: controller.isFormValid ? colorScheme.primary : Colors.grey,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                          ),
-                          onPressed: () async {
-                            await controller.save();
-                            Modular.to.navigate(veiculoRoute);
-                          },
-                          child: Text(
-                            'Salvar',
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: colorScheme.onPrimary,
+                            onPressed: controller.isFormValid
+                                ? () async {
+                                    await controller.save();
+                                    Modular.to.navigate(veiculoRoute);
+                                  }
+                                : null,
+                            child: Text(
+                              'Salvar',
+                              style: textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: colorScheme.onPrimary,
+                              ),
                             ),
                           ),
                         ),
@@ -110,61 +115,61 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
   }
 
   Widget _buildForm() {
-    return Observer(
-      builder: (_) => Column(
-        children: [
-          TextFieldCustom(
-            label: 'Nome do veículo',
-            initialValue: controller.veiculo.modelo,
-            onChanged: (v) => controller.veiculo.modelo = v,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextFieldCustom(
-                  label: 'Marca',
-                  initialValue: controller.veiculo.marca,
-                  onChanged: (v) => controller.veiculo.marca = v,
-                ),
+    return Column(
+      children: [
+        TextFieldCustom(
+          label: 'Nome do veículo',
+          onChanged: (v) => controller.veiculo.modelo = v,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFieldCustom(
+                label: 'Marca',
+                onChanged: (v) => controller.veiculo.marca = v,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFieldCustom(
-                  label: 'Ano',
-                  initialValue: controller.veiculo.ano.toString(),
-                  onChanged: (v) => controller.veiculo.ano = int.tryParse(v) ?? 0,
-                ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextFieldCustom(
+                label: 'Ano',
+                onlyNumbers: true,
+                validator: (value) {
+                  final year = int.tryParse(value);
+                  if (year == null || year < 1950 || year > 2026) {
+                    return 'Ano inválido (1950–2026)';
+                  }
+                  return null;
+                },
+                onChanged: (v) => controller.veiculo.ano = int.tryParse(v) ?? 0,
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextFieldCustom(
-                  label: 'Placa',
-                  initialValue: controller.veiculo.placa,
-                  onChanged: (v) => controller.veiculo.placa = v,
-                ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFieldCustom(
+                label: 'Placa',
+                toUpperCase: true,
+                onChanged: (v) => controller.veiculo.placa = v,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFieldCustom(
-                  label: 'Quilometragem',
-                  initialValue: controller.veiculo.quilometragem.toString(),
-                  onChanged: (v) => controller.veiculo.quilometragem = int.tryParse(v) ?? 0,
-                ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextFieldCustom(
+                label: 'Quilometragem',
+                onlyNumbers: true,
+                onChanged: (v) => controller.veiculo.quilometragem = int.tryParse(v) ?? 0,
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildFuelTypeDropdown(),
-          const SizedBox(height: 16),
-          _buildObservationsField(),
-          const SizedBox(height: 16),
-        ],
-      ),
+            ),
+          ],
+        ),
+        _buildFuelTypeDropdown(),
+        const SizedBox(height: 16),
+        _buildObservationsField(),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -178,7 +183,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
         builder: (_) => DropdownButtonFormField<String>(
           value: controller.veiculo.tipoCombustivel,
           decoration: InputDecoration(
-            labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+            labelStyle: textTheme.bodySmall,
             filled: true,
             fillColor: Colors.grey[200],
             border: OutlineInputBorder(
@@ -190,7 +195,7 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
           items: fuelTypes.map((fuel) => DropdownMenuItem(value: fuel, child: Text(fuel))).toList(),
           onChanged: (value) => controller.veiculo.tipoCombustivel = value!,
           dropdownColor: Colors.white,
-          style: const TextStyle(color: Colors.black87, fontSize: 14),
+          style: textTheme.bodySmall,
         ),
       ),
     );
@@ -202,50 +207,21 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Observer(
-        builder: (_) => TextField(
-          maxLines: 4,
-          onChanged: (v) => controller.veiculo.observacoes = v,
-          decoration: InputDecoration(
-            labelText: 'Observações',
-            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-            filled: true,
-            fillColor: Colors.grey[200],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            alignLabelWithHint: true,
+      child: TextField(
+        maxLines: 4,
+        onChanged: (v) => controller.veiculo.observacoes = v,
+        decoration: InputDecoration(
+          labelText: 'Observações',
+          labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          filled: true,
+          fillColor: Colors.grey[200],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
           ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          alignLabelWithHint: true,
         ),
-      ),
-    );
-  }
-}
-
-class TextFieldCustom extends StatelessWidget {
-  final String label;
-  final String? initialValue;
-  final void Function(String)? onChanged;
-
-  const TextFieldCustom({super.key, required this.label, this.initialValue, this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: initialValue,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        filled: true,
-        fillColor: Colors.grey[200],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       ),
     );
   }
