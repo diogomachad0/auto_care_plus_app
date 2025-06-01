@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_care_plus_app/app/modules/lembrete/repositories/lembrete_repository.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/repositories/veiculo_repository.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,6 +18,7 @@ class DatabaseLocal {
   Future<void> _onCreate(Database db, int version) async {
     var batch = db.batch();
     VeiculoRepository().create(batch);
+    LembreteRepository().create(batch);
 
     //todo: implementar a criação das tabelas necessárias
     await batch.commit();
