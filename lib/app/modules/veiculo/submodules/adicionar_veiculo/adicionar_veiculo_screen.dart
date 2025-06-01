@@ -135,9 +135,9 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
                 label: 'Ano',
                 onlyNumbers: true,
                 validator: (value) {
-                  final year = int.tryParse(value);
-                  if (year == null || year < 1950 || year > 2026) {
-                    return 'Ano inválido (1950–2026)';
+                  final ano = int.tryParse(value);
+                  if (ano == null || ano < 1900 || ano > 2026) {
+                    return 'Ano inválido (1900 – 2026)';
                   }
                   return null;
                 },
