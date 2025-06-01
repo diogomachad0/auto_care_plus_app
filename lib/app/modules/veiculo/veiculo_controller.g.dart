@@ -16,6 +16,13 @@ mixin _$VeiculoController on _VeiculoControllerBase, Store {
           Computed<List<VeiculoStore>>(() => super.veiculosFiltrados,
               name: '_VeiculoControllerBase.veiculosFiltrados'))
       .value;
+  Computed<bool>? _$isFormValidComputed;
+
+  @override
+  bool get isFormValid =>
+      (_$isFormValidComputed ??= Computed<bool>(() => super.isFormValid,
+              name: '_VeiculoControllerBase.isFormValid'))
+          .value;
 
   late final _$searchTextAtom =
       Atom(name: '_VeiculoControllerBase.searchText', context: context);
@@ -87,7 +94,8 @@ mixin _$VeiculoController on _VeiculoControllerBase, Store {
 searchText: ${searchText},
 veiculo: ${veiculo},
 veiculos: ${veiculos},
-veiculosFiltrados: ${veiculosFiltrados}
+veiculosFiltrados: ${veiculosFiltrados},
+isFormValid: ${isFormValid}
     ''';
   }
 }
