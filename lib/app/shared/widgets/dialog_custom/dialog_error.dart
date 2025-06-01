@@ -10,8 +10,7 @@ class DialogError extends StatefulWidget {
   @override
   State<DialogError> createState() => _DialogErrorState();
 
-  static Future<void> show(
-      BuildContext context, String message, StackTrace s) async {
+  static Future<void> show(BuildContext context, String message, StackTrace s) async {
     debugPrintStack(label: message, stackTrace: s);
 
     await showDialog(
@@ -21,8 +20,7 @@ class DialogError extends StatefulWidget {
   }
 }
 
-class _DialogErrorState extends State<DialogError>
-    with ThemeMixin, SingleTickerProviderStateMixin {
+class _DialogErrorState extends State<DialogError> with ThemeMixin, SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -42,6 +40,9 @@ class _DialogErrorState extends State<DialogError>
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      titlePadding: const EdgeInsets.only(top: 16),
+      contentPadding: const EdgeInsets.all(16),
+      actionsPadding: const EdgeInsets.all(16),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -53,12 +54,12 @@ class _DialogErrorState extends State<DialogError>
               size: 70,
             ),
           ),
-          const SizedBox(height: 16),
-          Text('Ops!', style: Theme.of(context).textTheme.titleMedium),
         ],
       ),
-      content: Text(widget.message.replaceAll('Exception: ', ''),
-          style: textTheme.bodyMedium),
+      content: Text(
+        widget.message.replaceAll('Exception: ', ''),
+        style: textTheme.bodyMedium,
+      ),
       actions: [
         FilledButton(
           style: FilledButton.styleFrom(
