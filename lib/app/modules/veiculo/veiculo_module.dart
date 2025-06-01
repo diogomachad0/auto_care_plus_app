@@ -18,6 +18,7 @@ class VeiculoModule extends Module {
 
     super.binds(i);
   }
+
   @override
   void routes(RouteManager r) {
     r.child(Modular.initialRoute, child: (context) => const VeiculoScreen());
