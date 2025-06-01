@@ -1,6 +1,7 @@
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -61,23 +62,27 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                       children: [
                         _buildIllustration(),
                         _buildForm(),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 46),
-                            backgroundColor: colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        Observer(
+                          builder: (_) => FilledButton(
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 46),
+                              backgroundColor: controller.isFormValid ? colorScheme.primary : Colors.grey,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                          ),
-                          onPressed: () async {
-                            await controller.save();
-                            Modular.to.pop(true);
-                          },
-                          child: Text(
-                            'Salvar alterações',
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: colorScheme.onPrimary,
+                            onPressed: controller.isFormValid
+                                ? () async {
+                                    await controller.save();
+                                    Modular.to.navigate(veiculoRoute);
+                                  }
+                                : null,
+                            child: Text(
+                              'Salvar alterações',
+                              style: textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: colorScheme.onPrimary,
+                              ),
                             ),
                           ),
                         )
@@ -149,7 +154,6 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
             initialValue: controller.veiculo.modelo,
             onChanged: (v) => controller.veiculo.modelo = v,
           ),
-          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -163,13 +167,20 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
               Expanded(
                 child: TextFieldCustom(
                   label: 'Ano',
+                  onlyNumbers: true,
+                  validator: (value) {
+                    final ano = int.tryParse(value);
+                    if (ano == null || ano < 1900 || ano > 2026) {
+                      return 'Ano inválido (1900 – 2026)';
+                    }
+                    return null;
+                  },
                   initialValue: controller.veiculo.ano.toString(),
                   onChanged: (v) => controller.veiculo.ano = int.tryParse(v) ?? 0,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -183,13 +194,13 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
               Expanded(
                 child: TextFieldCustom(
                   label: 'Quilometragem',
+                  onlyNumbers: true,
                   initialValue: controller.veiculo.quilometragem.toString(),
                   onChanged: (v) => controller.veiculo.quilometragem = int.tryParse(v) ?? 0,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
           _buildFuelTypeDropdown(),
           const SizedBox(height: 16),
           _buildObservationsField(),
@@ -250,33 +261,6 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
             alignLabelWithHint: true,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class TextFieldCustom extends StatelessWidget {
-  final String label;
-  final String? initialValue;
-  final void Function(String)? onChanged;
-
-  const TextFieldCustom({super.key, required this.label, this.initialValue, this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: initialValue,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        filled: true,
-        fillColor: Colors.grey[200],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       ),
     );
   }
