@@ -1,23 +1,22 @@
+import 'package:auto_care_plus_app/app/modules/lembrete/lembrete_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AdicionarLembreteWidget extends StatefulWidget {
-  final Function(String titulo, String data, bool notificar)? onSave;
-
-  const AdicionarLembreteWidget({super.key, this.onSave});
+  const AdicionarLembreteWidget({super.key});
 
   @override
-  State<AdicionarLembreteWidget> createState() =>
-      _AdicionarLembreteWidgetState();
+  State<AdicionarLembreteWidget> createState() => _AdicionarLembreteWidgetState();
 }
 
-class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
-    with ThemeMixin {
+class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with ThemeMixin {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _dataController = TextEditingController();
   bool _notificar = false;
+
+  final controller = Modular.get<LembreteController>();
 
   @override
   void dispose() {
@@ -35,7 +34,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
       elevation: 0,
       backgroundColor: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,20 +43,17 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
               'Adicionar um novo lembrete',
               style: textTheme.titleMedium,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
             TextFieldCustom(
               label: 'Título do lembrete',
               controller: _tituloController,
             ),
-            const SizedBox(height: 16),
             TextFieldCustom(
               label: 'Data',
               controller: _dataController,
               onTap: () => _selectDate(context),
             ),
-            const SizedBox(height: 24),
             _buildNotificationToggle(),
-            const SizedBox(height: 24),
             _buildButtons(),
           ],
         ),
@@ -94,7 +90,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
         Expanded(
           child: OutlinedButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Modular.to.pop();
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Colors.grey[400]!),
@@ -112,14 +108,23 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
-              if (widget.onSave != null) {
-                widget.onSave!(
-                  _tituloController.text,
-                  _dataController.text,
-                  _notificar,
-                );
-              }
+            onPressed: () async {
+              if (_tituloController.text.isEmpty || _dataController.text.isEmpty) return;
+
+              final parts = _dataController.text.split('/');
+              final data = DateTime(
+                int.parse(parts[2]),
+                int.parse(parts[1]),
+                int.parse(parts[0]),
+              );
+
+              controller.updateLembrete(
+                _tituloController.text,
+                data,
+                _notificar,
+              );
+
+              await controller.save();
               Modular.to.pop();
             },
             style: ElevatedButton.styleFrom(
@@ -173,11 +178,7 @@ void showAdicionarLembreteDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AdicionarLembreteWidget(
-        onSave: (titulo, data, notificar) {
-          print('Título: $titulo, Data: $data, Notificar: $notificar');
-        },
-      );
+      return const AdicionarLembreteWidget();
     },
   );
 }
