@@ -1,11 +1,16 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TextFieldCustom extends StatefulWidget {
   final String label;
   final VoidCallback? onTap;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  final String? initialValue;
+  final bool onlyNumbers;
+  final bool toUpperCase;
+  final String? Function(String value)? validator;
 
   const TextFieldCustom({
     super.key,
@@ -13,6 +18,10 @@ class TextFieldCustom extends StatefulWidget {
     this.onTap,
     this.controller,
     this.onChanged,
+    this.initialValue,
+    this.onlyNumbers = false,
+    this.toUpperCase = false,
+    this.validator,
   });
 
   @override
@@ -21,31 +30,103 @@ class TextFieldCustom extends StatefulWidget {
 
 class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
   late final TextEditingController _internalController;
+  String? _errorText;
 
   @override
   void initState() {
     super.initState();
     _internalController = widget.controller ?? TextEditingController();
+
+    if (widget.initialValue != null && widget.controller == null) {
+      _internalController.text = widget.initialValue!;
+    }
+  }
+
+  void _handleChange(String value) {
+    if (widget.validator != null) {
+      final validationResult = widget.validator!(value);
+      setState(() => _errorText = validationResult);
+    }
+
+    widget.onChanged?.call(value);
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _internalController,
-      readOnly: widget.onTap != null,
-      onTap: widget.onTap,
-      onChanged: widget.onChanged,
-      decoration: InputDecoration(
-        labelText: widget.label,
-        labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        filled: true,
-        fillColor: Colors.grey[200],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+    List<TextInputFormatter> formatters = [];
+
+    if (widget.onlyNumbers) {
+      formatters.add(FilteringTextInputFormatter.digitsOnly);
+    }
+
+    if (widget.toUpperCase) {
+      formatters.add(UpperCaseTextFormatter());
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _internalController,
+          readOnly: widget.onTap != null,
+          onTap: widget.onTap,
+          onChanged: _handleChange,
+          keyboardType: widget.onlyNumbers ? TextInputType.number : TextInputType.text,
+          inputFormatters: formatters.isNotEmpty ? formatters : null,
+          textCapitalization: widget.toUpperCase ? TextCapitalization.characters : TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: widget.label,
+            labelStyle: textTheme.bodyMedium?.copyWith(
+              color: _errorText != null ? Colors.red : Colors.grey.shade500,
+            ),
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+            floatingLabelStyle: textTheme.bodyMedium?.copyWith(
+              color: _errorText != null ? Colors.red : colorScheme.primary,
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+            contentPadding: const EdgeInsets.all(8),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colorScheme.primary, width: 1),
+            ),
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      ),
+        const SizedBox(height: 4),
+        SizedBox(
+          height: 16,
+          child: _errorText != null
+              ? Text(
+                  _errorText!,
+                  style: textTheme.bodySmall?.copyWith(
+                    fontSize: 9,
+                    color: colorScheme.error,
+                  ),
+                )
+              : null,
+        ),
+      ],
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }
