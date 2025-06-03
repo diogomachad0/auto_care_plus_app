@@ -54,7 +54,7 @@ class _LembreteScreenState extends State<LembreteScreen> with ThemeMixin {
                           children: [
                             Image.asset(
                               'assets/img/banners/amico.png',
-                              width: 330,
+                              width: 300,
                             ),
                             const SizedBox(height: 16),
                             Text(
