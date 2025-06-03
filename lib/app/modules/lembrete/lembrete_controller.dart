@@ -22,7 +22,9 @@ abstract class _LembreteControllerBase with Store {
 
   Future<void> load() async {
     final list = await _service.getAll();
+
     lembretes.clear();
+
     for (var lemb in list) {
       lembretes.add(LembreteStoreFactory.fromModel(lemb));
     }
@@ -31,7 +33,7 @@ abstract class _LembreteControllerBase with Store {
   @action
   Future<void> save() async {
     await _service.saveOrUpdate(lembrete.toModel());
-    lembrete = LembreteStoreFactory.novo();
+
     await load();
   }
 
