@@ -244,8 +244,7 @@ class _LembreteScreenState extends State<LembreteScreen> with ThemeMixin {
             onPressed: () {
               showAdicionarLembreteDialog(context);
             },
-          )
-,
+          ),
         ],
       ),
     );
