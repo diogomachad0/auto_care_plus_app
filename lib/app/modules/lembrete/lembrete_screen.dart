@@ -241,8 +241,12 @@ class _LembreteScreenState extends State<LembreteScreen> with ThemeMixin {
               color: colorScheme.onPrimary,
               size: 36,
             ),
-            onPressed: () {
-              showAdicionarLembreteDialog(context);
+            onPressed: () async {
+              await showAdicionarLembreteDialog(context).then((value) {
+                if (value == true) {
+                  controller.load();
+                }
+              });
             },
           ),
         ],

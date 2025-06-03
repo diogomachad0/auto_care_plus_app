@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/lembrete/lembrete_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -8,10 +9,12 @@ class AdicionarLembreteWidget extends StatefulWidget {
   const AdicionarLembreteWidget({super.key});
 
   @override
-  State<AdicionarLembreteWidget> createState() => _AdicionarLembreteWidgetState();
+  State<AdicionarLembreteWidget> createState() =>
+      _AdicionarLembreteWidgetState();
 }
 
-class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with ThemeMixin {
+class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
+    with ThemeMixin {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _dataController = TextEditingController();
   bool _notificar = false;
@@ -109,7 +112,8 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
         Expanded(
           child: ElevatedButton(
             onPressed: () async {
-              if (_tituloController.text.isEmpty || _dataController.text.isEmpty) return;
+              if (_tituloController.text.isEmpty ||
+                  _dataController.text.isEmpty) return;
 
               final parts = _dataController.text.split('/');
               final data = DateTime(
@@ -125,7 +129,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
               );
 
               await controller.save();
-              Modular.to.pop();
+              Modular.to.pop(true);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
@@ -174,8 +178,8 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
   }
 }
 
-void showAdicionarLembreteDialog(BuildContext context) {
-  showDialog(
+Future<bool?> showAdicionarLembreteDialog(BuildContext context) {
+  return showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
       return const AdicionarLembreteWidget();
