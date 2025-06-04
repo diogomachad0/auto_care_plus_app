@@ -1,6 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/lembrete/lembrete_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
-import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -9,12 +9,10 @@ class AdicionarLembreteWidget extends StatefulWidget {
   const AdicionarLembreteWidget({super.key});
 
   @override
-  State<AdicionarLembreteWidget> createState() =>
-      _AdicionarLembreteWidgetState();
+  State<AdicionarLembreteWidget> createState() => _AdicionarLembreteWidgetState();
 }
 
-class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
-    with ThemeMixin {
+class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with ThemeMixin {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _dataController = TextEditingController();
   bool _notificar = false;
@@ -65,25 +63,43 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
   }
 
   Widget _buildNotificationToggle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Notificar lembretes?',
-          style: textTheme.bodyMedium,
-        ),
-        Switch(
-          value: _notificar,
-          onChanged: (value) {
-            setState(() {
-              _notificar = value;
-            });
-          },
-          activeColor: Colors.white,
-          activeTrackColor: colorScheme.primary,
-          inactiveThumbColor: Colors.white,
-        ),
-      ],
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Notificar lembrete?',
+                  style: textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Você receberá uma notificação às 00:00 da data agendada',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _notificar,
+            onChanged: (value) {
+              setState(() {
+                _notificar = value;
+              });
+            },
+            activeColor: Colors.white,
+            activeTrackColor: colorScheme.primary,
+            inactiveThumbColor: Colors.white,
+          ),
+        ],
+      ),
     );
   }
 
@@ -112,24 +128,24 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget>
         Expanded(
           child: ElevatedButton(
             onPressed: () async {
-              if (_tituloController.text.isEmpty ||
-                  _dataController.text.isEmpty) return;
-
-              final parts = _dataController.text.split('/');
-              final data = DateTime(
-                int.parse(parts[2]),
-                int.parse(parts[1]),
-                int.parse(parts[0]),
-              );
-
-              controller.updateLembrete(
-                _tituloController.text,
-                data,
-                _notificar,
-              );
-
-              await controller.save();
-              Modular.to.pop(true);
+              if (_tituloController.text.isEmpty || _dataController.text.isEmpty) return;
+              try {
+                final parts = _dataController.text.split('/');
+                final data = DateTime(
+                  int.parse(parts[2]),
+                  int.parse(parts[1]),
+                  int.parse(parts[0]),
+                );
+                controller.updateLembrete(
+                  _tituloController.text,
+                  data,
+                  _notificar,
+                );
+                await controller.save();
+                Modular.to.pop(true);
+              } catch (e, s) {
+                await DialogError.show(context, 'Erro ao salvar o lembrete: \nErro: ${e.toString()}', s);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
