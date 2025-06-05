@@ -20,9 +20,7 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
         data TEXT NOT NULL,
         km TEXT,
         total_pago TEXT,
-        valor_pago TEXT,
         litros TEXT,
-        preco_litro TEXT,
         tipo_combustivel TEXT,
         estabelecimento TEXT,
         numero_parcela TEXT,
@@ -33,38 +31,48 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
 
   @override
   AtividadeModel fromMap(Map<String, dynamic> e) => AtividadeModel(
-        base: baseFromMap(e),
-        tipoAtividade: e['tipo_atividade'],
-        data: e['data'],
-        km: e['km'] ?? '',
-        totalPago: e['total_pago'] ?? '',
-        valorPago: e['valor_pago'] ?? '',
-        litros: e['litros'] ?? '',
-        precoLitro: e['preco_litro'] ?? '',
-        tipoCombustivel: e['tipo_combustivel'] ?? '',
-        estabelecimento: e['estabelecimento'] ?? '',
-        numeroParcela: e['numero_parcela'] ?? '',
-        observacoes: e['observacoes'] ?? '',
-      );
+    base: baseFromMap(e),
+    tipoAtividade: e['tipo_atividade'] ?? '',
+    data: e['data'] ?? '',
+    km: e['km'] ?? '',
+    totalPago: e['total_pago'] ?? '',
+    litros: e['litros'] ?? '',
+    tipoCombustivel: e['tipo_combustivel'] ?? '',
+    estabelecimento: e['estabelecimento'] ?? '',
+    numeroParcela: e['numero_parcela'] ?? '',
+    observacoes: e['observacoes'] ?? '',
+  );
 
   @override
-  Map<String, dynamic> toMap(AtividadeModel model) => {
-        getIdColumnName: model.base.id,
-        BaseRepository.dataHoraCriado: model.base.dataHoraCriado?.toIso8601String() ?? DateTime.now().toIso8601String(),
-        BaseRepository.dataHoraDeletado: model.base.dataHoraDeletado?.toIso8601String(),
-        BaseRepository.dataHoraUltimaAlteracao: model.base.dataHoraUltimaAlteracao?.toIso8601String(),
-        'tipo_atividade': model.tipoAtividade,
-        'data': model.data,
-        'km': model.km,
-        'total_pago': model.totalPago,
-        'valor_pago': model.valorPago,
-        'litros': model.litros,
-        'preco_litro': model.precoLitro,
-        'tipo_combustivel': model.tipoCombustivel,
-        'estabelecimento': model.estabelecimento,
-        'numero_parcela': model.numeroParcela,
-        'observacoes': model.observacoes,
-      };
+  Map<String, dynamic> toMap(AtividadeModel model) {
+    print('=== DEBUG REPOSITORY toMap ===');
+    print('tipoAtividade: ${model.tipoAtividade}');
+    print('data: ${model.data}');
+    print('km: ${model.km}');
+    print('totalPago: ${model.totalPago}');
+    print('litros: ${model.litros}');
+    print('tipoCombustivel: ${model.tipoCombustivel}');
+    print('estabelecimento: ${model.estabelecimento}');
+    print('numeroParcela: ${model.numeroParcela}');
+    print('observacoes: ${model.observacoes}');
+    print('===============================');
+
+    return {
+      getIdColumnName: model.base.id,
+      BaseRepository.dataHoraCriado: model.base.dataHoraCriado?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      BaseRepository.dataHoraDeletado: model.base.dataHoraDeletado?.toIso8601String(),
+      BaseRepository.dataHoraUltimaAlteracao: model.base.dataHoraUltimaAlteracao?.toIso8601String(),
+      'tipo_atividade': model.tipoAtividade,
+      'data': model.data,
+      'km': model.km,
+      'total_pago': model.totalPago,
+      'litros': model.litros,
+      'tipo_combustivel': model.tipoCombustivel,
+      'estabelecimento': model.estabelecimento,
+      'numero_parcela': model.numeroParcela,
+      'observacoes': model.observacoes,
+    };
+  }
 
   @override
   void validate(AtividadeModel entity) {}
