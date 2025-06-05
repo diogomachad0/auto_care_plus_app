@@ -88,22 +88,6 @@ mixin _$AtividadeStore on _AtividadeStoreBase, Store {
     });
   }
 
-  late final _$valorPagoAtom =
-      Atom(name: '_AtividadeStoreBase.valorPago', context: context);
-
-  @override
-  String get valorPago {
-    _$valorPagoAtom.reportRead();
-    return super.valorPago;
-  }
-
-  @override
-  set valorPago(String value) {
-    _$valorPagoAtom.reportWrite(value, super.valorPago, () {
-      super.valorPago = value;
-    });
-  }
-
   late final _$litrosAtom =
       Atom(name: '_AtividadeStoreBase.litros', context: context);
 
@@ -117,22 +101,6 @@ mixin _$AtividadeStore on _AtividadeStoreBase, Store {
   set litros(String value) {
     _$litrosAtom.reportWrite(value, super.litros, () {
       super.litros = value;
-    });
-  }
-
-  late final _$precoLitroAtom =
-      Atom(name: '_AtividadeStoreBase.precoLitro', context: context);
-
-  @override
-  String get precoLitro {
-    _$precoLitroAtom.reportRead();
-    return super.precoLitro;
-  }
-
-  @override
-  set precoLitro(String value) {
-    _$precoLitroAtom.reportWrite(value, super.precoLitro, () {
-      super.precoLitro = value;
     });
   }
 
@@ -208,9 +176,7 @@ tipoAtividade: ${tipoAtividade},
 data: ${data},
 km: ${km},
 totalPago: ${totalPago},
-valorPago: ${valorPago},
 litros: ${litros},
-precoLitro: ${precoLitro},
 tipoCombustivel: ${tipoCombustivel},
 estabelecimento: ${estabelecimento},
 numeroParcela: ${numeroParcela},
