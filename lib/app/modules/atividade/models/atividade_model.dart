@@ -13,11 +13,7 @@ class AtividadeModel implements IBaseModel {
 
   String totalPago;
 
-  String valorPago;
-
   String litros;
-
-  String precoLitro;
 
   String tipoCombustivel;
 
@@ -33,9 +29,7 @@ class AtividadeModel implements IBaseModel {
     required this.data,
     required this.km,
     required this.totalPago,
-    required this.valorPago,
     required this.litros,
-    required this.precoLitro,
     required this.tipoCombustivel,
     required this.estabelecimento,
     required this.numeroParcela,
