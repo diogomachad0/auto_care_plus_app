@@ -45,7 +45,6 @@ abstract class _AtividadeControllerBase with Store {
         return a.km.isNotEmpty &&
             a.totalPago.isNotEmpty &&
             a.litros.isNotEmpty &&
-            a.precoLitro.isNotEmpty &&
             a.estabelecimento.isNotEmpty;
 
       case 'Troca de óleo':
@@ -72,10 +71,10 @@ abstract class _AtividadeControllerBase with Store {
         return a.totalPago.isNotEmpty;
 
       case 'Impostos':
-        return a.valorPago.isNotEmpty;
+        return a.totalPago.isNotEmpty;
 
       case 'Outros':
-        return a.valorPago.isNotEmpty &&
+        return a.totalPago.isNotEmpty &&
             a.estabelecimento.isNotEmpty;
 
       default:
