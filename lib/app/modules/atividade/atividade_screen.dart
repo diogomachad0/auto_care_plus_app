@@ -1,9 +1,14 @@
+import 'package:auto_care_plus_app/app/modules/atividade/atividade_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class AtividadeScreen extends StatefulWidget {
-  const AtividadeScreen({super.key});
+  final String? atividadeId;
+
+  const AtividadeScreen({super.key, this.atividadeId});
 
   @override
   State<AtividadeScreen> createState() => _AtividadeScreenState();
@@ -14,10 +19,11 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   final TextEditingController _kmAtualController = TextEditingController();
   final TextEditingController _totalPagoController = TextEditingController();
   final TextEditingController _litrosController = TextEditingController();
-  final TextEditingController _precoLitroController = TextEditingController();
-  final TextEditingController _estabelecimentoController =
-      TextEditingController();
+  final TextEditingController _estabelecimentoController = TextEditingController();
+  final TextEditingController _numeroParcelaController = TextEditingController();
   final TextEditingController _observacoesController = TextEditingController();
+
+  final AtividadeController _controller = Modular.get<AtividadeController>();
 
   String selectedActivityType = 'Abastecimento';
   String selectedFuelType = 'Gasolina';
@@ -43,13 +49,103 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    if (widget.atividadeId != null) {
+      _loadAtividade();
+    } else {
+      // Nova atividade - limpar tudo
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _resetFormCompletely();
+      });
+    }
+  }
+
+  void _resetFormCompletely() {
+    // Reset controller
+    _controller.resetForm();
+
+    // Limpar todos os controllers
+    _dataController.clear();
+    _kmAtualController.clear();
+    _totalPagoController.clear();
+    _litrosController.clear();
+    _estabelecimentoController.clear();
+    _numeroParcelaController.clear();
+    _observacoesController.clear();
+
+    // Reset dropdowns
+    setState(() {
+      selectedActivityType = 'Abastecimento';
+      selectedFuelType = 'Gasolina';
+    });
+
+    // Garantir que o store está limpo
+    _controller.atividade.tipoAtividade = 'Abastecimento';
+    _controller.atividade.data = '';
+    _controller.atividade.km = '';
+    _controller.atividade.totalPago = '';
+    _controller.atividade.litros = '';
+    _controller.atividade.tipoCombustivel = 'Gasolina';
+    _controller.atividade.estabelecimento = '';
+    _controller.atividade.numeroParcela = '';
+    _controller.atividade.observacoes = '';
+  }
+
+  Future<void> _loadAtividade() async {
+    await _controller.loadById(widget.atividadeId!);
+    _updateControllers();
+  }
+
+  void _updateControllers() {
+    final atividade = _controller.atividade;
+
+    setState(() {
+      selectedActivityType = atividade.tipoAtividade;
+      _dataController.text = atividade.data;
+      _kmAtualController.text = atividade.km;
+      _totalPagoController.text = atividade.totalPago;
+      _litrosController.text = atividade.litros;
+      selectedFuelType = atividade.tipoCombustivel.isNotEmpty ? atividade.tipoCombustivel : 'Gasolina';
+      _estabelecimentoController.text = atividade.estabelecimento;
+      _numeroParcelaController.text = atividade.numeroParcela;
+      _observacoesController.text = atividade.observacoes;
+    });
+  }
+
+  void _updateAtividadeStore() {
+    print('=== DEBUG ANTES DE SALVAR ===');
+    print('selectedActivityType: $selectedActivityType');
+    print('data: ${_dataController.text}');
+    print('km: ${_kmAtualController.text}');
+    print('totalPago: ${_totalPagoController.text}');
+    print('litros: ${_litrosController.text}');
+    print('tipoCombustivel: $selectedFuelType');
+    print('estabelecimento: ${_estabelecimentoController.text}');
+    print('numeroParcela: ${_numeroParcelaController.text}');
+    print('observacoes: ${_observacoesController.text}');
+    print('=============================');
+
+    _controller.atividade.tipoAtividade = selectedActivityType;
+    _controller.atividade.data = _dataController.text;
+    _controller.atividade.km = _kmAtualController.text;
+    _controller.atividade.totalPago = _totalPagoController.text;
+    _controller.atividade.litros = _litrosController.text;
+    _controller.atividade.tipoCombustivel = selectedFuelType;
+    _controller.atividade.estabelecimento = _estabelecimentoController.text;
+    _controller.atividade.numeroParcela = _numeroParcelaController.text;
+    _controller.atividade.observacoes = _observacoesController.text;
+  }
+
+  @override
   void dispose() {
     _dataController.dispose();
     _kmAtualController.dispose();
     _totalPagoController.dispose();
     _litrosController.dispose();
-    _precoLitroController.dispose();
     _estabelecimentoController.dispose();
+    _numeroParcelaController.dispose();
     _observacoesController.dispose();
     super.dispose();
   }
@@ -71,9 +167,13 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           ),
         ),
         centerTitle: true,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Text(
-          'Nova atividade',
+          widget.atividadeId != null ? 'Editar atividade' : 'Nova atividade',
           style: textTheme.titleLarge?.copyWith(
             color: Colors.white,
           ),
@@ -163,6 +263,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             onChanged: (String? newValue) {
               setState(() {
                 selectedActivityType = newValue!;
+                _clearFieldsOnTypeChange();
               });
             },
             items: activityTypes.map<DropdownMenuItem<String>>((String value) {
@@ -200,6 +301,31 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     );
   }
 
+  void _clearFieldsOnTypeChange() {
+    // Limpa apenas os campos específicos (mantém data e observações)
+    _kmAtualController.clear();
+    _totalPagoController.clear();
+    _litrosController.clear();
+    _estabelecimentoController.clear();
+    _numeroParcelaController.clear();
+
+    // Limpa os valores do store
+    _controller.atividade.km = '';
+    _controller.atividade.totalPago = '';
+    _controller.atividade.litros = '';
+    _controller.atividade.estabelecimento = '';
+    _controller.atividade.numeroParcela = '';
+
+    // Atualiza o tipo de atividade no store
+    _controller.atividade.tipoAtividade = selectedActivityType;
+
+    // Reseta o tipo de combustível
+    setState(() {
+      selectedFuelType = 'Gasolina';
+    });
+    _controller.atividade.tipoCombustivel = 'Gasolina';
+  }
+
   IconData _getActivityIcon(String activityType) {
     switch (activityType) {
       case 'Abastecimento':
@@ -226,65 +352,231 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   Widget _buildForm() {
     return Column(
       children: [
-        // Data
+        // Data - sempre presente
         TextFieldCustom(
           label: 'Data',
           controller: _dataController,
           onTap: () => _selectDate(context),
+          onChanged: (value) {
+            _controller.atividade.data = value;
+          },
         ),
-        const SizedBox(height: 16),
 
-        // Km atual e Total pago
-        Row(
-          children: [
-            Expanded(
-              child: TextFieldCustom(
-                label: 'Km atual',
-                controller: _kmAtualController,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextFieldCustom(
-                label: 'Total pago',
-                controller: _totalPagoController,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
+        // Campos específicos por tipo de atividade
+        ..._buildSpecificFields(),
 
-        Row(
-          children: [
-            Expanded(
-              child: TextFieldCustom(
-                label: 'Litros',
-                controller: _litrosController,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextFieldCustom(
-                label: 'Preço do Litro',
-                controller: _precoLitroController,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        _buildFuelTypeDropdown(),
-        const SizedBox(height: 16),
-
-        TextFieldCustom(
-          label: 'Estabelecimento',
-          controller: _estabelecimentoController,
-        ),
-        const SizedBox(height: 16),
-
+        // Observações - sempre presente
         _buildObservationsField(),
       ],
     );
+  }
+
+  List<Widget> _buildSpecificFields() {
+    List<Widget> fields = [];
+
+    switch (selectedActivityType) {
+      case 'Abastecimento':
+        fields.addAll([
+          Row(
+            children: [
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Km',
+                  controller: _kmAtualController,
+                  onChanged: (value) {
+                    _controller.atividade.km = value;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Total pago',
+                  controller: _totalPagoController,
+                  onChanged: (value) {
+                    _controller.atividade.totalPago = value;
+                  },
+                ),
+              ),
+            ],
+          ),
+          TextFieldCustom(
+            label: 'Litros',
+            controller: _litrosController,
+            onChanged: (value) {
+              _controller.atividade.litros = value;
+            },
+          ),
+          _buildFuelTypeDropdown(),
+          const SizedBox(height: 16),
+          TextFieldCustom(
+            label: 'Estabelecimento',
+            controller: _estabelecimentoController,
+            onChanged: (value) {
+              _controller.atividade.estabelecimento = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Troca de óleo':
+        fields.addAll([
+          Row(
+            children: [
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Km',
+                  controller: _kmAtualController,
+                  onChanged: (value) {
+                    _controller.atividade.km = value;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Total pago',
+                  controller: _totalPagoController,
+                  onChanged: (value) {
+                    _controller.atividade.totalPago = value;
+                  },
+                ),
+              ),
+            ],
+          ),
+          TextFieldCustom(
+            label: 'Estabelecimento',
+            controller: _estabelecimentoController,
+            onChanged: (value) {
+              _controller.atividade.estabelecimento = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Lavagem':
+        fields.addAll([
+          TextFieldCustom(
+            label: 'Total pago',
+            controller: _totalPagoController,
+            onChanged: (value) {
+              _controller.atividade.totalPago = value;
+            },
+          ),
+          TextFieldCustom(
+            label: 'Estabelecimento',
+            controller: _estabelecimentoController,
+            onChanged: (value) {
+              _controller.atividade.estabelecimento = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Seguro':
+        fields.addAll([
+          TextFieldCustom(
+            label: 'Total pago',
+            controller: _totalPagoController,
+            onChanged: (value) {
+              _controller.atividade.totalPago = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Serviço mecânico':
+        fields.addAll([
+          TextFieldCustom(
+            label: 'Total pago',
+            controller: _totalPagoController,
+            onChanged: (value) {
+              _controller.atividade.totalPago = value;
+            },
+          ),
+          TextFieldCustom(
+            label: 'Estabelecimento',
+            controller: _estabelecimentoController,
+            onChanged: (value) {
+              _controller.atividade.estabelecimento = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Financiamento':
+        fields.addAll([
+          Row(
+            children: [
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Total pago',
+                  controller: _totalPagoController,
+                  onChanged: (value) {
+                    _controller.atividade.totalPago = value;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Número da parcela',
+                  controller: _numeroParcelaController,
+                  onChanged: (value) {
+                    _controller.atividade.numeroParcela = value;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ]);
+        break;
+
+      case 'Compras':
+        fields.addAll([
+          TextFieldCustom(
+            label: 'Total pago',
+            controller: _totalPagoController,
+            onChanged: (value) {
+              _controller.atividade.totalPago = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Impostos':
+        fields.addAll([
+          TextFieldCustom(
+            label: 'Total pago',
+            controller: _totalPagoController,
+            onChanged: (value) {
+              _controller.atividade.totalPago = value;
+            },
+          ),
+        ]);
+        break;
+
+      case 'Outros':
+        fields.addAll([
+          TextFieldCustom(
+            label: 'Total pago',
+            controller: _totalPagoController,
+            onChanged: (value) {
+              _controller.atividade.totalPago = value;
+            },
+          ),
+          TextFieldCustom(
+            label: 'Estabelecimento',
+            controller: _estabelecimentoController,
+            onChanged: (value) {
+              _controller.atividade.estabelecimento = value;
+            },
+          ),
+        ]);
+        break;
+    }
+
+    return fields;
   }
 
   Widget _buildFuelTypeDropdown() {
@@ -307,7 +599,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             borderSide: BorderSide.none,
           ),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
         items: fuelTypes.map((String fuelType) {
           return DropdownMenuItem<String>(
@@ -318,6 +610,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         onChanged: (String? newValue) {
           setState(() {
             selectedFuelType = newValue!;
+            _controller.atividade.tipoCombustivel = newValue;
           });
         },
       ),
@@ -333,6 +626,9 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
       child: TextField(
         controller: _observacoesController,
         maxLines: 4,
+        onChanged: (value) {
+          _controller.atividade.observacoes = value;
+        },
         decoration: InputDecoration(
           labelText: 'Observações',
           labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
@@ -343,7 +639,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             borderSide: BorderSide.none,
           ),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           alignLabelWithHint: true,
         ),
       ),
@@ -351,33 +647,67 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   Widget _buildCadastrarButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(double.infinity, 46),
-          backgroundColor: colorScheme.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        onPressed: () {},
-        child: Text(
-          'Cadastrar',
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colorScheme.onPrimary,
-          ),
-        ),
-      ),
+    return Observer(
+        builder: (_) {
+          return SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 46),
+                backgroundColor: _controller.isFormValid
+                    ? colorScheme.primary
+                    : Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: _controller.isFormValid
+                  ? () => _saveAtividade(context)
+                  : null,
+              child: Text(
+                'Cadastrar',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onPrimary,
+                ),
+              ),
+            ),
+          );
+        }
     );
+  }
+
+  Future<void> _saveAtividade(BuildContext context) async {
+    try {
+      _updateAtividadeStore();
+      await _controller.save();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Atividade salva com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao salvar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
@@ -396,6 +726,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         _dataController.text = "${picked.day.toString().padLeft(2, '0')}/"
             "${picked.month.toString().padLeft(2, '0')}/"
             "${picked.year}";
+        _controller.atividade.data = _dataController.text;
       });
     }
   }
