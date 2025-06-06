@@ -241,7 +241,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
       date: DateTime.now().subtract(Duration(days: items.length + 2)),
       icon: Icons.chat_bubble,
       iconColor: Colors.white,
-      iconBackgroundColor: const Color(0xFF2196F3),
+      iconBackgroundColor: colorScheme.primary,
       isWelcome: true,
     ));
 
@@ -308,15 +308,15 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           break;
 
         case 'Lavagem':
-          // Para lavagem, não há campos específicos além do estabelecimento
+        // Para lavagem, não há campos específicos além do estabelecimento
           break;
 
         case 'Seguro':
-          // Para seguro, não há campos específicos além do valor
+        // Para seguro, não há campos específicos além do valor
           break;
 
         case 'Serviço mecânico':
-          // Para serviço mecânico, não há campos específicos além do estabelecimento
+        // Para serviço mecânico, não há campos específicos além do estabelecimento
           break;
 
         case 'Financiamento':
@@ -329,15 +329,15 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           break;
 
         case 'Compras':
-          // Para compras, não há campos específicos além do estabelecimento
+        // Para compras, não há campos específicos além do estabelecimento
           break;
 
         case 'Impostos':
-          // Para impostos, não há campos específicos
+        // Para impostos, não há campos específicos
           break;
 
         case 'Outros':
-          // Para outros, não há campos específicos além do estabelecimento
+        // Para outros, não há campos específicos além do estabelecimento
           break;
       }
 
@@ -435,13 +435,20 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
   }) {
     return TimelineTile(
       alignment: TimelineAlign.manual,
-      lineXY: 0.12,
+      lineXY: 0,
       isFirst: isFirst,
       isLast: isLast,
       indicatorStyle: IndicatorStyle(
-        width: 44,
-        height: 44,
-        indicator: Container(
+        width: item.isWelcome ? 120 : 44,
+        height: item.isWelcome ? 120 : 44,
+        indicator: item.isWelcome
+            ? Align(
+                alignment: Alignment.centerLeft,
+                child: Image.asset(
+                  'assets/img/logo_black_app.png',
+                ),
+              )
+            : Container(
           decoration: BoxDecoration(
             color: item.iconBackgroundColor,
             shape: BoxShape.circle,
@@ -456,14 +463,14 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           child: Center(
             child: item.emoji != null
                 ? Text(
-                    item.emoji!,
-                    style: const TextStyle(fontSize: 20),
-                  )
+              item.emoji!,
+              style: const TextStyle(fontSize: 24),
+            )
                 : Icon(
-                    item.icon,
-                    color: item.iconColor,
-                    size: 22,
-                  ),
+              item.icon,
+              color: item.iconColor,
+              size: 22,
+            ),
           ),
         ),
         drawGap: true,
@@ -478,138 +485,137 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
       ),
       endChild: Container(
         margin: const EdgeInsets.only(left: 16.0),
-        child: Card(
-          elevation: 0,
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-            side: BorderSide.none,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header com título e data
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: item.isWelcome
-                          ? RichText(
-                              text: TextSpan(
-                                text: '${item.title} ',
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header com título e data
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: item.isWelcome
+                            ? RichText(
+                          text: TextSpan(
+                            text: '${item.title} ',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF424242),
+                            ),
+                            children: [
+                              TextSpan(
+                                text: item.subtitle,
                                 style: const TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1976D2),
                                 ),
-                                children: [
-                                  TextSpan(
-                                    text: item.subtitle,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Text(
-                              item.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: item.isSpecial ? const Color(0xFF757575) : Colors.black,
-                              ),
-                            ),
-                    ),
-                    if (!item.isSpecial && !item.isWelcome)
-                      Text(
-                        _formatDateShort(item.date),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF9E9E9E),
-                          fontWeight: FontWeight.w400,
+                              )
+                            ],
+                          ),
+                        )
+                            : item.isSpecial
+                            ? Text(
+                          item.title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF424242),
+                          ),
+                        )
+                            : Text(
+                          item.title,
+                          style: textTheme.bodyMedium,
                         ),
                       ),
+                      if (!item.isSpecial && !item.isWelcome)
+                        Text(
+                          _formatDateShort(item.date),
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontSize: 13,
+                            color: const Color(0xFF9E9E9E),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  // Data completa para atividades normais
+                  if (!item.isSpecial && !item.isWelcome) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDateFull(item.date),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF9E9E9E),
+                      ),
+                    ),
                   ],
-                ),
 
-                // Data completa para atividades normais
-                if (!item.isSpecial && !item.isWelcome) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDateFull(item.date),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF757575),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-
-                // Detalhes da atividade
-                if (!item.isSpecial && !item.isWelcome && item.details.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  ...item.details.map((detail) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              detail.icon,
-                              size: 14,
-                              color: const Color(0xFF9E9E9E),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                detail.text,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF757575),
-                                  fontWeight: FontWeight.w400,
-                                ),
+                  // Detalhes da atividade
+                  if (!item.isSpecial && !item.isWelcome && item.details.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    ...item.details.map((detail) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            detail.icon,
+                            size: 14,
+                            color: const Color(0xFF9E9E9E),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              detail.text,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: const Color(0xFF9E9E9E),
                               ),
                             ),
-                          ],
-                        ),
-                      )),
-                ],
+                          ),
+                        ],
+                      ),
+                    )),
+                  ],
 
-                // Preço
-                if (!item.isSpecial && !item.isWelcome && item.price != null) ...[
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'R\$ ${item.price!.toStringAsFixed(2).replaceAll('.', ',')}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                  // Preço
+                  if (!item.isSpecial && !item.isWelcome && item.price != null) ...[
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'R\$ ${item.price!.toStringAsFixed(2).replaceAll('.', ',')}',
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
 
-                // Data para itens especiais
-                if (item.isSpecial) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _formatDateShort(item.date),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF9E9E9E),
-                      fontWeight: FontWeight.w400,
+                  // Data para itens especiais
+                  if (item.isSpecial) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _formatDateShort(item.date),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF9E9E9E),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
+            // Divider apenas se não for o último item
+            if (!isLast)
+              const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFE0E0E0),
+              ),
+          ],
         ),
       ),
     );
