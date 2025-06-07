@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_conta.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_custom.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ class MenuScreen extends StatefulWidget {
 
 class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
   bool notificationsEnabled = true;
+
+  final AuthService _authService = Modular.get<AuthService>();
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +61,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       ),
                       _buildMenuListItem(
                         title: 'Contato',
-                        subtitle:
-                            'Dúvidas? Entre em contato conosco através do nosso suporte!',
+                        subtitle: 'Dúvidas? Entre em contato conosco através do nosso suporte!',
                         onTap: () {
                           Modular.to.navigate(contatoRoute);
                         },
@@ -79,8 +81,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                     _buildSectionBlock([
                       _buildMenuListItem(
                         title: 'Tema',
-                        subtitle:
-                            'Escolha o tema que deseja aplicar no aplicativo',
+                        subtitle: 'Escolha o tema que deseja aplicar no aplicativo',
                         onTap: () {},
                         isFirst: true,
                         isLast: true,
@@ -101,7 +102,6 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Altere de conta',
                         subtitle: 'Troque entre contas cadastradas',
                         onTap: () {
-                          //todo: mockado para testes front end
                           final accounts = [
                             UserAccount(
                               id: '1',
@@ -120,9 +120,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                             accounts: accounts,
                             activeAccountId: '1',
                             onAccountSelected: (account) {},
-                            onAddAccount: () {
-                              //todo: logica para adicionar nova conta
-                            },
+                            onAddAccount: () {},
                           );
                         },
                       ),
@@ -134,10 +132,11 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                           ConfirmarBottomSheet.show(
                             context: context,
                             titulo: 'Atenção',
-                            mensagem:
-                            'Você realmente quer fazer logout?',
+                            mensagem: 'Você realmente quer fazer logout?',
                             textoConfirmar: 'Sair',
-                            onConfirmar: () {},
+                            onConfirmar: () async {
+                              await _performLogout();
+                            },
                           );
                         },
                         isLast: true,
@@ -152,6 +151,37 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
         ],
       ),
     );
+  }
+
+  Future<void> _performLogout() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      await _authService.logout();
+
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao fazer logout: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildHeader() {
