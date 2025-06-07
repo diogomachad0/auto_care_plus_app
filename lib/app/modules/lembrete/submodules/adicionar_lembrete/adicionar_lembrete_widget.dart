@@ -44,7 +44,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
               'Adicionar um novo lembrete',
               style: textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             TextFieldCustom(
               label: 'Título do lembrete',
               controller: _tituloController,
@@ -64,7 +64,6 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
 
   Widget _buildNotificationToggle() {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -76,7 +75,6 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
                   'Notificar lembrete?',
                   style: textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 4),
                 Text(
                   'Você receberá uma notificação às 00:00 da data agendada',
                   style: textTheme.bodySmall?.copyWith(
@@ -84,6 +82,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
                     fontSize: 12,
                   ),
                 ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
