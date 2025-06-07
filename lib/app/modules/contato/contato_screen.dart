@@ -77,7 +77,7 @@ class _ContatoScreenState extends State<ContatoScreen> with ThemeMixin {
             'assets/img/banners/pana.png',
             height: 200,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
             'Se você tiver alguma dúvida, sugestão ou problema com o aplicativo, entre em contato conosco preenchendo o formulário abaixo.',
             textAlign: TextAlign.start,
@@ -97,11 +97,9 @@ class _ContatoScreenState extends State<ContatoScreen> with ThemeMixin {
           const TextFieldCustom(
             label: 'E-mail',
           ),
-          const SizedBox(height: 16),
           const TextFieldCustom(
             label: 'Assunto do contato',
           ),
-          const SizedBox(height: 16),
           _buildObservationsField(context),
           const SizedBox(height: 16),
           FilledButton(
