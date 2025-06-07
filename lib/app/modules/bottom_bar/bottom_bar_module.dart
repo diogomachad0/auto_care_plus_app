@@ -12,9 +12,17 @@ import 'package:auto_care_plus_app/app/modules/veiculo/submodules/adicionar_veic
 import 'package:auto_care_plus_app/app/modules/veiculo/submodules/editar_veiculo/editar_veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_screen.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class BottomBarModule extends Module {
+  @override
+  void binds(Injector i) {
+    i.add<AuthService>(AuthService.new);
+
+    super.binds(i);
+  }
+
   @override
   void routes(RouteManager r) {
     r.child(
