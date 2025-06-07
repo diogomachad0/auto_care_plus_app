@@ -19,8 +19,7 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
   final TextEditingController _telefoneController = TextEditingController();
   final TextEditingController _senhaAtualController = TextEditingController();
   final TextEditingController _novaSenhaController = TextEditingController();
-  final TextEditingController _confirmarSenhaController =
-      TextEditingController();
+  final TextEditingController _confirmarSenhaController = TextEditingController();
 
   @override
   void dispose() {
@@ -46,11 +45,10 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
           child: Column(
             children: [
               _buildAppBar(),
-              const SizedBox(height: 32),
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
                     child: Column(
                       children: [
                         Image.asset(
@@ -127,17 +125,14 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
           label: 'Nome',
           controller: _nomeController,
         ),
-        const SizedBox(height: 16),
         TextFieldCustom(
           label: 'E-mail',
           controller: _emailController,
         ),
-        const SizedBox(height: 16),
         TextFieldCustom(
           label: 'Telefone',
           controller: _telefoneController,
         ),
-        const SizedBox(height: 32),
         Padding(
           padding: const EdgeInsets.only(left: 8),
           child: Text(
@@ -152,13 +147,11 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
           label: 'Senha atual',
           controller: _senhaAtualController,
         ),
-        const SizedBox(height: 16),
         const PasswordTextFieldCustom(label: 'Nova senha'),
         const SizedBox(height: 16),
         const PasswordTextFieldCustom(label: 'Confirme a nova senha'),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
         _buildActionButtons(),
-        const SizedBox(height: 24),
       ],
     );
   }
@@ -198,8 +191,7 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
             ConfirmarBottomSheet.show(
               context: context,
               titulo: 'Excluir conta',
-              mensagem:
-                  'Deseja mesmo excluir sua conta? Isso apagará todos os seus dados de forma permanente.',
+              mensagem: 'Deseja mesmo excluir sua conta? Isso apagará todos os seus dados de forma permanente.',
               textoConfirmar: 'Excluir conta',
               onConfirmar: () {},
             );
