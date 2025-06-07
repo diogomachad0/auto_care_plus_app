@@ -12,6 +12,8 @@ class TextFieldCustom extends StatefulWidget {
   final bool toUpperCase;
   final String? Function(String value)? validator;
   final Icon? icon;
+  final TextInputType? keyboardType;
+  final bool enabled;
 
   const TextFieldCustom({
     super.key,
@@ -24,6 +26,8 @@ class TextFieldCustom extends StatefulWidget {
     this.toUpperCase = false,
     this.validator,
     this.icon,
+    this.keyboardType,
+    this.enabled = true,
   });
 
   @override
@@ -33,6 +37,7 @@ class TextFieldCustom extends StatefulWidget {
 class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
   late final TextEditingController _internalController;
   String? _errorText;
+  bool _hasBeenTouched = false;
 
   @override
   void initState() {
@@ -42,15 +47,47 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
     if (widget.initialValue != null && widget.controller == null) {
       _internalController.text = widget.initialValue!;
     }
+
+    _internalController.addListener(_validateField);
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _internalController.dispose();
+    } else {
+      _internalController.removeListener(_validateField);
+    }
+    super.dispose();
+  }
+
+  void _validateField() {
+    if (!_hasBeenTouched) return;
+
+    if (widget.validator != null) {
+      final validationResult = widget.validator!(_internalController.text);
+      if (mounted) {
+        setState(() => _errorText = validationResult);
+      }
+    }
   }
 
   void _handleChange(String value) {
+    if (!_hasBeenTouched) {
+      setState(() => _hasBeenTouched = true);
+    }
+
     if (widget.validator != null) {
       final validationResult = widget.validator!(value);
       setState(() => _errorText = validationResult);
     }
 
     widget.onChanged?.call(value);
+  }
+
+  void _handleFocusLost() {
+    setState(() => _hasBeenTouched = true);
+    _validateField();
   }
 
   @override
@@ -68,47 +105,61 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _internalController,
-          readOnly: widget.onTap != null,
-          onTap: widget.onTap,
-          onChanged: _handleChange,
-          keyboardType: widget.onlyNumbers ? TextInputType.number : TextInputType.text,
-          inputFormatters: formatters.isNotEmpty ? formatters : null,
-          textCapitalization: widget.toUpperCase ? TextCapitalization.characters : TextCapitalization.sentences,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            labelStyle: textTheme.bodyMedium?.copyWith(
-              color: _errorText != null ? Colors.red : Colors.grey.shade500,
-            ),
-            floatingLabelBehavior: FloatingLabelBehavior.auto,
-            floatingLabelStyle: textTheme.bodyMedium?.copyWith(
-              color: _errorText != null ? Colors.red : colorScheme.primary,
-            ),
-            filled: true,
-            fillColor: Colors.grey[200],
-            contentPadding: const EdgeInsets.all(8),
-            prefixIcon: widget.icon != null
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 4),
-                    child: widget.icon,
-                  )
-                : null,
-            prefixIconConstraints: const BoxConstraints(
-              minWidth: 0,
-              minHeight: 0,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: colorScheme.primary, width: 1),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (!hasFocus) _handleFocusLost();
+          },
+          child: TextField(
+            controller: _internalController,
+            enabled: widget.enabled,
+            readOnly: widget.onTap != null,
+            onTap: widget.onTap,
+            onChanged: _handleChange,
+            keyboardType: widget.keyboardType ?? (widget.onlyNumbers ? TextInputType.number : TextInputType.text),
+            inputFormatters: formatters.isNotEmpty ? formatters : null,
+            textCapitalization: widget.toUpperCase ? TextCapitalization.characters : TextCapitalization.sentences,
+            decoration: InputDecoration(
+              labelText: widget.label,
+              labelStyle: textTheme.bodyMedium?.copyWith(
+                color: _errorText != null ? Colors.red : Colors.grey.shade500,
+              ),
+              floatingLabelBehavior: FloatingLabelBehavior.auto,
+              floatingLabelStyle: textTheme.bodyMedium?.copyWith(
+                color: _errorText != null ? Colors.red : colorScheme.primary,
+              ),
+              filled: true,
+              fillColor: widget.enabled ? Colors.grey[200] : Colors.grey[100],
+              contentPadding: const EdgeInsets.all(8),
+              prefixIcon: widget.icon != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 4),
+                      child: widget.icon,
+                    )
+                  : null,
+              prefixIconConstraints: const BoxConstraints(
+                minWidth: 0,
+                minHeight: 0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _errorText != null ? Colors.red : colorScheme.primary, width: 1),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
+              ),
             ),
           ),
         ),
