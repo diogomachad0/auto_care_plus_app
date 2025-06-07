@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/password_text_field_custom.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,111 @@ class EntrarScreen extends StatefulWidget {
 }
 
 class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
+  late final AuthService _authService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthService();
+  }
+
   @override
   void dispose() {
+    _authService.dispose();
     super.dispose();
+  }
+
+  Widget _buildErrorWidget() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _authService.isErrorCredential,
+      builder: (context, hasCredentialError, child) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: _authService.isErrorGeneric,
+          builder: (context, hasGenericError, child) {
+            return ValueListenableBuilder<String>(
+              valueListenable: _authService.errorMessage,
+              builder: (context, errorMessage, child) {
+                if (hasCredentialError || hasGenericError) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      border: Border.all(color: Colors.red.shade200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            errorMessage.isNotEmpty ? errorMessage : 'Erro de autenticação',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: Colors.red.shade600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _authService.isLoading,
+      builder: (context, isLoading, child) {
+        return FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(double.infinity, 46),
+            backgroundColor: colorScheme.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          onPressed: isLoading ? null : () => _authService.login(),
+          child: isLoading
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Entrando...',
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  'Entrar',
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onPrimary,
+                  ),
+                ),
+        );
+      },
+    );
   }
 
   @override
@@ -79,31 +182,19 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                   'assets/img/logo_black_app.png',
                                   width: 200,
                                 ),
-                                const SizedBox(height: 32),
-                                const TextFieldCustom(label: 'E-mail'),
-                                const SizedBox(height: 16),
-                                const PasswordTextFieldCustom(label: 'Senha'),
-                                const SizedBox(height: 24),
-                                FilledButton(
-                                  style: FilledButton.styleFrom(
-                                    minimumSize:
-                                        const Size(double.infinity, 46),
-                                    backgroundColor: colorScheme.primary,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Modular.to.navigate('$bottomBarRoute/$homeRoute');
-                                  },
-                                  child: Text(
-                                    'Entrar',
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                  ),
+                                const SizedBox(height: 28),
+                                _buildErrorWidget(),
+                                TextFieldCustom(
+                                  label: 'E-mail',
+                                  controller: _authService.emailController,
+                                  validator: _authService.validateEmail,
                                 ),
+                                PasswordTextFieldCustom(
+                                  label: 'Senha',
+                                  controller: _authService.passwordController,
+                                ),
+                                const SizedBox(height: 16),
+                                _buildLoginButton(),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Row(
@@ -115,8 +206,7 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8.0),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                         child: Text(
                                           'ou',
                                           style: textTheme.bodyMedium?.copyWith(
@@ -135,7 +225,7 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    Modular.to.pushNamed('$recuperarSenhaRoute/');
+                                    Modular.to.pushNamed('/$recuperarSenhaRoute/');
                                   },
                                   child: Text(
                                     'Esqueci minha senha',
