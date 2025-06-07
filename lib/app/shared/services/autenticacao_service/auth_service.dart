@@ -1,17 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final emailControllerRegister = TextEditingController();
   final passwordControllerRegister = TextEditingController();
+  final nomeController = TextEditingController();
+  final telefoneController = TextEditingController();
+  final confirmarSenhaController = TextEditingController();
 
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
   final ValueNotifier<bool> isErrorCredential = ValueNotifier(false);
   final ValueNotifier<bool> isErrorGeneric = ValueNotifier(false);
+  final ValueNotifier<String> errorMessage = ValueNotifier('');
+  final ValueNotifier<bool> isGoogleLoading = ValueNotifier(false);
 
   User? user;
 
@@ -20,70 +29,280 @@ class AuthService {
     emailControllerRegister.clear();
     passwordController.clear();
     emailController.clear();
+    nomeController.clear();
+    telefoneController.clear();
+    confirmarSenhaController.clear();
   }
 
-  _setErrorGeneric(bool error) {
+  _setErrorGeneric(bool error, [String message = '']) {
     isLoading.value = false;
+    isGoogleLoading.value = false;
     isErrorGeneric.value = error;
+    errorMessage.value = message;
   }
 
-  _setErrorCredential(bool error) {
+  _setErrorCredential(bool error, [String message = '']) {
     isLoading.value = false;
+    isGoogleLoading.value = false;
     isErrorCredential.value = error;
+    errorMessage.value = message;
   }
 
   _setLoading(bool loading) {
     isLoading.value = loading;
   }
 
+  _setGoogleLoading(bool loading) {
+    isGoogleLoading.value = loading;
+  }
+
   _cleanStates() {
     _setLoading(false);
+    _setGoogleLoading(false);
     _setErrorCredential(false);
     _setErrorGeneric(false);
+    errorMessage.value = '';
   }
 
-  Future<void> login(BuildContext context) async {
+  String? validateEmail(String email) {
+    if (email.isEmpty) return 'E-mail é obrigatório';
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      return 'E-mail inválido';
+    }
+    return null;
+  }
+
+  String? validatePassword(String password) {
+    if (password.isEmpty) return 'Senha é obrigatória';
+    if (password.length < 6) return 'Senha deve ter pelo menos 6 caracteres';
+    return null;
+  }
+
+  String? validateConfirmPassword(String password, String confirmPassword) {
+    if (confirmPassword.isEmpty) return 'Confirmação de senha é obrigatória';
+    if (password != confirmPassword) return 'Senhas não coincidem';
+    return null;
+  }
+
+  Future<void> login() async {
     _cleanStates();
+
+    final emailError = validateEmail(emailController.text);
+    final passwordError = validatePassword(passwordController.text);
+
+    if (emailError != null || passwordError != null) {
+      _setErrorGeneric(true, emailError ?? passwordError!);
+      return;
+    }
+
     _setLoading(true);
 
     try {
-      UserCredential credential =
-          await _firebaseAuth.signInWithEmailAndPassword(
-              email: emailController.text, password: passwordController.text);
+      UserCredential credential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
       user = credential.user;
       _resetControllers();
-      Navigator.pushReplacementNamed(context, "/home");
+      Modular.to.navigate('$bottomBarRoute/$homeRoute');
     } on FirebaseAuthException catch (e) {
-      _setErrorCredential(true);
+      String message = 'Erro de autenticação';
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'Usuário não encontrado';
+          break;
+        case 'wrong-password':
+          message = 'Senha incorreta';
+          break;
+        case 'invalid-email':
+          message = 'E-mail inválido';
+          break;
+        case 'user-disabled':
+          message = 'Usuário desabilitado';
+          break;
+        case 'too-many-requests':
+          message = 'Muitas tentativas. Tente novamente mais tarde';
+          break;
+        case 'invalid-credential':
+          message = 'Credenciais inválidas';
+          break;
+      }
+      _setErrorCredential(true, message);
     } on Exception catch (e) {
-      _setErrorGeneric(true);
+      _setErrorGeneric(true, 'Erro inesperado. Tente novamente');
     }
   }
 
-  Future<void> register(BuildContext context) async {
+  Future<void> signInWithGoogle() async {
     _cleanStates();
+    _setGoogleLoading(true);
+
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in
+        _setGoogleLoading(false);
+        return;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+      user = userCredential.user;
+
+      print('Google Sign-In successful: ${user?.displayName} (${user?.email})');
+
+      _resetControllers();
+      Modular.to.navigate('$bottomBarRoute/$homeRoute');
+
+    } on FirebaseAuthException catch (e) {
+      String message = 'Erro ao fazer login com Google';
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          message = 'Conta já existe com credenciais diferentes';
+          break;
+        case 'invalid-credential':
+          message = 'Credenciais do Google inválidas';
+          break;
+        case 'operation-not-allowed':
+          message = 'Login com Google não está habilitado';
+          break;
+        case 'user-disabled':
+          message = 'Usuário desabilitado';
+          break;
+        case 'user-not-found':
+          message = 'Usuário não encontrado';
+          break;
+        case 'wrong-password':
+          message = 'Senha incorreta';
+          break;
+      }
+      _setErrorGeneric(true, message);
+    } catch (e) {
+      print('Google Sign-In error: $e');
+      _setErrorGeneric(true, 'Erro inesperado ao fazer login com Google');
+    }
+  }
+
+  Future<void> register() async {
+    _cleanStates();
+
+    final emailError = validateEmail(emailControllerRegister.text);
+    final passwordError = validatePassword(passwordControllerRegister.text);
+    final confirmPasswordError = validateConfirmPassword(
+        passwordControllerRegister.text,
+        confirmarSenhaController.text
+    );
+
+    if (emailError != null || passwordError != null || confirmPasswordError != null) {
+      _setErrorGeneric(true, emailError ?? passwordError ?? confirmPasswordError!);
+      return;
+    }
+
+    if (nomeController.text.trim().isEmpty) {
+      _setErrorGeneric(true, 'Nome é obrigatório');
+      return;
+    }
+
     _setLoading(true);
 
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(
-          email: emailControllerRegister.text, password: passwordControllerRegister.text);
+      UserCredential credential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: emailControllerRegister.text.trim(),
+        password: passwordControllerRegister.text,
+      );
+
+      await credential.user?.updateDisplayName(nomeController.text.trim());
+
       _resetControllers();
-      Navigator.pushReplacementNamed(context, "/");
-    } on Exception {
-      _setErrorGeneric(true);
+      Modular.to.navigate('/');
+    } on FirebaseAuthException catch (e) {
+      String message = 'Erro ao criar conta';
+      switch (e.code) {
+        case 'weak-password':
+          message = 'Senha muito fraca';
+          break;
+        case 'email-already-in-use':
+          message = 'E-mail já está em uso';
+          break;
+        case 'invalid-email':
+          message = 'E-mail inválido';
+          break;
+      }
+      _setErrorGeneric(true, message);
+    } on Exception catch (e) {
+      _setErrorGeneric(true, 'Erro inesperado. Tente novamente');
     }
   }
 
-  Future<void> logout(BuildContext context) async {
+  Future<void> logout() async {
     _cleanStates();
 
     try {
+      // Sign out from Google
+      await _googleSignIn.signOut();
+      // Sign out from Firebase
       await _firebaseAuth.signOut();
       user = null;
       _resetControllers();
-      Navigator.pushReplacementNamed(context, "/");
+      Modular.to.navigate('/');
     } on Exception catch (e) {
-      _setErrorGeneric(true);
+      _setErrorGeneric(true, 'Erro ao fazer logout');
     }
+  }
+
+  Future<void> resetPassword(String email) async {
+    _cleanStates();
+
+    final emailError = validateEmail(email);
+    if (emailError != null) {
+      _setErrorGeneric(true, emailError);
+      return;
+    }
+
+    _setLoading(true);
+
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+      _setLoading(false);
+    } on FirebaseAuthException catch (e) {
+      String message = 'Erro ao enviar e-mail';
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'Usuário não encontrado';
+          break;
+        case 'invalid-email':
+          message = 'E-mail inválido';
+          break;
+      }
+      _setErrorGeneric(true, message);
+    } on Exception catch (e) {
+      _setErrorGeneric(true, 'Erro inesperado. Tente novamente');
+    }
+  }
+
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    emailControllerRegister.dispose();
+    passwordControllerRegister.dispose();
+    nomeController.dispose();
+    telefoneController.dispose();
+    confirmarSenhaController.dispose();
+    isLoading.dispose();
+    isErrorCredential.dispose();
+    isErrorGeneric.dispose();
+    errorMessage.dispose();
+    isGoogleLoading.dispose();
   }
 }
