@@ -1,12 +1,15 @@
+import 'package:auto_care_plus_app/app/shared/database/local/database_local.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:sqflite/sqflite.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final DatabaseLocal _databaseLocal = DatabaseLocal();
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -103,6 +106,10 @@ class AuthService {
         password: passwordController.text,
       );
       user = credential.user;
+
+      // Após login bem-sucedido, inicializa o banco do usuário
+      await _initializeUserDatabase();
+
       _resetControllers();
       Modular.to.navigate('$bottomBarRoute/$homeRoute');
     } on FirebaseAuthException catch (e) {
@@ -161,6 +168,9 @@ class AuthService {
       user = userCredential.user;
 
       print('Google Sign-In successful: ${user?.displayName} (${user?.email})');
+
+      // Após login bem-sucedido, inicializa o banco do usuário
+      await _initializeUserDatabase();
 
       _resetControllers();
       Modular.to.navigate('$bottomBarRoute/$homeRoute');
@@ -223,6 +233,10 @@ class AuthService {
       );
 
       await credential.user?.updateDisplayName(nomeController.text.trim());
+      user = credential.user;
+
+      // Após registro bem-sucedido, inicializa o banco do usuário
+      await _initializeUserDatabase();
 
       _resetControllers();
       Modular.to.navigate('/');
@@ -249,6 +263,9 @@ class AuthService {
     _cleanStates();
 
     try {
+      // Fecha o banco de dados antes do logout
+      await _databaseLocal.closeDatabase();
+
       // Sign out from Google
       await _googleSignIn.signOut();
       // Sign out from Firebase
@@ -259,6 +276,33 @@ class AuthService {
     } on Exception catch (e) {
       _setErrorGeneric(true, 'Erro ao fazer logout');
     }
+  }
+
+  /// Inicializa o banco de dados do usuário após login/registro
+  Future<void> _initializeUserDatabase() async {
+    try {
+      final databaseLocal = DatabaseLocal();
+
+      // Se estávamos usando banco temporário, migra os dados
+      if (databaseLocal.isUsingTemporaryDatabase()) {
+        await databaseLocal.migrateFromTemporaryDatabase();
+      } else {
+        // Apenas força a abertura do banco do usuário
+        await databaseLocal.getDb();
+      }
+
+      print('Banco de dados do usuário inicializado: ${user?.uid}');
+    } catch (e) {
+      print('Erro ao inicializar banco do usuário: $e');
+    }
+  }
+
+  /// Obtém a instância do banco de dados do usuário atual
+  Future<Database> getUserDatabase() async {
+    if (user == null) {
+      throw Exception('Usuário não autenticado');
+    }
+    return await _databaseLocal.getDb();
   }
 
   Future<void> resetPassword(String email) async {
