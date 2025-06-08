@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/atividade/atividade_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/mapbox/mapbox_place_search.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -55,7 +56,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     if (widget.atividadeId != null) {
       _loadAtividade();
     } else {
-      // Nova atividade - limpar tudo
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _resetFormCompletely();
       });
@@ -63,10 +63,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   void _resetFormCompletely() {
-    // Reset controller
     _controller.resetForm();
 
-    // Limpar todos os controllers
     _dataController.clear();
     _kmAtualController.clear();
     _totalPagoController.clear();
@@ -75,13 +73,11 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _numeroParcelaController.clear();
     _observacoesController.clear();
 
-    // Reset dropdowns
     setState(() {
       selectedActivityType = 'Abastecimento';
       selectedFuelType = 'Gasolina';
     });
 
-    // Garantir que o store está limpo
     _controller.atividade.tipoAtividade = 'Abastecimento';
     _controller.atividade.data = '';
     _controller.atividade.km = '';
@@ -91,6 +87,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _controller.atividade.estabelecimento = '';
     _controller.atividade.numeroParcela = '';
     _controller.atividade.observacoes = '';
+    _controller.atividade.latitude = 0.toString();
+    _controller.atividade.longitude = 0.toString();
   }
 
   Future<void> _loadAtividade() async {
@@ -115,18 +113,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   void _updateAtividadeStore() {
-    print('=== DEBUG ANTES DE SALVAR ===');
-    print('selectedActivityType: $selectedActivityType');
-    print('data: ${_dataController.text}');
-    print('km: ${_kmAtualController.text}');
-    print('totalPago: ${_totalPagoController.text}');
-    print('litros: ${_litrosController.text}');
-    print('tipoCombustivel: $selectedFuelType');
-    print('estabelecimento: ${_estabelecimentoController.text}');
-    print('numeroParcela: ${_numeroParcelaController.text}');
-    print('observacoes: ${_observacoesController.text}');
-    print('=============================');
-
     _controller.atividade.tipoAtividade = selectedActivityType;
     _controller.atividade.data = _dataController.text;
     _controller.atividade.km = _kmAtualController.text;
@@ -274,9 +260,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                     const SizedBox(width: 10),
                     Icon(
                       _getActivityIcon(value),
-                      color: value == selectedActivityType
-                          ? Colors.white
-                          : colorScheme.secondary,
+                      color: value == selectedActivityType ? Colors.white : colorScheme.secondary,
                     ),
                     const SizedBox(width: 10),
                     Align(
@@ -285,9 +269,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                         textAlign: TextAlign.center,
                         value,
                         style: textTheme.bodyMedium?.copyWith(
-                          color: value == selectedActivityType
-                              ? colorScheme.onPrimary
-                              : colorScheme.secondary,
+                          color: value == selectedActivityType ? colorScheme.onPrimary : colorScheme.secondary,
                         ),
                       ),
                     ),
@@ -302,24 +284,22 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   void _clearFieldsOnTypeChange() {
-    // Limpa apenas os campos específicos (mantém data e observações)
     _kmAtualController.clear();
     _totalPagoController.clear();
     _litrosController.clear();
     _estabelecimentoController.clear();
     _numeroParcelaController.clear();
 
-    // Limpa os valores do store
     _controller.atividade.km = '';
     _controller.atividade.totalPago = '';
     _controller.atividade.litros = '';
     _controller.atividade.estabelecimento = '';
     _controller.atividade.numeroParcela = '';
+    _controller.atividade.latitude = '';
+    _controller.atividade.longitude = '';
 
-    // Atualiza o tipo de atividade no store
     _controller.atividade.tipoAtividade = selectedActivityType;
 
-    // Reseta o tipo de combustível
     setState(() {
       selectedFuelType = 'Gasolina';
     });
@@ -352,7 +332,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   Widget _buildForm() {
     return Column(
       children: [
-        // Data - sempre presente
         TextFieldCustom(
           label: 'Data',
           controller: _dataController,
@@ -361,13 +340,24 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             _controller.atividade.data = value;
           },
         ),
-
-        // Campos específicos por tipo de atividade
         ..._buildSpecificFields(),
-
-        // Observações - sempre presente
         _buildObservationsField(),
       ],
+    );
+  }
+
+  Widget _buildEstabelecimentoField() {
+    return MapboxPlaceSearch(
+      controller: _estabelecimentoController,
+      label: 'Estabelecimento',
+      onPlaceSelected: (address, lat, lng) {
+        _controller.setEstabelecimentoComCoordenadas(address, lat, lng);
+        print('Endereço selecionado: $address');
+        print('Coordenadas: $lat, $lng');
+      },
+      onChanged: (value) {
+        _controller.atividade.estabelecimento = value;
+      },
     );
   }
 
@@ -409,13 +399,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           ),
           _buildFuelTypeDropdown(),
           const SizedBox(height: 16),
-          TextFieldCustom(
-            label: 'Estabelecimento',
-            controller: _estabelecimentoController,
-            onChanged: (value) {
-              _controller.atividade.estabelecimento = value;
-            },
-          ),
+          _buildEstabelecimentoField(),
         ]);
         break;
 
@@ -444,13 +428,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
               ),
             ],
           ),
-          TextFieldCustom(
-            label: 'Estabelecimento',
-            controller: _estabelecimentoController,
-            onChanged: (value) {
-              _controller.atividade.estabelecimento = value;
-            },
-          ),
+          _buildEstabelecimentoField(),
         ]);
         break;
 
@@ -463,13 +441,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
               _controller.atividade.totalPago = value;
             },
           ),
-          TextFieldCustom(
-            label: 'Estabelecimento',
-            controller: _estabelecimentoController,
-            onChanged: (value) {
-              _controller.atividade.estabelecimento = value;
-            },
-          ),
+          _buildEstabelecimentoField(),
         ]);
         break;
 
@@ -494,13 +466,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
               _controller.atividade.totalPago = value;
             },
           ),
-          TextFieldCustom(
-            label: 'Estabelecimento',
-            controller: _estabelecimentoController,
-            onChanged: (value) {
-              _controller.atividade.estabelecimento = value;
-            },
-          ),
+          _buildEstabelecimentoField(),
         ]);
         break;
 
@@ -565,13 +531,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
               _controller.atividade.totalPago = value;
             },
           ),
-          TextFieldCustom(
-            label: 'Estabelecimento',
-            controller: _estabelecimentoController,
-            onChanged: (value) {
-              _controller.atividade.estabelecimento = value;
-            },
-          ),
+          _buildEstabelecimentoField(),
         ]);
         break;
     }
@@ -598,8 +558,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         ),
         items: fuelTypes.map((String fuelType) {
           return DropdownMenuItem<String>(
@@ -638,8 +597,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
           ),
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           alignLabelWithHint: true,
         ),
       ),
@@ -647,34 +605,28 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   Widget _buildCadastrarButton() {
-    return Observer(
-        builder: (_) {
-          return SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 46),
-                backgroundColor: _controller.isFormValid
-                    ? colorScheme.primary
-                    : Colors.grey,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: _controller.isFormValid
-                  ? () => _saveAtividade(context)
-                  : null,
-              child: Text(
-                'Cadastrar',
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onPrimary,
-                ),
-              ),
+    return Observer(builder: (_) {
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(double.infinity, 46),
+            backgroundColor: _controller.isFormValid ? colorScheme.primary : Colors.grey,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-          );
-        }
-    );
+          ),
+          onPressed: _controller.isFormValid ? () => _saveAtividade(context) : null,
+          child: Text(
+            'Cadastrar',
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onPrimary,
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Future<void> _saveAtividade(BuildContext context) async {
