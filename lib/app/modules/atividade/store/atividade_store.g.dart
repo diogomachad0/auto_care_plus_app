@@ -168,6 +168,38 @@ mixin _$AtividadeStore on _AtividadeStoreBase, Store {
     });
   }
 
+  late final _$latitudeAtom =
+      Atom(name: '_AtividadeStoreBase.latitude', context: context);
+
+  @override
+  String get latitude {
+    _$latitudeAtom.reportRead();
+    return super.latitude;
+  }
+
+  @override
+  set latitude(String value) {
+    _$latitudeAtom.reportWrite(value, super.latitude, () {
+      super.latitude = value;
+    });
+  }
+
+  late final _$longitudeAtom =
+      Atom(name: '_AtividadeStoreBase.longitude', context: context);
+
+  @override
+  String get longitude {
+    _$longitudeAtom.reportRead();
+    return super.longitude;
+  }
+
+  @override
+  set longitude(String value) {
+    _$longitudeAtom.reportWrite(value, super.longitude, () {
+      super.longitude = value;
+    });
+  }
+
   @override
   String toString() {
     return '''
@@ -180,7 +212,9 @@ litros: ${litros},
 tipoCombustivel: ${tipoCombustivel},
 estabelecimento: ${estabelecimento},
 numeroParcela: ${numeroParcela},
-observacoes: ${observacoes}
+observacoes: ${observacoes},
+latitude: ${latitude},
+longitude: ${longitude}
     ''';
   }
 }

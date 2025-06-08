@@ -18,6 +18,8 @@ abstract class AtividadeStoreFactory {
     estabelecimento: model.estabelecimento,
     numeroParcela: model.numeroParcela,
     observacoes: model.observacoes,
+    latitude: model.latitude?.toString() ?? '',
+    longitude: model.longitude?.toString() ?? '',
   );
 
   static AtividadeStore novo() => AtividadeStore(
@@ -31,6 +33,8 @@ abstract class AtividadeStoreFactory {
     estabelecimento: '',
     numeroParcela: '',
     observacoes: '',
+    latitude: '',
+    longitude: '',
   );
 }
 
@@ -65,6 +69,12 @@ abstract class _AtividadeStoreBase with Store {
   @observable
   String observacoes;
 
+  @observable
+  String latitude;
+
+  @observable
+  String longitude;
+
   _AtividadeStoreBase({
     required this.base,
     required this.tipoAtividade,
@@ -76,6 +86,8 @@ abstract class _AtividadeStoreBase with Store {
     required this.estabelecimento,
     required this.numeroParcela,
     required this.observacoes,
+    required this.latitude,
+    required this.longitude,
   });
 
   AtividadeModel toModel() {
@@ -90,6 +102,14 @@ abstract class _AtividadeStoreBase with Store {
       estabelecimento: estabelecimento,
       numeroParcela: numeroParcela,
       observacoes: observacoes,
+      latitude: latitude.isNotEmpty ? double.tryParse(latitude) : null,
+      longitude: longitude.isNotEmpty ? double.tryParse(longitude) : null,
     );
   }
+
+  // Métodos auxiliares para trabalhar com coordenadas
+  double? get latitudeAsDouble => latitude.isNotEmpty ? double.tryParse(latitude) : null;
+  double? get longitudeAsDouble => longitude.isNotEmpty ? double.tryParse(longitude) : null;
+
+  bool get hasCoordinates => latitudeAsDouble != null && longitudeAsDouble != null;
 }
