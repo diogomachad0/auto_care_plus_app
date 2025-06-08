@@ -23,6 +23,10 @@ class AtividadeModel implements IBaseModel {
 
   String observacoes;
 
+  double? latitude;
+
+  double? longitude;
+
   AtividadeModel({
     required this.base,
     required this.tipoAtividade,
@@ -34,5 +38,7 @@ class AtividadeModel implements IBaseModel {
     required this.estabelecimento,
     required this.numeroParcela,
     required this.observacoes,
+    this.latitude,  // Removido required
+    this.longitude, // Removido required
   });
 }
