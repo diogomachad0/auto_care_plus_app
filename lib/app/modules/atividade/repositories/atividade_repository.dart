@@ -24,7 +24,9 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
         tipo_combustivel TEXT,
         estabelecimento TEXT,
         numero_parcela TEXT,
-        observacoes TEXT
+        observacoes TEXT,
+        latitude TEXT,
+        longitude TEXT
       );
     ''');
   }
@@ -41,22 +43,16 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
     estabelecimento: e['estabelecimento'] ?? '',
     numeroParcela: e['numero_parcela'] ?? '',
     observacoes: e['observacoes'] ?? '',
+    latitude: e['latitude'] != null && e['latitude'].toString().isNotEmpty
+        ? double.tryParse(e['latitude'].toString())
+        : null,
+    longitude: e['longitude'] != null && e['longitude'].toString().isNotEmpty
+        ? double.tryParse(e['longitude'].toString())
+        : null,
   );
 
   @override
   Map<String, dynamic> toMap(AtividadeModel model) {
-    print('=== DEBUG REPOSITORY toMap ===');
-    print('tipoAtividade: ${model.tipoAtividade}');
-    print('data: ${model.data}');
-    print('km: ${model.km}');
-    print('totalPago: ${model.totalPago}');
-    print('litros: ${model.litros}');
-    print('tipoCombustivel: ${model.tipoCombustivel}');
-    print('estabelecimento: ${model.estabelecimento}');
-    print('numeroParcela: ${model.numeroParcela}');
-    print('observacoes: ${model.observacoes}');
-    print('===============================');
-
     return {
       getIdColumnName: model.base.id,
       BaseRepository.dataHoraCriado: model.base.dataHoraCriado?.toIso8601String() ?? DateTime.now().toIso8601String(),
@@ -71,6 +67,8 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
       'estabelecimento': model.estabelecimento,
       'numero_parcela': model.numeroParcela,
       'observacoes': model.observacoes,
+      'latitude': model.latitude?.toString(),
+      'longitude': model.longitude?.toString(),
     };
   }
 
