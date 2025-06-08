@@ -20,52 +20,50 @@ abstract class _AtividadeControllerBase with Store {
 
   _AtividadeControllerBase(this._service);
 
+  @action
+  void setEstabelecimentoComCoordenadas(String estabelecimento, double lat, double lng) {
+    atividade.estabelecimento = estabelecimento;
+    atividade.latitude = lat.toString();
+    atividade.longitude = lng.toString();
+  }
+
+  @computed
+  List<AtividadeStore> get atividadesComCoordenadas {
+    return atividades.where((a) => a.hasCoordinates && a.estabelecimento.isNotEmpty).toList();
+  }
+
   @computed
   List<AtividadeStore> get atividadesFiltradas {
     if (searchText.isEmpty) return atividades;
 
     final query = searchText.toLowerCase();
-    return atividades.where((a) =>
-    a.tipoAtividade.toLowerCase().contains(query) ||
-        a.estabelecimento.toLowerCase().contains(query) ||
-        a.data.toLowerCase().contains(query)
-    ).toList();
+    return atividades.where((a) => a.tipoAtividade.toLowerCase().contains(query) || a.estabelecimento.toLowerCase().contains(query) || a.data.toLowerCase().contains(query)).toList();
   }
 
   @computed
   bool get isFormValid {
     final a = atividade;
 
-    // Validação básica - data e tipo sempre obrigatórios
     if (a.data.isEmpty || a.tipoAtividade.isEmpty) return false;
 
-    // Validações específicas por tipo de atividade
     switch (a.tipoAtividade) {
       case 'Abastecimento':
-        return a.km.isNotEmpty &&
-            a.totalPago.isNotEmpty &&
-            a.litros.isNotEmpty &&
-            a.estabelecimento.isNotEmpty;
+        return a.km.isNotEmpty && a.totalPago.isNotEmpty && a.litros.isNotEmpty && a.estabelecimento.isNotEmpty;
 
       case 'Troca de óleo':
-        return a.km.isNotEmpty &&
-            a.totalPago.isNotEmpty &&
-            a.estabelecimento.isNotEmpty;
+        return a.km.isNotEmpty && a.totalPago.isNotEmpty && a.estabelecimento.isNotEmpty;
 
       case 'Lavagem':
-        return a.totalPago.isNotEmpty &&
-            a.estabelecimento.isNotEmpty;
+        return a.totalPago.isNotEmpty && a.estabelecimento.isNotEmpty;
 
       case 'Seguro':
         return a.totalPago.isNotEmpty;
 
       case 'Serviço mecânico':
-        return a.totalPago.isNotEmpty &&
-            a.estabelecimento.isNotEmpty;
+        return a.totalPago.isNotEmpty && a.estabelecimento.isNotEmpty;
 
       case 'Financiamento':
-        return a.totalPago.isNotEmpty &&
-            a.numeroParcela.isNotEmpty;
+        return a.totalPago.isNotEmpty && a.numeroParcela.isNotEmpty;
 
       case 'Compras':
         return a.totalPago.isNotEmpty;
@@ -74,8 +72,7 @@ abstract class _AtividadeControllerBase with Store {
         return a.totalPago.isNotEmpty;
 
       case 'Outros':
-        return a.totalPago.isNotEmpty &&
-            a.estabelecimento.isNotEmpty;
+        return a.totalPago.isNotEmpty && a.estabelecimento.isNotEmpty;
 
       default:
         return false;
@@ -118,40 +115,30 @@ abstract class _AtividadeControllerBase with Store {
     atividade = AtividadeStoreFactory.novo();
   }
 
-  // Métodos para filtrar atividades por tipo
   @computed
-  List<AtividadeStore> get abastecimentos =>
-      atividades.where((a) => a.tipoAtividade == 'Abastecimento').toList();
+  List<AtividadeStore> get abastecimentos => atividades.where((a) => a.tipoAtividade == 'Abastecimento').toList();
 
   @computed
-  List<AtividadeStore> get trocasOleo =>
-      atividades.where((a) => a.tipoAtividade == 'Troca de óleo').toList();
+  List<AtividadeStore> get trocasOleo => atividades.where((a) => a.tipoAtividade == 'Troca de óleo').toList();
 
   @computed
-  List<AtividadeStore> get lavagens =>
-      atividades.where((a) => a.tipoAtividade == 'Lavagem').toList();
+  List<AtividadeStore> get lavagens => atividades.where((a) => a.tipoAtividade == 'Lavagem').toList();
 
   @computed
-  List<AtividadeStore> get seguros =>
-      atividades.where((a) => a.tipoAtividade == 'Seguro').toList();
+  List<AtividadeStore> get seguros => atividades.where((a) => a.tipoAtividade == 'Seguro').toList();
 
   @computed
-  List<AtividadeStore> get servicosMecanicos =>
-      atividades.where((a) => a.tipoAtividade == 'Serviço mecânico').toList();
+  List<AtividadeStore> get servicosMecanicos => atividades.where((a) => a.tipoAtividade == 'Serviço mecânico').toList();
 
   @computed
-  List<AtividadeStore> get financiamentos =>
-      atividades.where((a) => a.tipoAtividade == 'Financiamento').toList();
+  List<AtividadeStore> get financiamentos => atividades.where((a) => a.tipoAtividade == 'Financiamento').toList();
 
   @computed
-  List<AtividadeStore> get compras =>
-      atividades.where((a) => a.tipoAtividade == 'Compras').toList();
+  List<AtividadeStore> get compras => atividades.where((a) => a.tipoAtividade == 'Compras').toList();
 
   @computed
-  List<AtividadeStore> get impostos =>
-      atividades.where((a) => a.tipoAtividade == 'Impostos').toList();
+  List<AtividadeStore> get impostos => atividades.where((a) => a.tipoAtividade == 'Impostos').toList();
 
   @computed
-  List<AtividadeStore> get outros =>
-      atividades.where((a) => a.tipoAtividade == 'Outros').toList();
+  List<AtividadeStore> get outros => atividades.where((a) => a.tipoAtividade == 'Outros').toList();
 }
