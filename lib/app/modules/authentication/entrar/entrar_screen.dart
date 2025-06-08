@@ -225,7 +225,7 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    Modular.to.pushNamed('/$recuperarSenhaRoute/');
+                                    Modular.to.pushNamed('$recuperarSenhaRoute/');
                                   },
                                   child: Text(
                                     'Esqueci minha senha',
