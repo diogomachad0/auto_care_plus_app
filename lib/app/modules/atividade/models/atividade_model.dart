@@ -5,6 +5,8 @@ class AtividadeModel implements IBaseModel {
   @override
   BaseModel base;
 
+  String veiculoId;
+
   String tipoAtividade;
 
   String data;
@@ -29,6 +31,7 @@ class AtividadeModel implements IBaseModel {
 
   AtividadeModel({
     required this.base,
+    required this.veiculoId,
     required this.tipoAtividade,
     required this.data,
     required this.km,
@@ -38,7 +41,7 @@ class AtividadeModel implements IBaseModel {
     required this.estabelecimento,
     required this.numeroParcela,
     required this.observacoes,
-    this.latitude,  // Removido required
-    this.longitude, // Removido required
+    this.latitude,
+    this.longitude,
   });
 }
