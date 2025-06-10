@@ -4,9 +4,13 @@ import 'package:auto_care_plus_app/app/modules/atividade/repositories/atividade_
 import 'package:auto_care_plus_app/app/modules/atividade/repositories/atividade_repository_interface.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/services/atividade_service.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/services/atividade_service_interface.dart';
+import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_module.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AtividadeModule extends Module {
+  @override
+  List<Module> get imports => [VeiculoModule()];
+
   @override
   void binds(Injector i) {
     i.add<IAtividadeRepository>(AtividadeRepository.new);
@@ -15,7 +19,6 @@ class AtividadeModule extends Module {
 
     super.binds(i);
   }
-
 
   @override
   void routes(RouteManager r) {
