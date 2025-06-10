@@ -28,6 +28,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
   String selectedActivityType = 'Abastecimento';
   String selectedFuelType = 'Gasolina';
+  String? selectedVeiculoId;
 
   final List<String> activityTypes = [
     'Abastecimento',
@@ -53,6 +54,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   void initState() {
     super.initState();
 
+    _controller.loadVeiculos();
+
     if (widget.atividadeId != null) {
       _loadAtividade();
     } else {
@@ -76,9 +79,11 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     setState(() {
       selectedActivityType = 'Abastecimento';
       selectedFuelType = 'Gasolina';
+      selectedVeiculoId = null;
     });
 
     _controller.atividade.tipoAtividade = 'Abastecimento';
+    _controller.atividade.veiculoId = '';
     _controller.atividade.data = '';
     _controller.atividade.km = '';
     _controller.atividade.totalPago = '';
@@ -101,6 +106,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
     setState(() {
       selectedActivityType = atividade.tipoAtividade;
+      selectedVeiculoId = atividade.veiculoId.isNotEmpty ? atividade.veiculoId : null;
       _dataController.text = atividade.data;
       _kmAtualController.text = atividade.km;
       _totalPagoController.text = atividade.totalPago;
@@ -114,6 +120,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
   void _updateAtividadeStore() {
     _controller.atividade.tipoAtividade = selectedActivityType;
+    _controller.atividade.veiculoId = selectedVeiculoId ?? '';
     _controller.atividade.data = _dataController.text;
     _controller.atividade.km = _kmAtualController.text;
     _controller.atividade.totalPago = _totalPagoController.text;
@@ -340,9 +347,79 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             _controller.atividade.data = value;
           },
         ),
+        const SizedBox(height: 16),
+        _buildVeiculoDropdown(),
         ..._buildSpecificFields(),
         _buildObservationsField(),
       ],
+    );
+  }
+
+  Widget _buildVeiculoDropdown() {
+    return Observer(
+      builder: (_) {
+        final veiculos = _controller.veiculos;
+
+        if (veiculos.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange[100],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning, color: Colors.orange[800]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Nenhum veículo cadastrado. Cadastre um veículo primeiro.',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.orange[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButtonFormField<String>(
+            value: selectedVeiculoId,
+            decoration: InputDecoration(
+              labelText: 'Selecione o veículo',
+              labelStyle: textTheme.bodyMedium?.copyWith(
+                color: Colors.grey,
+              ),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            ),
+            items: veiculos.map((veiculo) {
+              return DropdownMenuItem<String>(
+                value: veiculo.base.id,
+                child: Text('${veiculo.marca} ${veiculo.modelo} (${veiculo.placa})'),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedVeiculoId = newValue;
+                _controller.atividade.veiculoId = newValue ?? '';
+              });
+            },
+          ),
+        );
+      },
     );
   }
 
