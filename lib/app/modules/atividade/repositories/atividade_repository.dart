@@ -16,6 +16,7 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
         ${BaseRepository.dataHoraCriado} TEXT NOT NULL,
         ${BaseRepository.dataHoraDeletado} TEXT,
         ${BaseRepository.dataHoraUltimaAlteracao} TEXT,
+        veiculo_id TEXT NOT NULL,
         tipo_atividade TEXT NOT NULL,
         data TEXT NOT NULL,
         km TEXT,
@@ -29,27 +30,28 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
         longitude TEXT
       );
     ''');
+
+    batch.execute('''
+      CREATE INDEX idx_atividade_veiculo_id ON $getTableName(veiculo_id);
+    ''');
   }
 
   @override
   AtividadeModel fromMap(Map<String, dynamic> e) => AtividadeModel(
-    base: baseFromMap(e),
-    tipoAtividade: e['tipo_atividade'] ?? '',
-    data: e['data'] ?? '',
-    km: e['km'] ?? '',
-    totalPago: e['total_pago'] ?? '',
-    litros: e['litros'] ?? '',
-    tipoCombustivel: e['tipo_combustivel'] ?? '',
-    estabelecimento: e['estabelecimento'] ?? '',
-    numeroParcela: e['numero_parcela'] ?? '',
-    observacoes: e['observacoes'] ?? '',
-    latitude: e['latitude'] != null && e['latitude'].toString().isNotEmpty
-        ? double.tryParse(e['latitude'].toString())
-        : null,
-    longitude: e['longitude'] != null && e['longitude'].toString().isNotEmpty
-        ? double.tryParse(e['longitude'].toString())
-        : null,
-  );
+        base: baseFromMap(e),
+        veiculoId: e['veiculo_id'] ?? '',
+        tipoAtividade: e['tipo_atividade'] ?? '',
+        data: e['data'] ?? '',
+        km: e['km'] ?? '',
+        totalPago: e['total_pago'] ?? '',
+        litros: e['litros'] ?? '',
+        tipoCombustivel: e['tipo_combustivel'] ?? '',
+        estabelecimento: e['estabelecimento'] ?? '',
+        numeroParcela: e['numero_parcela'] ?? '',
+        observacoes: e['observacoes'] ?? '',
+        latitude: e['latitude'] != null && e['latitude'].toString().isNotEmpty ? double.tryParse(e['latitude'].toString()) : null,
+        longitude: e['longitude'] != null && e['longitude'].toString().isNotEmpty ? double.tryParse(e['longitude'].toString()) : null,
+      );
 
   @override
   Map<String, dynamic> toMap(AtividadeModel model) {
@@ -58,6 +60,7 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
       BaseRepository.dataHoraCriado: model.base.dataHoraCriado?.toIso8601String() ?? DateTime.now().toIso8601String(),
       BaseRepository.dataHoraDeletado: model.base.dataHoraDeletado?.toIso8601String(),
       BaseRepository.dataHoraUltimaAlteracao: model.base.dataHoraUltimaAlteracao?.toIso8601String(),
+      'veiculo_id': model.veiculoId,
       'tipo_atividade': model.tipoAtividade,
       'data': model.data,
       'km': model.km,
@@ -73,7 +76,11 @@ class AtividadeRepository extends TableRepositoryLocal<AtividadeModel> implement
   }
 
   @override
-  void validate(AtividadeModel entity) {}
+  void validate(AtividadeModel entity) {
+    if (entity.veiculoId.isEmpty) {
+      throw Exception('Veículo é obrigatório');
+    }
+  }
 
   @override
   void dispose() {}
