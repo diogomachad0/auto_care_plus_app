@@ -25,6 +25,22 @@ mixin _$AtividadeStore on _AtividadeStoreBase, Store {
     });
   }
 
+  late final _$veiculoIdAtom =
+      Atom(name: '_AtividadeStoreBase.veiculoId', context: context);
+
+  @override
+  String get veiculoId {
+    _$veiculoIdAtom.reportRead();
+    return super.veiculoId;
+  }
+
+  @override
+  set veiculoId(String value) {
+    _$veiculoIdAtom.reportWrite(value, super.veiculoId, () {
+      super.veiculoId = value;
+    });
+  }
+
   late final _$tipoAtividadeAtom =
       Atom(name: '_AtividadeStoreBase.tipoAtividade', context: context);
 
@@ -204,6 +220,7 @@ mixin _$AtividadeStore on _AtividadeStoreBase, Store {
   String toString() {
     return '''
 base: ${base},
+veiculoId: ${veiculoId},
 tipoAtividade: ${tipoAtividade},
 data: ${data},
 km: ${km},
