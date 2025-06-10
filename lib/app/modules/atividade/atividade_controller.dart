@@ -1,5 +1,8 @@
 import 'package:auto_care_plus_app/app/modules/atividade/services/atividade_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/store/atividade_store.dart';
+import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
+import 'package:auto_care_plus_app/app/modules/veiculo/store/veiculo_store.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mobx/mobx.dart';
 
 part 'atividade_controller.g.dart';
@@ -18,6 +21,12 @@ abstract class _AtividadeControllerBase with Store {
   @observable
   ObservableList<AtividadeStore> atividades = ObservableList<AtividadeStore>();
 
+  @observable
+  ObservableList<VeiculoStore> veiculos = ObservableList<VeiculoStore>();
+
+  @observable
+  String? veiculoSelecionadoId;
+
   _AtividadeControllerBase(this._service);
 
   @action
@@ -27,6 +36,11 @@ abstract class _AtividadeControllerBase with Store {
     atividade.longitude = lng.toString();
   }
 
+  @action
+  void setVeiculoSelecionado(String? veiculoId) {
+    veiculoSelecionadoId = veiculoId;
+  }
+
   @computed
   List<AtividadeStore> get atividadesComCoordenadas {
     return atividades.where((a) => a.hasCoordinates && a.estabelecimento.isNotEmpty).toList();
@@ -34,17 +48,37 @@ abstract class _AtividadeControllerBase with Store {
 
   @computed
   List<AtividadeStore> get atividadesFiltradas {
-    if (searchText.isEmpty) return atividades;
+    var atividadesList = atividades.toList();
+
+    if (veiculoSelecionadoId != null && veiculoSelecionadoId!.isNotEmpty) {
+      atividadesList = atividadesList.where((a) => a.veiculoId == veiculoSelecionadoId).toList();
+    }
+
+    if (searchText.isEmpty) return atividadesList;
 
     final query = searchText.toLowerCase();
-    return atividades.where((a) => a.tipoAtividade.toLowerCase().contains(query) || a.estabelecimento.toLowerCase().contains(query) || a.data.toLowerCase().contains(query)).toList();
+    return atividadesList.where((a) => a.tipoAtividade.toLowerCase().contains(query) || a.estabelecimento.toLowerCase().contains(query) || a.data.toLowerCase().contains(query)).toList();
+  }
+
+  @computed
+  String get nomeVeiculoSelecionado {
+    if (veiculoSelecionadoId == null || veiculoSelecionadoId!.isEmpty) {
+      return 'Todos os veículos';
+    }
+
+    final veiculo = veiculos.firstWhere(
+      (v) => v.base.id == veiculoSelecionadoId,
+      orElse: () => VeiculoStoreFactory.novo(),
+    );
+
+    return veiculo.modelo.isNotEmpty ? '${veiculo.marca} ${veiculo.modelo}' : 'Veículo não encontrado';
   }
 
   @computed
   bool get isFormValid {
     final a = atividade;
 
-    if (a.data.isEmpty || a.tipoAtividade.isEmpty) return false;
+    if (a.data.isEmpty || a.tipoAtividade.isEmpty || a.veiculoId.isEmpty) return false;
 
     switch (a.tipoAtividade) {
       case 'Abastecimento':
@@ -79,6 +113,22 @@ abstract class _AtividadeControllerBase with Store {
     }
   }
 
+  @action
+  Future<void> loadVeiculos() async {
+    try {
+      final veiculoService = Modular.get<IVeiculoService>();
+      final list = await veiculoService.getAll();
+
+      veiculos.clear();
+      for (var veiculo in list) {
+        veiculos.add(VeiculoStoreFactory.fromModel(veiculo));
+      }
+    } catch (e) {
+      print('Erro ao carregar veículos: $e');
+      veiculos.clear();
+    }
+  }
+
   Future<void> load() async {
     final list = await _service.getAll();
 
@@ -100,13 +150,11 @@ abstract class _AtividadeControllerBase with Store {
   @action
   Future<void> save() async {
     await _service.saveOrUpdate(atividade.toModel());
-
     await load();
   }
 
   Future<void> delete(AtividadeStore atividade) async {
     await _service.delete(atividade.toModel());
-
     atividades.remove(atividade);
   }
 
@@ -116,29 +164,143 @@ abstract class _AtividadeControllerBase with Store {
   }
 
   @computed
-  List<AtividadeStore> get abastecimentos => atividades.where((a) => a.tipoAtividade == 'Abastecimento').toList();
+  String get veiculoSelecionadoNome {
+    if (atividade.veiculoId.isEmpty) return '';
+    final veiculo = veiculos.firstWhere(
+      (v) => v.base.id == atividade.veiculoId,
+      orElse: () => VeiculoStoreFactory.novo(),
+    );
+    return veiculo.modelo.isNotEmpty ? '${veiculo.marca} ${veiculo.modelo}' : '';
+  }
 
   @computed
-  List<AtividadeStore> get trocasOleo => atividades.where((a) => a.tipoAtividade == 'Troca de óleo').toList();
+  List<AtividadeStore> get abastecimentos => atividadesFiltradas.where((a) => a.tipoAtividade == 'Abastecimento').toList();
 
   @computed
-  List<AtividadeStore> get lavagens => atividades.where((a) => a.tipoAtividade == 'Lavagem').toList();
+  List<AtividadeStore> get trocasOleo => atividadesFiltradas.where((a) => a.tipoAtividade == 'Troca de óleo').toList();
 
   @computed
-  List<AtividadeStore> get seguros => atividades.where((a) => a.tipoAtividade == 'Seguro').toList();
+  List<AtividadeStore> get lavagens => atividadesFiltradas.where((a) => a.tipoAtividade == 'Lavagem').toList();
 
   @computed
-  List<AtividadeStore> get servicosMecanicos => atividades.where((a) => a.tipoAtividade == 'Serviço mecânico').toList();
+  List<AtividadeStore> get seguros => atividadesFiltradas.where((a) => a.tipoAtividade == 'Seguro').toList();
 
   @computed
-  List<AtividadeStore> get financiamentos => atividades.where((a) => a.tipoAtividade == 'Financiamento').toList();
+  List<AtividadeStore> get servicosMecanicos => atividadesFiltradas.where((a) => a.tipoAtividade == 'Serviço mecânico').toList();
 
   @computed
-  List<AtividadeStore> get compras => atividades.where((a) => a.tipoAtividade == 'Compras').toList();
+  List<AtividadeStore> get financiamentos => atividadesFiltradas.where((a) => a.tipoAtividade == 'Financiamento').toList();
 
   @computed
-  List<AtividadeStore> get impostos => atividades.where((a) => a.tipoAtividade == 'Impostos').toList();
+  List<AtividadeStore> get compras => atividadesFiltradas.where((a) => a.tipoAtividade == 'Compras').toList();
 
   @computed
-  List<AtividadeStore> get outros => atividades.where((a) => a.tipoAtividade == 'Outros').toList();
+  List<AtividadeStore> get impostos => atividadesFiltradas.where((a) => a.tipoAtividade == 'Impostos').toList();
+
+  @computed
+  List<AtividadeStore> get outros => atividadesFiltradas.where((a) => a.tipoAtividade == 'Outros').toList();
+
+  @computed
+  double get totalGastoGeral {
+    return atividadesFiltradas.fold(0.0, (total, atividade) {
+      try {
+        if (atividade.totalPago.isNotEmpty) {
+          String priceString = atividade.totalPago.replaceAll(RegExp(r'[^\d,.]'), '');
+          priceString = priceString.replaceAll(',', '.');
+          return total + double.parse(priceString);
+        }
+      } catch (e) {
+        print('Erro ao calcular total gasto: $e');
+      }
+      return total;
+    });
+  }
+
+  @computed
+  double get totalGastoAbastecimento {
+    return abastecimentos.fold(0.0, (total, atividade) {
+      try {
+        if (atividade.totalPago.isNotEmpty) {
+          String priceString = atividade.totalPago.replaceAll(RegExp(r'[^\d,.]'), '');
+          priceString = priceString.replaceAll(',', '.');
+          return total + double.parse(priceString);
+        }
+      } catch (e) {
+        print('Erro ao calcular total abastecimento: $e');
+      }
+      return total;
+    });
+  }
+
+  @computed
+  double get totalGastoManutencao {
+    final manutencoes = [...trocasOleo, ...servicosMecanicos];
+    return manutencoes.fold(0.0, (total, atividade) {
+      try {
+        if (atividade.totalPago.isNotEmpty) {
+          String priceString = atividade.totalPago.replaceAll(RegExp(r'[^\d,.]'), '');
+          priceString = priceString.replaceAll(',', '.');
+          return total + double.parse(priceString);
+        }
+      } catch (e) {
+        print('Erro ao calcular total manutenção: $e');
+      }
+      return total;
+    });
+  }
+
+  @computed
+  int get totalAtividadesDoVeiculo {
+    return atividadesFiltradas.length;
+  }
+
+  List<AtividadeStore> getAtividadesPorPeriodo(DateTime inicio, DateTime fim) {
+    return atividadesFiltradas.where((atividade) {
+      try {
+        final dataAtividade = _parseDate(atividade.data);
+        return dataAtividade.isAfter(inicio.subtract(const Duration(days: 1))) && dataAtividade.isBefore(fim.add(const Duration(days: 1)));
+      } catch (e) {
+        print('Erro ao filtrar por período: $e');
+        return false;
+      }
+    }).toList();
+  }
+
+  DateTime _parseDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) {
+      return DateTime.now();
+    }
+
+    try {
+      final parts = dateString.split('/');
+      if (parts.length == 3) {
+        final day = int.parse(parts[0]);
+        final month = int.parse(parts[1]);
+        final year = int.parse(parts[2]);
+        return DateTime(year, month, day);
+      }
+    } catch (e) {
+      print('Erro ao fazer parse da data: $dateString - $e');
+    }
+    return DateTime.now();
+  }
+
+  AtividadeStore? getUltimaAtividadePorTipo(String tipo) {
+    final atividadesTipo = atividadesFiltradas.where((a) => a.tipoAtividade == tipo).toList();
+    if (atividadesTipo.isEmpty) return null;
+
+    atividadesTipo.sort((a, b) {
+      final dataA = _parseDate(a.data);
+      final dataB = _parseDate(b.data);
+      return dataB.compareTo(dataA);
+    });
+
+    return atividadesTipo.first;
+  }
+
+  @action
+  void limparFiltros() {
+    veiculoSelecionadoId = null;
+    searchText = '';
+  }
 }
