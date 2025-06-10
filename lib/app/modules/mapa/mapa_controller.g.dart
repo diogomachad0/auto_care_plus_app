@@ -9,6 +9,15 @@ part of 'mapa_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$MapaController on _MapaControllerBase, Store {
+  Computed<dynamic>? _$atividadesComLocalizacaoComputed;
+
+  @override
+  dynamic get atividadesComLocalizacao =>
+      (_$atividadesComLocalizacaoComputed ??= Computed<dynamic>(
+              () => super.atividadesComLocalizacao,
+              name: '_MapaControllerBase.atividadesComLocalizacao'))
+          .value;
+
   late final _$myPositionAtom =
       Atom(name: '_MapaControllerBase.myPosition', context: context);
 
@@ -36,7 +45,8 @@ mixin _$MapaController on _MapaControllerBase, Store {
   @override
   String toString() {
     return '''
-myPosition: ${myPosition}
+myPosition: ${myPosition},
+atividadesComLocalizacao: ${atividadesComLocalizacao}
     ''';
   }
 }
