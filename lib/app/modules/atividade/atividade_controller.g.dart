@@ -9,6 +9,14 @@ part of 'atividade_controller.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AtividadeController on _AtividadeControllerBase, Store {
+  Computed<List<AtividadeStore>>? _$atividadesComCoordenadasComputed;
+
+  @override
+  List<AtividadeStore> get atividadesComCoordenadas =>
+      (_$atividadesComCoordenadasComputed ??= Computed<List<AtividadeStore>>(
+              () => super.atividadesComCoordenadas,
+              name: '_AtividadeControllerBase.atividadesComCoordenadas'))
+          .value;
   Computed<List<AtividadeStore>>? _$atividadesFiltradasComputed;
 
   @override
@@ -17,6 +25,13 @@ mixin _$AtividadeController on _AtividadeControllerBase, Store {
               () => super.atividadesFiltradas,
               name: '_AtividadeControllerBase.atividadesFiltradas'))
           .value;
+  Computed<String>? _$nomeVeiculoSelecionadoComputed;
+
+  @override
+  String get nomeVeiculoSelecionado => (_$nomeVeiculoSelecionadoComputed ??=
+          Computed<String>(() => super.nomeVeiculoSelecionado,
+              name: '_AtividadeControllerBase.nomeVeiculoSelecionado'))
+      .value;
   Computed<bool>? _$isFormValidComputed;
 
   @override
@@ -24,6 +39,13 @@ mixin _$AtividadeController on _AtividadeControllerBase, Store {
       (_$isFormValidComputed ??= Computed<bool>(() => super.isFormValid,
               name: '_AtividadeControllerBase.isFormValid'))
           .value;
+  Computed<String>? _$veiculoSelecionadoNomeComputed;
+
+  @override
+  String get veiculoSelecionadoNome => (_$veiculoSelecionadoNomeComputed ??=
+          Computed<String>(() => super.veiculoSelecionadoNome,
+              name: '_AtividadeControllerBase.veiculoSelecionadoNome'))
+      .value;
   Computed<List<AtividadeStore>>? _$abastecimentosComputed;
 
   @override
@@ -87,6 +109,34 @@ mixin _$AtividadeController on _AtividadeControllerBase, Store {
       (_$outrosComputed ??= Computed<List<AtividadeStore>>(() => super.outros,
               name: '_AtividadeControllerBase.outros'))
           .value;
+  Computed<double>? _$totalGastoGeralComputed;
+
+  @override
+  double get totalGastoGeral => (_$totalGastoGeralComputed ??= Computed<double>(
+          () => super.totalGastoGeral,
+          name: '_AtividadeControllerBase.totalGastoGeral'))
+      .value;
+  Computed<double>? _$totalGastoAbastecimentoComputed;
+
+  @override
+  double get totalGastoAbastecimento => (_$totalGastoAbastecimentoComputed ??=
+          Computed<double>(() => super.totalGastoAbastecimento,
+              name: '_AtividadeControllerBase.totalGastoAbastecimento'))
+      .value;
+  Computed<double>? _$totalGastoManutencaoComputed;
+
+  @override
+  double get totalGastoManutencao => (_$totalGastoManutencaoComputed ??=
+          Computed<double>(() => super.totalGastoManutencao,
+              name: '_AtividadeControllerBase.totalGastoManutencao'))
+      .value;
+  Computed<int>? _$totalAtividadesDoVeiculoComputed;
+
+  @override
+  int get totalAtividadesDoVeiculo => (_$totalAtividadesDoVeiculoComputed ??=
+          Computed<int>(() => super.totalAtividadesDoVeiculo,
+              name: '_AtividadeControllerBase.totalAtividadesDoVeiculo'))
+      .value;
 
   late final _$searchTextAtom =
       Atom(name: '_AtividadeControllerBase.searchText', context: context);
@@ -136,6 +186,47 @@ mixin _$AtividadeController on _AtividadeControllerBase, Store {
     });
   }
 
+  late final _$veiculosAtom =
+      Atom(name: '_AtividadeControllerBase.veiculos', context: context);
+
+  @override
+  ObservableList<VeiculoStore> get veiculos {
+    _$veiculosAtom.reportRead();
+    return super.veiculos;
+  }
+
+  @override
+  set veiculos(ObservableList<VeiculoStore> value) {
+    _$veiculosAtom.reportWrite(value, super.veiculos, () {
+      super.veiculos = value;
+    });
+  }
+
+  late final _$veiculoSelecionadoIdAtom = Atom(
+      name: '_AtividadeControllerBase.veiculoSelecionadoId', context: context);
+
+  @override
+  String? get veiculoSelecionadoId {
+    _$veiculoSelecionadoIdAtom.reportRead();
+    return super.veiculoSelecionadoId;
+  }
+
+  @override
+  set veiculoSelecionadoId(String? value) {
+    _$veiculoSelecionadoIdAtom.reportWrite(value, super.veiculoSelecionadoId,
+        () {
+      super.veiculoSelecionadoId = value;
+    });
+  }
+
+  late final _$loadVeiculosAsyncAction =
+      AsyncAction('_AtividadeControllerBase.loadVeiculos', context: context);
+
+  @override
+  Future<void> loadVeiculos() {
+    return _$loadVeiculosAsyncAction.run(() => super.loadVeiculos());
+  }
+
   late final _$loadByIdAsyncAction =
       AsyncAction('_AtividadeControllerBase.loadById', context: context);
 
@@ -156,6 +247,29 @@ mixin _$AtividadeController on _AtividadeControllerBase, Store {
       ActionController(name: '_AtividadeControllerBase', context: context);
 
   @override
+  void setEstabelecimentoComCoordenadas(
+      String estabelecimento, double lat, double lng) {
+    final _$actionInfo = _$_AtividadeControllerBaseActionController.startAction(
+        name: '_AtividadeControllerBase.setEstabelecimentoComCoordenadas');
+    try {
+      return super.setEstabelecimentoComCoordenadas(estabelecimento, lat, lng);
+    } finally {
+      _$_AtividadeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setVeiculoSelecionado(String? veiculoId) {
+    final _$actionInfo = _$_AtividadeControllerBaseActionController.startAction(
+        name: '_AtividadeControllerBase.setVeiculoSelecionado');
+    try {
+      return super.setVeiculoSelecionado(veiculoId);
+    } finally {
+      _$_AtividadeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void resetForm() {
     final _$actionInfo = _$_AtividadeControllerBaseActionController.startAction(
         name: '_AtividadeControllerBase.resetForm');
@@ -167,13 +281,29 @@ mixin _$AtividadeController on _AtividadeControllerBase, Store {
   }
 
   @override
+  void limparFiltros() {
+    final _$actionInfo = _$_AtividadeControllerBaseActionController.startAction(
+        name: '_AtividadeControllerBase.limparFiltros');
+    try {
+      return super.limparFiltros();
+    } finally {
+      _$_AtividadeControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 searchText: ${searchText},
 atividade: ${atividade},
 atividades: ${atividades},
+veiculos: ${veiculos},
+veiculoSelecionadoId: ${veiculoSelecionadoId},
+atividadesComCoordenadas: ${atividadesComCoordenadas},
 atividadesFiltradas: ${atividadesFiltradas},
+nomeVeiculoSelecionado: ${nomeVeiculoSelecionado},
 isFormValid: ${isFormValid},
+veiculoSelecionadoNome: ${veiculoSelecionadoNome},
 abastecimentos: ${abastecimentos},
 trocasOleo: ${trocasOleo},
 lavagens: ${lavagens},
@@ -182,7 +312,11 @@ servicosMecanicos: ${servicosMecanicos},
 financiamentos: ${financiamentos},
 compras: ${compras},
 impostos: ${impostos},
-outros: ${outros}
+outros: ${outros},
+totalGastoGeral: ${totalGastoGeral},
+totalGastoAbastecimento: ${totalGastoAbastecimento},
+totalGastoManutencao: ${totalGastoManutencao},
+totalAtividadesDoVeiculo: ${totalAtividadesDoVeiculo}
     ''';
   }
 }
