@@ -8,39 +8,44 @@ class AtividadeStore = _AtividadeStoreBase with _$AtividadeStore;
 
 abstract class AtividadeStoreFactory {
   static AtividadeStore fromModel(AtividadeModel model) => AtividadeStore(
-    base: BaseStoreFactory.fromEntity(model.base),
-    tipoAtividade: model.tipoAtividade,
-    data: model.data,
-    km: model.km,
-    totalPago: model.totalPago,
-    litros: model.litros,
-    tipoCombustivel: model.tipoCombustivel,
-    estabelecimento: model.estabelecimento,
-    numeroParcela: model.numeroParcela,
-    observacoes: model.observacoes,
-    latitude: model.latitude?.toString() ?? '',
-    longitude: model.longitude?.toString() ?? '',
-  );
+        base: BaseStoreFactory.fromEntity(model.base),
+        veiculoId: model.veiculoId,
+        tipoAtividade: model.tipoAtividade,
+        data: model.data,
+        km: model.km,
+        totalPago: model.totalPago,
+        litros: model.litros,
+        tipoCombustivel: model.tipoCombustivel,
+        estabelecimento: model.estabelecimento,
+        numeroParcela: model.numeroParcela,
+        observacoes: model.observacoes,
+        latitude: model.latitude?.toString() ?? '',
+        longitude: model.longitude?.toString() ?? '',
+      );
 
   static AtividadeStore novo() => AtividadeStore(
-    base: BaseStoreFactory.novo(),
-    tipoAtividade: 'Abastecimento',
-    data: '',
-    km: '',
-    totalPago: '',
-    litros: '',
-    tipoCombustivel: 'Gasolina',
-    estabelecimento: '',
-    numeroParcela: '',
-    observacoes: '',
-    latitude: '',
-    longitude: '',
-  );
+        base: BaseStoreFactory.novo(),
+        veiculoId: '',
+        tipoAtividade: 'Abastecimento',
+        data: '',
+        km: '',
+        totalPago: '',
+        litros: '',
+        tipoCombustivel: 'Gasolina',
+        estabelecimento: '',
+        numeroParcela: '',
+        observacoes: '',
+        latitude: '',
+        longitude: '',
+      );
 }
 
 abstract class _AtividadeStoreBase with Store {
   @observable
   BaseStore base;
+
+  @observable
+  String veiculoId;
 
   @observable
   String tipoAtividade;
@@ -77,6 +82,7 @@ abstract class _AtividadeStoreBase with Store {
 
   _AtividadeStoreBase({
     required this.base,
+    required this.veiculoId,
     required this.tipoAtividade,
     required this.data,
     required this.km,
@@ -93,6 +99,7 @@ abstract class _AtividadeStoreBase with Store {
   AtividadeModel toModel() {
     return AtividadeModel(
       base: base.toModel(),
+      veiculoId: veiculoId,
       tipoAtividade: tipoAtividade,
       data: data,
       km: km,
@@ -107,8 +114,8 @@ abstract class _AtividadeStoreBase with Store {
     );
   }
 
-  // Métodos auxiliares para trabalhar com coordenadas
   double? get latitudeAsDouble => latitude.isNotEmpty ? double.tryParse(latitude) : null;
+
   double? get longitudeAsDouble => longitude.isNotEmpty ? double.tryParse(longitude) : null;
 
   bool get hasCoordinates => latitudeAsDouble != null && longitudeAsDouble != null;
