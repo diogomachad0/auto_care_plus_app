@@ -29,106 +29,261 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colorScheme.primary,
-                colorScheme.secondary,
-              ],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-            ),
-          ),
-        ),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Mapa',
-          style: textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-          ),
+      body: Column(
+        children: [
+          _buildAppBar(),
+          Expanded(child: _buildMap()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top,
+        bottom: 8,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primary,
+            colorScheme.secondary,
+          ],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
         ),
       ),
-      body: Observer(
-        builder: (_) {
-          if (controller.myPosition == null) {
-            return Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: colorScheme.secondary,
-                ));
-          }
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Mapa',
+                style: textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          _buildVehicleDropdown(),
+        ],
+      ),
+    );
+  }
 
-          // Cria lista de markers
-          List<Marker> markers = [
-            // Marker da posição atual
-            Marker(
-              point: controller.myPosition!,
-              builder: (context) {
-                return const Icon(
-                  Icons.person_pin,
-                  color: Colors.blueAccent,
-                  size: 40,
-                );
-              },
-            ),
-          ];
+  Widget _buildVehicleDropdown() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          width: double.infinity,
+          height: 46,
+          decoration: BoxDecoration(
+            color: colorScheme.onPrimary,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Observer(
+            builder: (_) {
+              final veiculos = controller.veiculos;
 
-          // Adiciona markers das atividades
-          for (var atividade in controller.atividadesComLocalizacao) {
-            if (atividade.hasCoordinates) {
-              markers.add(
-                Marker(
-                  point: LatLng(atividade.latitudeAsDouble!, atividade.longitudeAsDouble!),
-                  builder: (context) {
-                    return GestureDetector(
-                      onTap: () {
-                        _showAtividadeInfo(context, atividade);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: _getActivityColor(atividade.tipoAtividade),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: Icon(
-                          _getActivityIcon(atividade.tipoAtividade),
-                          color: Colors.white,
-                          size: 24,
-                        ),
+              return DropdownButtonHideUnderline(
+                child: DropdownButton<String?>(
+                  dropdownColor: Colors.grey.shade200,
+                  value: controller.veiculoSelecionadoId,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                  hint: const Row(
+                    children: [
+                      Icon(Icons.directions_car),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                  selectedItemBuilder: (BuildContext context) {
+                    return <Widget>[
+                      // Item para "Todos os veículos"
+                      Row(
+                        children: [
+                          const Icon(Icons.south_east_rounded),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Todos os veículos',
+                              style: textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                    );
+                      // Items para cada veículo
+                      ...veiculos.map((veiculo) {
+                        return Row(
+                          children: [
+                            const Icon(Icons.directions_car),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                '${veiculo.modelo} - ${veiculo.placa}',
+                                style: textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ];
                   },
+                  onChanged: (String? newValue) {
+                    controller.setVeiculoSelecionado(newValue);
+                  },
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.south_east_rounded,
+                                color: controller.veiculoSelecionadoId == null
+                                    ? Colors.white
+                                    : colorScheme.secondary,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Todos os veículos',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: controller.veiculoSelecionadoId == null
+                                      ? colorScheme.onPrimary
+                                      : colorScheme.secondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.transparent),
+                        ],
+                      ),
+                    ),
+                    ...veiculos.map((veiculo) {
+                      final isSelected = controller.veiculoSelecionadoId == veiculo.base.id;
+                      return DropdownMenuItem<String?>(
+                        value: veiculo.base.id,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.directions_car,
+                                  color: isSelected ? Colors.white : colorScheme.secondary,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  '${veiculo.modelo} - ${veiculo.placa}',
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: isSelected ? colorScheme.onPrimary : colorScheme.secondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                  borderRadius: BorderRadius.circular(8),
                 ),
               );
-            }
-          }
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
-          return FlutterMap(
-            options: MapOptions(
-              center: controller.myPosition,
-              minZoom: 5,
-              zoom: 18,
-              maxZoom: 20,
-              interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+  Widget _buildMap() {
+    return Observer(
+      builder: (_) {
+        if (controller.myPosition == null) {
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colorScheme.secondary,
             ),
-            nonRotatedChildren: [
-              TileLayer(
-                urlTemplate:
-                'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
-                additionalOptions: const {
-                  'accessToken': MAPBOX_ACCESS_TOKEN,
-                  'id': 'mapbox/streets-v12',
+          );
+        }
+
+        // Cria lista de markers
+        List<Marker> markers = [
+          // Marker da posição atual
+          Marker(
+            point: controller.myPosition!,
+            builder: (context) {
+              return const Icon(
+                Icons.person_pin,
+                color: Colors.blueAccent,
+                size: 40,
+              );
+            },
+          ),
+        ];
+
+        // Adiciona markers das atividades filtradas
+        for (var atividade in controller.atividadesComLocalizacao) {
+          if (atividade.hasCoordinates) {
+            markers.add(
+              Marker(
+                point: LatLng(atividade.latitudeAsDouble!, atividade.longitudeAsDouble!),
+                builder: (context) {
+                  return GestureDetector(
+                    onTap: () {
+                      _showAtividadeInfo(context, atividade);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: _getActivityColor(atividade.tipoAtividade),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: Icon(
+                        _getActivityIcon(atividade.tipoAtividade),
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  );
                 },
               ),
-              MarkerLayer(markers: markers),
-            ],
-          );
-        },
-      ),
+            );
+          }
+        }
+
+        return FlutterMap(
+          options: MapOptions(
+            center: controller.myPosition,
+            minZoom: 5,
+            zoom: 18,
+            maxZoom: 20,
+            interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+          ),
+          nonRotatedChildren: [
+            TileLayer(
+              urlTemplate:
+              'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
+              additionalOptions: const {
+                'accessToken': MAPBOX_ACCESS_TOKEN,
+                'id': 'mapbox/streets-v12',
+              },
+            ),
+            MarkerLayer(markers: markers),
+          ],
+        );
+      },
     );
   }
 
