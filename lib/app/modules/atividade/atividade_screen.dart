@@ -161,10 +161,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         ),
         centerTitle: true,
         automaticallyImplyLeading: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         title: Text(
           widget.atividadeId != null ? 'Editar atividade' : 'Nova atividade',
           style: textTheme.titleLarge?.copyWith(
