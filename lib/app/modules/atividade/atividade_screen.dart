@@ -347,8 +347,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             _controller.atividade.data = value;
           },
         ),
-        const SizedBox(height: 16),
         _buildVeiculoDropdown(),
+        const SizedBox(height: 16),
         ..._buildSpecificFields(),
         _buildObservationsField(),
       ],
@@ -477,6 +477,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           _buildFuelTypeDropdown(),
           const SizedBox(height: 16),
           _buildEstabelecimentoField(),
+          const SizedBox(height: 16),
         ]);
         break;
 
