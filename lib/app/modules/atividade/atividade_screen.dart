@@ -66,8 +66,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   void _resetFormCompletely() {
-    _controller.resetForm();
-
     _dataController.clear();
     _kmAtualController.clear();
     _totalPagoController.clear();
@@ -82,18 +80,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
       selectedVeiculoId = null;
     });
 
-    _controller.atividade.tipoAtividade = 'Abastecimento';
-    _controller.atividade.veiculoId = '';
-    _controller.atividade.data = '';
-    _controller.atividade.km = '';
-    _controller.atividade.totalPago = '';
-    _controller.atividade.litros = '';
-    _controller.atividade.tipoCombustivel = 'Gasolina';
-    _controller.atividade.estabelecimento = '';
-    _controller.atividade.numeroParcela = '';
-    _controller.atividade.observacoes = '';
-    _controller.atividade.latitude = 0.toString();
-    _controller.atividade.longitude = 0.toString();
+    _controller.resetForm();
   }
 
   Future<void> _loadAtividade() async {
@@ -707,7 +694,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     try {
       _updateAtividadeStore();
       await _controller.save();
-
+      _resetFormCompletely();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -715,7 +702,10 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.of(context).pop(true);
+
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop(true);
+        }
       }
     } catch (e) {
       if (mounted) {
