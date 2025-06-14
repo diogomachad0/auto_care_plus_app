@@ -1,9 +1,7 @@
 import 'package:auto_care_plus_app/app/app_controller.dart';
-import 'package:auto_care_plus_app/app/modules/authentication/login/login_module.dart';
-import 'package:auto_care_plus_app/app/modules/bottom_bar/bottom_bar_module.dart';
 import 'package:auto_care_plus_app/app/modules/lembrete/lembrete_module.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_module.dart';
-import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/modules/splash/splash_module.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppModule extends Module {
@@ -18,8 +16,7 @@ class AppModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.module(Modular.initialRoute, module: LoginModule());
-    r.module('/$bottomBarRoute', module: BottomBarModule());
+    r.module(Modular.initialRoute, module: SplashModule());
 
     super.routes(r);
   }
