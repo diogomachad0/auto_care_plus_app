@@ -1,9 +1,11 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/password_text_field_custom.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class EntrarScreen extends StatefulWidget {
@@ -20,12 +22,25 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
   void initState() {
     super.initState();
     _authService = AuthService();
+
+    _authService.emailController.addListener(_updateButtonState);
+    _authService.passwordController.addListener(_updateButtonState);
   }
 
   @override
   void dispose() {
+    _authService.emailController.removeListener(_updateButtonState);
+    _authService.passwordController.removeListener(_updateButtonState);
     _authService.dispose();
     super.dispose();
+  }
+
+  void _updateButtonState() {
+    setState(() {});
+  }
+
+  bool _isFormValid() {
+    return _authService.emailController.text.trim().isNotEmpty && _authService.passwordController.text.trim().isNotEmpty;
   }
 
   Widget _buildErrorWidget() {
@@ -38,31 +53,11 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
             return ValueListenableBuilder<String>(
               valueListenable: _authService.errorMessage,
               builder: (context, errorMessage, child) {
-                if (hasCredentialError || hasGenericError) {
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      border: Border.all(color: Colors.red.shade200),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            errorMessage.isNotEmpty ? errorMessage : 'Erro de autenticação',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: Colors.red.shade600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                if ((hasCredentialError || hasGenericError) && errorMessage.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    DialogError.show(context, errorMessage, StackTrace.current);
+                    _authService.clearError();
+                  });
                 }
                 return const SizedBox.shrink();
               },
@@ -77,15 +72,17 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
     return ValueListenableBuilder<bool>(
       valueListenable: _authService.isLoading,
       builder: (context, isLoading, child) {
+        final isFormValid = _isFormValid();
+
         return FilledButton(
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 46),
-            backgroundColor: colorScheme.primary,
+            backgroundColor: isFormValid ? colorScheme.primary : Colors.grey,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: isLoading ? null : () => _authService.login(),
+          onPressed: (isLoading || !isFormValid) ? null : () => _authService.login(),
           child: isLoading
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -113,7 +110,7 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                   'Entrar',
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: colorScheme.onPrimary,
+                    color: isFormValid ? colorScheme.onPrimary : Colors.grey.shade600,
                   ),
                 ),
         );
@@ -188,6 +185,13 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                   label: 'E-mail',
                                   controller: _authService.emailController,
                                   validator: _authService.validateEmail,
+                                  inputFormatters: [
+                                    TextInputFormatter.withFunction((oldValue, newValue) {
+                                      return newValue.copyWith(
+                                        text: newValue.text.toLowerCase(),
+                                      );
+                                    }),
+                                  ],
                                 ),
                                 PasswordTextFieldCustom(
                                   label: 'Senha',
