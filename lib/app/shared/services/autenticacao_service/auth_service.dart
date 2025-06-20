@@ -1,9 +1,9 @@
 import 'package:auto_care_plus_app/app/shared/database/local/database_local.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AuthService {
@@ -67,6 +67,11 @@ class AuthService {
     errorMessage.value = '';
   }
 
+  void clearError() {
+    isErrorGeneric.value = false;
+    errorMessage.value = '';
+  }
+
   String? validateEmail(String email) {
     if (email.isEmpty) return 'E-mail é obrigatório';
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
@@ -77,7 +82,6 @@ class AuthService {
 
   String? validatePassword(String password) {
     if (password.isEmpty) return 'Senha é obrigatória';
-    if (password.length < 6) return 'Senha deve ter pelo menos 6 caracteres';
     return null;
   }
 
@@ -174,7 +178,6 @@ class AuthService {
 
       _resetControllers();
       Modular.to.navigate('$bottomBarRoute/$homeRoute');
-
     } on FirebaseAuthException catch (e) {
       String message = 'Erro ao fazer login com Google';
       switch (e.code) {
@@ -209,10 +212,7 @@ class AuthService {
 
     final emailError = validateEmail(emailControllerRegister.text);
     final passwordError = validatePassword(passwordControllerRegister.text);
-    final confirmPasswordError = validateConfirmPassword(
-        passwordControllerRegister.text,
-        confirmarSenhaController.text
-    );
+    final confirmPasswordError = validateConfirmPassword(passwordControllerRegister.text, confirmarSenhaController.text);
 
     if (emailError != null || passwordError != null || confirmPasswordError != null) {
       _setErrorGeneric(true, emailError ?? passwordError ?? confirmPasswordError!);
