@@ -179,7 +179,7 @@ class _EntrarScreenState extends State<EntrarScreen> with ThemeMixin {
                                   'assets/img/logo_black_app.png',
                                   width: 200,
                                 ),
-                                const SizedBox(height: 28),
+                                const SizedBox(height: 16),
                                 _buildErrorWidget(),
                                 TextFieldCustom(
                                   label: 'E-mail',
