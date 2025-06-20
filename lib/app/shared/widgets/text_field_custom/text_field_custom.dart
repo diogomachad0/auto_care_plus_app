@@ -14,6 +14,7 @@ class TextFieldCustom extends StatefulWidget {
   final Icon? icon;
   final TextInputType? keyboardType;
   final bool enabled;
+  final List<TextInputFormatter>? inputFormatters;
 
   const TextFieldCustom({
     super.key,
@@ -28,6 +29,7 @@ class TextFieldCustom extends StatefulWidget {
     this.icon,
     this.keyboardType,
     this.enabled = true,
+    this.inputFormatters,
   });
 
   @override
@@ -94,6 +96,10 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
   Widget build(BuildContext context) {
     List<TextInputFormatter> formatters = [];
 
+    if (widget.inputFormatters != null) {
+      formatters.addAll(widget.inputFormatters!);
+    }
+
     if (widget.onlyNumbers) {
       formatters.add(FilteringTextInputFormatter.digitsOnly);
     }
@@ -121,11 +127,11 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
             decoration: InputDecoration(
               labelText: widget.label,
               labelStyle: textTheme.bodyMedium?.copyWith(
-                color: _errorText != null ? Colors.red : Colors.grey.shade500,
+                color: _errorText != null ? colorScheme.error : Colors.grey.shade500,
               ),
               floatingLabelBehavior: FloatingLabelBehavior.auto,
               floatingLabelStyle: textTheme.bodyMedium?.copyWith(
-                color: _errorText != null ? Colors.red : colorScheme.primary,
+                color: _errorText != null ? colorScheme.error : colorScheme.primary,
               ),
               filled: true,
               fillColor: widget.enabled ? Colors.grey[200] : Colors.grey[100],
@@ -150,15 +156,15 @@ class _TextFieldCustomState extends State<TextFieldCustom> with ThemeMixin {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: _errorText != null ? Colors.red : colorScheme.primary, width: 1),
+                borderSide: BorderSide(color: _errorText != null ? colorScheme.error : colorScheme.primary, width: 1),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.red, width: 1),
+                borderSide: BorderSide(color: colorScheme.error, width: 1),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.red, width: 1),
+                borderSide: BorderSide(color: colorScheme.error, width: 1),
               ),
             ),
           ),
