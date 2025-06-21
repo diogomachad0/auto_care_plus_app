@@ -32,6 +32,9 @@ abstract class _ContaControllerBase with Store {
   @observable
   String _originalEmail = '';
 
+  @observable
+  bool showEmailPasswordDialog = false;
+
   @action
   Future<void> loadUserData() async {
     try {
@@ -63,6 +66,35 @@ abstract class _ContaControllerBase with Store {
       errorMessage = '';
       successMessage = '';
 
+      final emailChanged = emailController.text.trim() != _originalEmail;
+      final nomeChanged = nomeController.text.trim() != _usuarioController.usuario.nome;
+      final telefoneChanged = telefoneController.text.replaceAll(RegExp(r'[^\d]'), '') != _usuarioController.usuario.telefone;
+
+      print('=== VALIDANDO ALTERAÇÃO DE PERFIL ===');
+      print('Email original: $_originalEmail');
+      print('Email novo: ${emailController.text.trim()}');
+      print('Email foi alterado: $emailChanged');
+      print('Nome foi alterado: $nomeChanged');
+      print('Telefone foi alterado: $telefoneChanged');
+
+      if (emailChanged && senhaAtualController.text.isEmpty) {
+        print('❌ Tentativa de alterar email sem senha - mostrando dialog');
+        showEmailPasswordDialog = true;
+        return false;
+      }
+
+      if (emailChanged) {
+        print('📧 Email foi alterado, validando senha atual...');
+        try {
+          await _usuarioService.validateCurrentPassword(senhaAtualController.text);
+          print('✅ Senha atual validada com sucesso');
+        } catch (e) {
+          errorMessage = 'Senha atual incorreta';
+          print('❌ Senha atual incorreta: $e');
+          return false;
+        }
+      }
+
       print('=== ATUALIZANDO PERFIL ===');
       print('Nome: ${nomeController.text.trim()}');
       print('Email: ${emailController.text.trim()}');
@@ -75,7 +107,16 @@ abstract class _ContaControllerBase with Store {
       final success = await _usuarioController.updateUser();
 
       if (success) {
-        successMessage = 'Perfil atualizado com sucesso!';
+        if (emailChanged) {
+          senhaAtualController.clear();
+          successMessage = 'Perfil atualizado! Um email de verificação foi enviado para ${emailController.text.trim()}';
+        } else if (nomeChanged || telefoneChanged) {
+          successMessage = 'Dados pessoais atualizados com sucesso!';
+        } else {
+          successMessage = 'Perfil atualizado com sucesso!';
+        }
+
+        await loadUserData();
       } else {
         errorMessage = _usuarioController.errorMessage;
       }
@@ -83,7 +124,9 @@ abstract class _ContaControllerBase with Store {
       return success;
     } catch (e) {
       if (e.toString().contains('Um email de verificação foi enviado')) {
-        successMessage = e.toString();
+        successMessage = e.toString().replaceAll('Exception: ', '');
+        senhaAtualController.clear();
+        await loadUserData();
         return true;
       }
 
@@ -146,7 +189,6 @@ abstract class _ContaControllerBase with Store {
       print('=== EXCLUINDO CONTA ===');
 
       await _usuarioService.deleteAccount();
-
       _usuarioController.usuario = UsuarioStoreFactory.novo();
 
       return true;
@@ -167,6 +209,11 @@ abstract class _ContaControllerBase with Store {
   @action
   void clearSuccess() {
     successMessage = '';
+  }
+
+  @action
+  void clearEmailPasswordDialog() {
+    showEmailPasswordDialog = false;
   }
 
   @computed
