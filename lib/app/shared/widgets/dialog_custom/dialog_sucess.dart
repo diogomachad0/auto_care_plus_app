@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -13,15 +15,15 @@ class DialogSucess extends StatefulWidget {
   static Future<void> show(BuildContext context, String message) async {
     await showDialog(
       context: context,
-      builder: (context) => DialogSucess(
-        message: message,
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+        child: DialogSucess(message: message),
       ),
     );
   }
 }
 
-class _DialogSucessState extends State<DialogSucess>
-    with ThemeMixin, SingleTickerProviderStateMixin {
+class _DialogSucessState extends State<DialogSucess> with ThemeMixin, SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
