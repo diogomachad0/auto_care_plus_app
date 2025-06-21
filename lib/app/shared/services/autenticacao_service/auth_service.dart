@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/shared/database/local/database_local.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/modules/usuario/usuario_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -176,6 +177,9 @@ class AuthService {
       // Após login bem-sucedido, inicializa o banco do usuário
       await _initializeUserDatabase();
 
+      // Salva os dados do Google no banco local
+      await _saveGoogleUserData();
+
       _resetControllers();
       Modular.to.navigate('$bottomBarRoute/$homeRoute');
     } on FirebaseAuthException catch (e) {
@@ -238,6 +242,9 @@ class AuthService {
       // Após registro bem-sucedido, inicializa o banco do usuário
       await _initializeUserDatabase();
 
+      // AQUI É A PARTE NOVA - Salva os dados na tabela usuario
+      await _saveUserDataToLocal();
+
       _resetControllers();
       Modular.to.navigate('/');
     } on FirebaseAuthException catch (e) {
@@ -256,6 +263,51 @@ class AuthService {
       _setErrorGeneric(true, message);
     } on Exception catch (e) {
       _setErrorGeneric(true, 'Erro inesperado. Tente novamente');
+    }
+  }
+
+  /// NOVO MÉTODO - Salva os dados do usuário na tabela local
+  Future<void> _saveUserDataToLocal() async {
+    try {
+      final usuarioController = Modular.get<UsuarioController>();
+
+      await usuarioController.saveUserFromRegistration(
+        nomeController.text.trim(),
+        emailControllerRegister.text.trim(),
+        telefoneController.text.replaceAll(RegExp(r'[^\d]'), ''), // Remove formatação
+        passwordControllerRegister.text,
+      );
+
+      print('Dados do usuário salvos na tabela local');
+    } catch (e) {
+      print('Erro ao salvar dados do usuário na tabela local: $e');
+      // Não vamos falhar o registro por causa disso
+    }
+  }
+
+  /// NOVO MÉTODO - Salva os dados do Google na tabela local
+  Future<void> _saveGoogleUserData() async {
+    try {
+      if (user != null) {
+        final usuarioController = Modular.get<UsuarioController>();
+
+        // Verifica se já existe um usuário salvo
+        await usuarioController.loadCurrentUser();
+
+        // Se não existe, salva os dados do Google
+        if (usuarioController.usuario.nome.isEmpty) {
+          await usuarioController.saveUserFromRegistration(
+            user!.displayName ?? 'Usuário Google',
+            user!.email ?? '',
+            '', // Google não fornece telefone
+            'google_auth', // Senha placeholder para login com Google
+          );
+        }
+
+        print('Dados do Google salvos na tabela local');
+      }
+    } catch (e) {
+      print('Erro ao salvar dados do Google na tabela local: $e');
     }
   }
 
