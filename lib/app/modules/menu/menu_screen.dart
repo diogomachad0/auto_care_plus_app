@@ -1,9 +1,11 @@
+import 'package:auto_care_plus_app/app/modules/usuario/usuario_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/services/autenticacao_service/auth_service.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_conta.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_custom.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class MenuScreen extends StatefulWidget {
@@ -17,6 +19,14 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
   bool notificationsEnabled = true;
 
   final AuthService _authService = Modular.get<AuthService>();
+  late final UsuarioController _usuarioController;
+
+  @override
+  void initState() {
+    super.initState();
+    _usuarioController = Modular.get<UsuarioController>();
+    _usuarioController.loadCurrentUser();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,16 +112,14 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                         title: 'Altere de conta',
                         subtitle: 'Troque entre contas cadastradas',
                         onTap: () {
+                          final currentUserName = _usuarioController.usuario.nome.isNotEmpty ? _usuarioController.usuario.nome : 'Usuário';
+                          final currentUserEmail = _usuarioController.usuario.email.isNotEmpty ? _usuarioController.usuario.email : 'email@exemplo.com';
+
                           final accounts = [
                             UserAccount(
                               id: '1',
-                              name: 'Diogo Machado',
-                              email: 'example@gmail.com',
-                            ),
-                            UserAccount(
-                              id: '2',
-                              name: 'João Matos',
-                              email: 'example@gmail.com',
+                              name: currentUserName,
+                              email: currentUserEmail,
                             ),
                           ];
 
@@ -220,23 +228,33 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                 height: 100,
               ),
               const SizedBox(height: 8),
-              Text.rich(
-                TextSpan(
-                  text: 'Olá, ',
-                  style: textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white,
-                  ),
-                  children: [
+              Observer(
+                builder: (_) {
+                  String firstName = 'Usuário';
+                  if (_usuarioController.usuario.nome.isNotEmpty) {
+                    final names = _usuarioController.usuario.nome.split(' ');
+                    firstName = names.first;
+                  }
+
+                  return Text.rich(
                     TextSpan(
-                      text: 'Diogo!',
+                      text: 'Olá, ',
                       style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w300,
                         color: Colors.white,
                       ),
+                      children: [
+                        TextSpan(
+                          text: '$firstName!',
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),
