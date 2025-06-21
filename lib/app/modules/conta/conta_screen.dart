@@ -2,6 +2,9 @@ import 'package:auto_care_plus_app/app/modules/conta/conta_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom_sheet_custom.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_info.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_sucess.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/password_text_field_custom.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +81,18 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
               Expanded(
                 child: Observer(
                   builder: (_) {
+                    if (_controller.showEmailPasswordDialog) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        DialogInfo.show(
+                          context,
+                          'Senha necessária',
+                          'Para alterar o email, você precisa informar sua senha atual no campo "Senha atual" abaixo.',
+                        ).then((_) {
+                          _controller.clearEmailPasswordDialog();
+                        });
+                      });
+                    }
+
                     if (_controller.isLoading) {
                       return const Center(
                         child: CircularProgressIndicator(color: Colors.white),
@@ -176,34 +191,6 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
             LengthLimitingTextInputFormatter(11),
           ],
         ),
-        Observer(
-          builder: (_) {
-            if (_controller.emailWasChanged) {
-              return Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(top: 8, bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Para alterar o email, você precisa informar sua senha atual abaixo.',
-                        style: textTheme.bodySmall?.copyWith(color: Colors.orange.shade700),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
         Padding(
           padding: const EdgeInsets.only(left: 8),
           child: Text(
@@ -251,30 +238,23 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
                   ? null
                   : () async {
                       bool profileSuccess = true;
+                      bool passwordSuccess = true;
+
                       if (_controller.isProfileFormValid) {
                         profileSuccess = await _controller.updateProfile();
                       }
 
-                      bool passwordSuccess = true;
                       if (_controller.isPasswordFormValid) {
                         passwordSuccess = await _controller.updatePassword();
                       }
 
                       if (mounted) {
-                        if (profileSuccess && passwordSuccess) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Dados salvos com sucesso!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(_controller.errorMessage.isNotEmpty ? _controller.errorMessage : 'Erro ao salvar dados'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                        if (_controller.hasSuccess) {
+                          await DialogSucess.show(context, _controller.successMessage);
+                          _controller.clearSuccess();
+                        } else if (_controller.hasError) {
+                          await DialogError.show(context, _controller.errorMessage, StackTrace.current);
+                          _controller.clearError();
                         }
                       }
                     },
@@ -329,13 +309,11 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
               onConfirmar: () async {
                 final success = await _controller.deleteAccount();
                 if (success && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Conta excluída com sucesso!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  await DialogSucess.show(context, 'Conta excluída com sucesso!');
                   Modular.to.navigate('/');
+                } else if (_controller.hasError && mounted) {
+                  await DialogError.show(context, _controller.errorMessage, StackTrace.current);
+                  _controller.clearError();
                 }
               },
             );
