@@ -5,16 +5,19 @@ class UsuarioModel implements IBaseModel {
   @override
   BaseModel base;
 
-  String nomeCompleto;
+  String nome;
 
   String email;
 
   String telefone;
 
+  String senha;
+
   UsuarioModel({
     required this.base,
-    required this.nomeCompleto,
+    required this.nome,
     required this.email,
     required this.telefone,
+    required this.senha,
   });
 }
