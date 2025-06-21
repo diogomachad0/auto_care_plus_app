@@ -26,27 +26,20 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
     controller.mapaController();
   }
 
-  // Método para calcular tamanho responsivo do ícone
   double _getResponsiveIconSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Calcula o tamanho baseado na largura da tela
-    // Para telas pequenas (< 360px): 24px
-    // Para telas médias (360-600px): 28-32px
-    // Para telas grandes (> 600px): 36px
     if (screenWidth < 360) {
       return 24.0;
     } else if (screenWidth < 600) {
-      return 28.0 + (screenWidth - 360) * 0.017; // Interpolação linear
+      return 28.0 + (screenWidth - 360) * 0.017;
     } else {
       return 36.0;
     }
   }
 
-  // Método para calcular offset da sombra responsivo
   double _getResponsiveShadowOffset(BuildContext context) {
     final iconSize = _getResponsiveIconSize(context);
-    // Offset proporcional ao tamanho do ícone (aproximadamente 7% do tamanho)
     return iconSize * 0.07;
   }
 
@@ -81,6 +74,7 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
       ),
       child: Column(
         children: [
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -128,7 +122,6 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                   ),
                   selectedItemBuilder: (BuildContext context) {
                     return <Widget>[
-                      // Item para "Todos os veículos"
                       Row(
                         children: [
                           const Icon(Icons.south_east_rounded),
@@ -142,7 +135,6 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                           ),
                         ],
                       ),
-                      // Items para cada veículo
                       ...veiculos.map((veiculo) {
                         return Row(
                           children: [
@@ -237,17 +229,16 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           );
         }
 
-        // Calcula tamanhos responsivos
         final iconSize = _getResponsiveIconSize(context);
         final shadowOffset = _getResponsiveShadowOffset(context);
-        final userIconSize = iconSize * 1.3; // Ícone do usuário um pouco maior
+        final userIconSize = iconSize * 1.2;
 
         List<Marker> markers = [
           Marker(
             point: controller.myPosition!,
             builder: (context) {
               return Icon(
-                Icons.person_pin,
+                Icons.person_pin_circle_rounded,
                 color: colorScheme.primary,
                 size: userIconSize,
               );
@@ -255,7 +246,6 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           ),
         ];
 
-        // Adiciona markers das atividades - ÍCONES RESPONSIVOS COM SOMBRA
         for (var atividade in controller.atividadesComLocalizacao) {
           if (atividade.hasCoordinates) {
             markers.add(
@@ -268,7 +258,6 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                     },
                     child: Stack(
                       children: [
-                        // Sombra do ícone (posicionada com offset responsivo)
                         Positioned(
                           left: shadowOffset,
                           top: shadowOffset,
@@ -278,7 +267,6 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                             size: iconSize,
                           ),
                         ),
-                        // Ícone principal responsivo
                         Icon(
                           Icons.location_on,
                           color: colorScheme.secondary,
