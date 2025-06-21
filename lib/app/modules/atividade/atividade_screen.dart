@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/atividade/atividade_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/mapbox/mapbox_place_search.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:flutter/material.dart';
@@ -206,7 +207,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         Align(
           alignment: Alignment.center,
           child: Text(
-            'Cadastre com base na sua informação',
+            'Selecione abaixo',
             style: textTheme.bodySmall?.copyWith(
               color: Colors.grey[600],
             ),
@@ -322,6 +323,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   Widget _buildForm() {
     return Column(
       children: [
+        _buildVeiculoDropdown(),
+        const SizedBox(height: 16),
         TextFieldCustom(
           label: 'Data',
           controller: _dataController,
@@ -330,9 +333,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             _controller.atividade.data = value;
           },
         ),
-        _buildVeiculoDropdown(),
-        const SizedBox(height: 16),
         ..._buildSpecificFields(),
+        const SizedBox(height: 16),
         _buildObservationsField(),
       ],
     );
@@ -345,28 +347,49 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
         if (veiculos.isEmpty) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.orange[100],
+              color: colorScheme.primary.withOpacity(0.5),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.orange),
             ),
             child: Row(
               children: [
-                Icon(Icons.warning, color: Colors.orange[800]),
+                Icon(Icons.warning_rounded, color: Colors.amber, size: 30,),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Nenhum veículo cadastrado. Cadastre um veículo primeiro.',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: Colors.orange[800],
+                  child: RichText(
+                    text: TextSpan(
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.secondary,
+                      ),
+                      children: [
+                        const TextSpan(text: 'Nenhum veículo cadastrado! '),
+                        WidgetSpan(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              Modular.to.pushNamed(veiculoRoute);
+                            },
+                            child: Text(
+                              'Cadastre um veículo',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const TextSpan(text: ' para começar!'),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        }
+          );        }
 
         return Container(
           decoration: BoxDecoration(
