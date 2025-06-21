@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_care_plus_app/app/modules/atividade/repositories/atividade_repository.dart';
 import 'package:auto_care_plus_app/app/modules/lembrete/repositories/lembrete_repository.dart';
+import 'package:auto_care_plus_app/app/modules/usuario/repositories/usuario_repository.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/repositories/veiculo_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart';
@@ -29,6 +30,7 @@ class DatabaseLocal {
     VeiculoRepository().create(batch);
     LembreteRepository().create(batch);
     AtividadeRepository().create(batch);
+    UsuarioRepository().create(batch);
 
     //todo: implementar a criação das tabelas necessárias
     await batch.commit();
