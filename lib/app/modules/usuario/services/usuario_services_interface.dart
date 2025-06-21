@@ -6,6 +6,8 @@ abstract class IUsuarioService implements IService<UsuarioModel> {
 
   Future<UsuarioModel?> getCurrentUser();
 
+  Future<void> validateCurrentPassword(String currentPassword);
+
   Future<void> updateFirebaseProfile(UsuarioModel usuario);
 
   Future<void> updatePassword(String currentPassword, String newPassword);
