@@ -17,6 +17,27 @@ mixin _$MapaController on _MapaControllerBase, Store {
               () => super.atividadesComLocalizacao,
               name: '_MapaControllerBase.atividadesComLocalizacao'))
           .value;
+  Computed<dynamic>? _$veiculosComputed;
+
+  @override
+  dynamic get veiculos =>
+      (_$veiculosComputed ??= Computed<dynamic>(() => super.veiculos,
+              name: '_MapaControllerBase.veiculos'))
+          .value;
+  Computed<String?>? _$veiculoSelecionadoIdComputed;
+
+  @override
+  String? get veiculoSelecionadoId => (_$veiculoSelecionadoIdComputed ??=
+          Computed<String?>(() => super.veiculoSelecionadoId,
+              name: '_MapaControllerBase.veiculoSelecionadoId'))
+      .value;
+  Computed<String>? _$nomeVeiculoSelecionadoComputed;
+
+  @override
+  String get nomeVeiculoSelecionado => (_$nomeVeiculoSelecionadoComputed ??=
+          Computed<String>(() => super.nomeVeiculoSelecionado,
+              name: '_MapaControllerBase.nomeVeiculoSelecionado'))
+      .value;
 
   late final _$myPositionAtom =
       Atom(name: '_MapaControllerBase.myPosition', context: context);
@@ -42,11 +63,28 @@ mixin _$MapaController on _MapaControllerBase, Store {
     return _$mapaControllerAsyncAction.run(() => super.mapaController());
   }
 
+  late final _$_MapaControllerBaseActionController =
+      ActionController(name: '_MapaControllerBase', context: context);
+
+  @override
+  void setVeiculoSelecionado(String? veiculoId) {
+    final _$actionInfo = _$_MapaControllerBaseActionController.startAction(
+        name: '_MapaControllerBase.setVeiculoSelecionado');
+    try {
+      return super.setVeiculoSelecionado(veiculoId);
+    } finally {
+      _$_MapaControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
 myPosition: ${myPosition},
-atividadesComLocalizacao: ${atividadesComLocalizacao}
+atividadesComLocalizacao: ${atividadesComLocalizacao},
+veiculos: ${veiculos},
+veiculoSelecionadoId: ${veiculoSelecionadoId},
+nomeVeiculoSelecionado: ${nomeVeiculoSelecionado}
     ''';
   }
 }
