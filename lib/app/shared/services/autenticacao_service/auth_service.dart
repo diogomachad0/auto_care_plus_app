@@ -135,7 +135,7 @@ class AuthService {
           message = 'Muitas tentativas. Tente novamente mais tarde';
           break;
         case 'invalid-credential':
-          message = 'Credenciais inválidas';
+          message = 'Usuário ou senha inválidos!\nPor favor, verifique suas credenciais e tente novamente.';
           break;
       }
       _setErrorCredential(true, message);
