@@ -53,6 +53,9 @@ class _DialogInfoState extends State<DialogInfo> with ThemeMixin, SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      titlePadding: const EdgeInsets.only(top: 16),
+      contentPadding: const EdgeInsets.all(16),
+      actionsPadding: const EdgeInsets.all(12),
       shadowColor: Colors.black,
       content: Column(
         mainAxisSize: MainAxisSize.min,
