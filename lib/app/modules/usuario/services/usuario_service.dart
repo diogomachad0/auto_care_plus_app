@@ -43,6 +43,32 @@ class UsuarioService extends BaseService<UsuarioModel, IUsuarioRepository> imple
   }
 
   @override
+  Future<void> validateCurrentPassword(String currentPassword) async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) throw Exception('Usuário não autenticado');
+
+      print('=== VALIDANDO SENHA ATUAL ===');
+      print('Email do usuário: ${user.email}');
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      print('✅ Senha atual validada com sucesso');
+    } catch (e) {
+      print('❌ Erro ao validar senha atual: $e');
+
+      if (e.toString().contains('wrong-password')) {
+        throw Exception('Senha atual incorreta');
+      }
+      throw Exception('Erro ao validar senha: $e');
+    }
+  }
+
+  @override
   Future<void> updateFirebaseProfile(UsuarioModel usuario) async {
     try {
       final firebaseUser = _firebaseAuth.currentUser;
