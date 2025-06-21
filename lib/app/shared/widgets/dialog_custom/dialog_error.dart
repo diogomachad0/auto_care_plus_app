@@ -47,18 +47,22 @@ class _DialogErrorState extends State<DialogError> with ThemeMixin, SingleTicker
     return AlertDialog(
       titlePadding: const EdgeInsets.only(top: 16),
       contentPadding: const EdgeInsets.all(16),
-      actionsPadding: const EdgeInsets.all(16),
+      actionsPadding: const EdgeInsets.all(12),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ScaleTransition(
             scale: _animation,
             child: const Icon(
-              Icons.error,
+              Icons.report_rounded,
               color: Colors.red,
               size: 70,
             ),
           ),
+          Text(
+            'Atenção!',
+            style: textTheme.titleLarge,
+          )
         ],
       ),
       content: Text(
