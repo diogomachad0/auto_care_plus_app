@@ -1,4 +1,5 @@
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -7,8 +8,7 @@ import 'package:latlong2/latlong.dart';
 
 import 'mapa_controller.dart';
 
-const MAPBOX_ACCESS_TOKEN =
-    'pk.eyJ1IjoiZGlvZ29tYWNoYWRvIiwiYSI6ImNtYjc2dXkwaDA3NGUyam4wMnJ4cHJyc2MifQ.UCZ3qN_mb80hb82sa6jmog';
+const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZGlvZ29tYWNoYWRvIiwiYSI6ImNtYjc2dXkwaDA3NGUyam4wMnJ4cHJyc2MifQ.UCZ3qN_mb80hb82sa6jmog';
 
 class MapaScreen extends StatefulWidget {
   MapaScreen({super.key});
@@ -24,6 +24,30 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
   void initState() {
     super.initState();
     controller.mapaController();
+  }
+
+  // Método para calcular tamanho responsivo do ícone
+  double _getResponsiveIconSize(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Calcula o tamanho baseado na largura da tela
+    // Para telas pequenas (< 360px): 24px
+    // Para telas médias (360-600px): 28-32px
+    // Para telas grandes (> 600px): 36px
+    if (screenWidth < 360) {
+      return 24.0;
+    } else if (screenWidth < 600) {
+      return 28.0 + (screenWidth - 360) * 0.017; // Interpolação linear
+    } else {
+      return 36.0;
+    }
+  }
+
+  // Método para calcular offset da sombra responsivo
+  double _getResponsiveShadowOffset(BuildContext context) {
+    final iconSize = _getResponsiveIconSize(context);
+    // Offset proporcional ao tamanho do ícone (aproximadamente 7% do tamanho)
+    return iconSize * 0.07;
   }
 
   @override
@@ -149,17 +173,13 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                             children: [
                               Icon(
                                 Icons.south_east_rounded,
-                                color: controller.veiculoSelecionadoId == null
-                                    ? Colors.white
-                                    : colorScheme.secondary,
+                                color: controller.veiculoSelecionadoId == null ? Colors.white : colorScheme.secondary,
                               ),
                               const SizedBox(width: 10),
                               Text(
                                 'Todos os veículos',
                                 style: textTheme.bodyMedium?.copyWith(
-                                  color: controller.veiculoSelecionadoId == null
-                                      ? colorScheme.onPrimary
-                                      : colorScheme.secondary,
+                                  color: controller.veiculoSelecionadoId == null ? colorScheme.onPrimary : colorScheme.secondary,
                                 ),
                               ),
                             ],
@@ -217,22 +237,25 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           );
         }
 
-        // Cria lista de markers
+        // Calcula tamanhos responsivos
+        final iconSize = _getResponsiveIconSize(context);
+        final shadowOffset = _getResponsiveShadowOffset(context);
+        final userIconSize = iconSize * 1.3; // Ícone do usuário um pouco maior
+
         List<Marker> markers = [
-          // Marker da posição atual
           Marker(
             point: controller.myPosition!,
             builder: (context) {
-              return const Icon(
+              return Icon(
                 Icons.person_pin,
-                color: Colors.blueAccent,
-                size: 40,
+                color: colorScheme.primary,
+                size: userIconSize,
               );
             },
           ),
         ];
 
-        // Adiciona markers das atividades filtradas
+        // Adiciona markers das atividades - ÍCONES RESPONSIVOS COM SOMBRA
         for (var atividade in controller.atividadesComLocalizacao) {
           if (atividade.hasCoordinates) {
             markers.add(
@@ -243,18 +266,25 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                     onTap: () {
                       _showAtividadeInfo(context, atividade);
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: _getActivityColor(atividade.tipoAtividade),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: Icon(
-                        _getActivityIcon(atividade.tipoAtividade),
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                    child: Stack(
+                      children: [
+                        // Sombra do ícone (posicionada com offset responsivo)
+                        Positioned(
+                          left: shadowOffset,
+                          top: shadowOffset,
+                          child: Icon(
+                            Icons.location_on,
+                            color: Colors.black.withOpacity(0.2),
+                            size: iconSize,
+                          ),
+                        ),
+                        // Ícone principal responsivo
+                        Icon(
+                          Icons.location_on,
+                          color: colorScheme.secondary,
+                          size: iconSize,
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -273,8 +303,7 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           ),
           nonRotatedChildren: [
             TileLayer(
-              urlTemplate:
-              'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
+              urlTemplate: 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
               additionalOptions: const {
                 'accessToken': MAPBOX_ACCESS_TOKEN,
                 'id': 'mapbox/streets-v12',
@@ -288,96 +317,21 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
   }
 
   void _showAtividadeInfo(BuildContext context, atividade) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(
-                _getActivityIcon(atividade.tipoAtividade),
-                color: _getActivityColor(atividade.tipoAtividade),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  atividade.tipoAtividade,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Estabelecimento: ${atividade.estabelecimento}'),
-              const SizedBox(height: 4),
-              Text('Data: ${atividade.data}'),
-              if (atividade.totalPago.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text('Total pago: R\$ ${atividade.totalPago}'),
-              ],
-              if (atividade.km.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text('Km: ${atividade.km}'),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fechar'),
-            ),
-          ],
-        );
-      },
+    String message = 'Estabelecimento: ${atividade.estabelecimento}\n'
+        'Data: ${atividade.data}';
+
+    if (atividade.totalPago.isNotEmpty) {
+      message += '\nTotal pago: R\$ ${atividade.totalPago}';
+    }
+
+    if (atividade.km.isNotEmpty) {
+      message += '\nKm: ${atividade.km}';
+    }
+
+    DialogInfo.show(
+      context,
+      atividade.tipoAtividade,
+      message,
     );
-  }
-
-  Color _getActivityColor(String activityType) {
-    switch (activityType) {
-      case 'Abastecimento':
-        return Colors.green;
-      case 'Troca de óleo':
-        return Colors.orange;
-      case 'Lavagem':
-        return Colors.blue;
-      case 'Seguro':
-        return Colors.purple;
-      case 'Serviço mecânico':
-        return Colors.red;
-      case 'Financiamento':
-        return Colors.teal;
-      case 'Compras':
-        return Colors.pink;
-      case 'Impostos':
-        return Colors.brown;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getActivityIcon(String activityType) {
-    switch (activityType) {
-      case 'Abastecimento':
-        return Icons.local_gas_station_rounded;
-      case 'Troca de óleo':
-        return Icons.build_circle_rounded;
-      case 'Lavagem':
-        return Icons.local_car_wash_rounded;
-      case 'Seguro':
-        return Icons.security_rounded;
-      case 'Serviço mecânico':
-        return Icons.build_circle_rounded;
-      case 'Financiamento':
-        return Icons.attach_money_rounded;
-      case 'Compras':
-        return Icons.shopping_cart_rounded;
-      case 'Impostos':
-        return Icons.receipt_rounded;
-      default:
-        return Icons.more_horiz_rounded;
-    }
   }
 }
