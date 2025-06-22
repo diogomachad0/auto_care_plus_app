@@ -51,130 +51,132 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
           _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('CONFIGURAÇÕES DO APP'),
-                    _buildSectionBlock([
-                      _buildMenuListItem(
-                        title: 'Meus veículos',
-                        subtitle: 'Gerencie seus veículos cadastrados',
-                        onTap: () => Modular.to.navigate(veiculoRoute),
-                        isFirst: true,
-                      ),
-                      _buildMenuListItem(
-                        title: 'Lembretes',
-                        subtitle: 'Gerencie seus lembretes que você criou',
-                        onTap: () => Modular.to.navigate(lembreteRoute),
-                      ),
-                      _buildMenuListItemWithSwitch(
-                        title: 'Notificações',
-                        subtitle: 'Permita que você receba notificações do App',
-                        value: notificationsEnabled,
-                        onChanged: (value) async {
-                          if (value) {
-                            final status = await Permission.notification.request();
-                            if (status.isGranted) {
-                              setState(() {
-                                notificationsEnabled = true;
-                              });
-                              await _updateNotificationPreference(true);
-                            } else {
-                              setState(() {
-                                notificationsEnabled = false;
-                              });
-                              await _updateNotificationPreference(false);
-
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Permissão para notificações negada. Ativação cancelada.'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: MediaQuery.of(context).padding.bottom + 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  _buildSectionTitle('CONFIGURAÇÕES DO APP'),
+                  _buildSectionBlock([
+                    _buildMenuListItem(
+                      title: 'Meus veículos',
+                      subtitle: 'Gerencie seus veículos cadastrados',
+                      onTap: () => Modular.to.navigate(veiculoRoute),
+                      isFirst: true,
+                    ),
+                    _buildMenuListItem(
+                      title: 'Lembretes',
+                      subtitle: 'Gerencie seus lembretes que você criou',
+                      onTap: () => Modular.to.navigate(lembreteRoute),
+                    ),
+                    _buildMenuListItemWithSwitch(
+                      title: 'Notificações',
+                      subtitle: 'Permita que você receba notificações do App',
+                      value: notificationsEnabled,
+                      onChanged: (value) async {
+                        if (value) {
+                          final status = await Permission.notification.request();
+                          if (status.isGranted) {
+                            setState(() {
+                              notificationsEnabled = true;
+                            });
+                            await _updateNotificationPreference(true);
                           } else {
                             setState(() {
                               notificationsEnabled = false;
                             });
                             await _updateNotificationPreference(false);
-                          }
-                        },
-                      ),
-                      _buildMenuListItem(
-                        title: 'Contato',
-                        subtitle: 'Dúvidas? Entre em contato conosco através do nosso suporte!',
-                        onTap: () => Modular.to.navigate(contatoRoute),
-                      ),
-                      _buildMenuListItem(
-                        title: 'Sobre',
-                        subtitle: 'Um pouco sobre o ',
-                        highlightedText: 'AUTO CARE+',
-                        onTap: () => Modular.to.navigate(sobreRoute),
-                        isLast: true,
-                      ),
-                    ]),
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('DEFINIÇÃO DO TEMA'),
-                    _buildSectionBlock([
-                      _buildMenuListItem(
-                        title: 'Tema',
-                        subtitle: 'Escolha o tema que deseja aplicar no aplicativo',
-                        onTap: () {},
-                        isFirst: true,
-                        isLast: true,
-                      ),
-                    ]),
-                    const SizedBox(height: 16),
-                    _buildSectionTitle('CONFIGURAÇÕES DA CONTA'),
-                    _buildSectionBlock([
-                      _buildMenuListItem(
-                        title: 'Minha conta',
-                        subtitle: 'Gerencie os dados da conta',
-                        onTap: () => Modular.to.navigate(contaRoute),
-                        isFirst: true,
-                      ),
-                      _buildMenuListItem(
-                        title: 'Altere de conta',
-                        subtitle: 'Troque entre contas cadastradas',
-                        onTap: () {
-                          final currentUserName = _usuarioController.usuario.nome.isNotEmpty ? _usuarioController.usuario.nome : 'Usuário';
-                          final currentUserEmail = _usuarioController.usuario.email.isNotEmpty ? _usuarioController.usuario.email : 'email@exemplo.com';
 
-                          BottomSheetConta.show(
-                            context: context,
-                            accounts: [
-                              UserAccount(id: '1', name: currentUserName, email: currentUserEmail),
-                            ],
-                            activeAccountId: '1',
-                            onAccountSelected: (_) {},
-                            onAddAccount: () {},
-                          );
-                        },
-                      ),
-                      _buildMenuListItemWithIcon(
-                        title: 'Sair',
-                        subtitle: 'Logout do App',
-                        icon: Icons.logout,
-                        onTap: () {
-                          ConfirmarBottomSheet.show(
-                            context: context,
-                            titulo: 'Atenção',
-                            mensagem: 'Você realmente quer fazer logout?',
-                            textoConfirmar: 'Sair',
-                            onConfirmar: () async => await _performLogout(),
-                          );
-                        },
-                        isLast: true,
-                      ),
-                    ]),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Permissão para notificações negada. Ativação cancelada.'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        } else {
+                          setState(() {
+                            notificationsEnabled = false;
+                          });
+                          await _updateNotificationPreference(false);
+                        }
+                      },
+                    ),
+                    _buildMenuListItem(
+                      title: 'Contato',
+                      subtitle: 'Dúvidas? Entre em contato conosco através do nosso suporte!',
+                      onTap: () => Modular.to.navigate(contatoRoute),
+                    ),
+                    _buildMenuListItem(
+                      title: 'Sobre',
+                      subtitle: 'Um pouco sobre o ',
+                      highlightedText: 'AUTO CARE+',
+                      onTap: () => Modular.to.navigate(sobreRoute),
+                      isLast: true,
+                    ),
+                  ]),
+                  const SizedBox(height: 16),
+                  _buildSectionTitle('DEFINIÇÃO DO TEMA'),
+                  _buildSectionBlock([
+                    _buildMenuListItem(
+                      title: 'Tema',
+                      subtitle: 'Escolha o tema que deseja aplicar no aplicativo',
+                      onTap: () {},
+                      isFirst: true,
+                      isLast: true,
+                    ),
+                  ]),
+                  const SizedBox(height: 16),
+                  _buildSectionTitle('CONFIGURAÇÕES DA CONTA'),
+                  _buildSectionBlock([
+                    _buildMenuListItem(
+                      title: 'Minha conta',
+                      subtitle: 'Gerencie os dados da conta',
+                      onTap: () => Modular.to.navigate(contaRoute),
+                      isFirst: true,
+                    ),
+                    _buildMenuListItem(
+                      title: 'Altere de conta',
+                      subtitle: 'Troque entre contas cadastradas',
+                      onTap: () {
+                        final currentUserName = _usuarioController.usuario.nome.isNotEmpty ? _usuarioController.usuario.nome : 'Usuário';
+                        final currentUserEmail = _usuarioController.usuario.email.isNotEmpty ? _usuarioController.usuario.email : 'email@exemplo.com';
+
+                        BottomSheetConta.show(
+                          context: context,
+                          accounts: [
+                            UserAccount(id: '1', name: currentUserName, email: currentUserEmail),
+                          ],
+                          activeAccountId: '1',
+                          onAccountSelected: (_) {},
+                          onAddAccount: () {},
+                        );
+                      },
+                    ),
+                    _buildMenuListItemWithIcon(
+                      title: 'Sair',
+                      subtitle: 'Logout do App',
+                      icon: Icons.logout,
+                      onTap: () {
+                        ConfirmarBottomSheet.show(
+                          context: context,
+                          titulo: 'Atenção',
+                          mensagem: 'Você realmente quer fazer logout?',
+                          textoConfirmar: 'Sair',
+                          onConfirmar: () async => await _performLogout(),
+                        );
+                      },
+                      isLast: true,
+                    ),
+                  ]),
+                  const SizedBox(height: 24), // ✅ Espaço extra no final
+                ],
               ),
             ),
           ),
