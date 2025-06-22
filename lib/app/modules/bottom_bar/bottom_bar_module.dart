@@ -5,7 +5,7 @@ import 'package:auto_care_plus_app/app/modules/contato/contato_screen.dart';
 import 'package:auto_care_plus_app/app/modules/home/home_module.dart';
 import 'package:auto_care_plus_app/app/modules/lembrete/lembrete_screen.dart';
 import 'package:auto_care_plus_app/app/modules/mapa/mapa_module.dart';
-import 'package:auto_care_plus_app/app/modules/menu/menu_screen.dart';
+import 'package:auto_care_plus_app/app/modules/menu/menu_module.dart';
 import 'package:auto_care_plus_app/app/modules/sobre/sobre_screen.dart';
 import 'package:auto_care_plus_app/app/modules/timeline/timeline_module.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/submodules/adicionar_veiculo/adicionar_veiculo_screen.dart';
@@ -35,7 +35,7 @@ class BottomBarModule extends Module {
         ModuleRoute('/$mapaRoute', module: MapaModule()),
         ModuleRoute('/$timeLineRoute', module: TimelineModule()),
         ModuleRoute('/$atividadeRoute', module: AtividadeModule()),
-        ChildRoute('/$menuRoute', child: (context) => const MenuScreen()),
+        ModuleRoute('/$menuRoute', module: MenuModule()),
       ],
     );
     r.child('/$veiculoRoute', child: (context) => const VeiculoScreen());
