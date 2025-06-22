@@ -80,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       ),
       child: Column(
         children: [
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
