@@ -44,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                 return RefreshIndicator(
                   onRefresh: _loadData,
                   child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom + 30,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -443,7 +446,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
               ),
             ],
           ),
-          const SizedBox(height: 80),
         ],
       ),
     );
