@@ -25,7 +25,7 @@ abstract class VeiculoStoreFactory {
     placa: '',
     ano: 0,
     quilometragem: 0,
-    tipoCombustivel: 'FLEX',
+    tipoCombustivel: 'Flex',
     observacoes: '',
   );
 }
