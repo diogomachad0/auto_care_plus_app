@@ -109,6 +109,23 @@ mixin _$ContaController on _ContaControllerBase, Store {
     });
   }
 
+  late final _$showEmailPasswordDialogAtom = Atom(
+      name: '_ContaControllerBase.showEmailPasswordDialog', context: context);
+
+  @override
+  bool get showEmailPasswordDialog {
+    _$showEmailPasswordDialogAtom.reportRead();
+    return super.showEmailPasswordDialog;
+  }
+
+  @override
+  set showEmailPasswordDialog(bool value) {
+    _$showEmailPasswordDialogAtom
+        .reportWrite(value, super.showEmailPasswordDialog, () {
+      super.showEmailPasswordDialog = value;
+    });
+  }
+
   late final _$loadUserDataAsyncAction =
       AsyncAction('_ContaControllerBase.loadUserData', context: context);
 
@@ -167,11 +184,23 @@ mixin _$ContaController on _ContaControllerBase, Store {
   }
 
   @override
+  void clearEmailPasswordDialog() {
+    final _$actionInfo = _$_ContaControllerBaseActionController.startAction(
+        name: '_ContaControllerBase.clearEmailPasswordDialog');
+    try {
+      return super.clearEmailPasswordDialog();
+    } finally {
+      _$_ContaControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 isLoading: ${isLoading},
 errorMessage: ${errorMessage},
 successMessage: ${successMessage},
+showEmailPasswordDialog: ${showEmailPasswordDialog},
 hasError: ${hasError},
 hasSuccess: ${hasSuccess},
 isProfileFormValid: ${isProfileFormValid},
