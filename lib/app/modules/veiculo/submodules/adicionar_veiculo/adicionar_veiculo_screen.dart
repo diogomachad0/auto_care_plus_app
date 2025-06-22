@@ -2,7 +2,9 @@ import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -16,7 +18,7 @@ class AdicionarVeiculoScreen extends StatefulWidget {
 class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with ThemeMixin {
   final controller = Modular.get<VeiculoController>();
 
-  final List<String> fuelTypes = ['FLEX', 'GASOLINA', 'ETANOL', 'DIESEL', 'ELÉTRICO'];
+  final List<String> fuelTypes = ['Flex', 'Gasolina', 'Etanol', 'Diesel', 'Elétrico'];
 
   @override
   Widget build(BuildContext context) {
@@ -150,10 +152,21 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
           children: [
             Expanded(
               child: TextFieldCustom(
-                label: 'Placa',
-                toUpperCase: true,
-                onChanged: (v) => controller.veiculo.placa = v,
-              ),
+                  label: 'Placa',
+                  toUpperCase: true,
+                  onChanged: (v) => controller.veiculo.placa = v,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(7),
+                  ],
+                  validator: (value) {
+                    if (value.trim().isEmpty) {
+                      return 'Campo obrigatório';
+                    }
+                    if (value.length != 7) {
+                      return 'Deve conter 7 caracteres';
+                    }
+                    return null;
+                  }),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -161,6 +174,9 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
                 label: 'Quilometragem',
                 onlyNumbers: true,
                 onChanged: (v) => controller.veiculo.quilometragem = int.tryParse(v) ?? 0,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(6),
+                ],
               ),
             ),
           ],
@@ -174,29 +190,44 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
   }
 
   Widget _buildFuelTypeDropdown() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Observer(
-        builder: (_) => DropdownButtonFormField<String>(
-          value: controller.veiculo.tipoCombustivel,
-          decoration: InputDecoration(
-            labelStyle: textTheme.bodySmall,
-            filled: true,
-            fillColor: Colors.grey[200],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    return Observer(
+      builder: (_) => DropdownButtonFormField2<String>(
+        value: controller.veiculo.tipoCombustivel,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey[200],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
           ),
-          items: fuelTypes.map((fuel) => DropdownMenuItem(value: fuel, child: Text(fuel))).toList(),
-          onChanged: (value) => controller.veiculo.tipoCombustivel = value!,
-          dropdownColor: Colors.white,
-          style: textTheme.bodySmall,
         ),
+        style: textTheme.bodyMedium,
+        dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            offset: const Offset(0, -2),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            maxHeight: 200),
+        buttonStyleData: const ButtonStyleData(
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          height: 40,
+          width: double.infinity,
+        ),
+        items: fuelTypes
+            .map(
+              (fuel) => DropdownMenuItem<String>(
+                value: fuel,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(fuel),
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: (value) => controller.veiculo.tipoCombustivel = value!,
       ),
     );
   }
