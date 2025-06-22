@@ -7,6 +7,8 @@ import 'package:auto_care_plus_app/app/shared/widgets/bottom_sheet_custom/bottom
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -16,7 +18,7 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
-  bool notificationsEnabled = true;
+  bool notificationsEnabled = false;
 
   final AuthService _authService = Modular.get<AuthService>();
   late final UsuarioController _usuarioController;
@@ -26,6 +28,19 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
     super.initState();
     _usuarioController = Modular.get<UsuarioController>();
     _usuarioController.loadCurrentUser();
+    _loadNotificationPreference();
+  }
+
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      notificationsEnabled = prefs.getBool('notifications_enabled') ?? false;
+    });
+  }
+
+  Future<void> _updateNotificationPreference(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', value);
   }
 
   @override
@@ -47,42 +62,59 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       _buildMenuListItem(
                         title: 'Meus veículos',
                         subtitle: 'Gerencie seus veículos cadastrados',
-                        onTap: () {
-                          Modular.to.navigate(veiculoRoute);
-                        },
+                        onTap: () => Modular.to.navigate(veiculoRoute),
                         isFirst: true,
                       ),
                       _buildMenuListItem(
                         title: 'Lembretes',
                         subtitle: 'Gerencie seus lembretes que você criou',
-                        onTap: () {
-                          Modular.to.navigate(lembreteRoute);
-                        },
+                        onTap: () => Modular.to.navigate(lembreteRoute),
                       ),
                       _buildMenuListItemWithSwitch(
                         title: 'Notificações',
                         subtitle: 'Permita que você receba notificações do App',
                         value: notificationsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            notificationsEnabled = value;
-                          });
+                        onChanged: (value) async {
+                          if (value) {
+                            final status = await Permission.notification.request();
+                            if (status.isGranted) {
+                              setState(() {
+                                notificationsEnabled = true;
+                              });
+                              await _updateNotificationPreference(true);
+                            } else {
+                              setState(() {
+                                notificationsEnabled = false;
+                              });
+                              await _updateNotificationPreference(false);
+
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Permissão para notificações negada. Ativação cancelada.'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          } else {
+                            setState(() {
+                              notificationsEnabled = false;
+                            });
+                            await _updateNotificationPreference(false);
+                          }
                         },
                       ),
                       _buildMenuListItem(
                         title: 'Contato',
                         subtitle: 'Dúvidas? Entre em contato conosco através do nosso suporte!',
-                        onTap: () {
-                          Modular.to.navigate(contatoRoute);
-                        },
+                        onTap: () => Modular.to.navigate(contatoRoute),
                       ),
                       _buildMenuListItem(
                         title: 'Sobre',
                         subtitle: 'Um pouco sobre o ',
                         highlightedText: 'AUTO CARE+',
-                        onTap: () {
-                          Modular.to.navigate(sobreRoute);
-                        },
+                        onTap: () => Modular.to.navigate(sobreRoute),
                         isLast: true,
                       ),
                     ]),
@@ -103,9 +135,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       _buildMenuListItem(
                         title: 'Minha conta',
                         subtitle: 'Gerencie os dados da conta',
-                        onTap: () {
-                          Modular.to.navigate(contaRoute);
-                        },
+                        onTap: () => Modular.to.navigate(contaRoute),
                         isFirst: true,
                       ),
                       _buildMenuListItem(
@@ -115,19 +145,13 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                           final currentUserName = _usuarioController.usuario.nome.isNotEmpty ? _usuarioController.usuario.nome : 'Usuário';
                           final currentUserEmail = _usuarioController.usuario.email.isNotEmpty ? _usuarioController.usuario.email : 'email@exemplo.com';
 
-                          final accounts = [
-                            UserAccount(
-                              id: '1',
-                              name: currentUserName,
-                              email: currentUserEmail,
-                            ),
-                          ];
-
                           BottomSheetConta.show(
                             context: context,
-                            accounts: accounts,
+                            accounts: [
+                              UserAccount(id: '1', name: currentUserName, email: currentUserEmail),
+                            ],
                             activeAccountId: '1',
-                            onAccountSelected: (account) {},
+                            onAccountSelected: (_) {},
                             onAddAccount: () {},
                           );
                         },
@@ -142,9 +166,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                             titulo: 'Atenção',
                             mensagem: 'Você realmente quer fazer logout?',
                             textoConfirmar: 'Sair',
-                            onConfirmar: () async {
-                              await _performLogout();
-                            },
+                            onConfirmar: () async => await _performLogout(),
                           );
                         },
                         isLast: true,
@@ -166,27 +188,17 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (_) => const Center(child: CircularProgressIndicator()),
       );
 
       await _authService.logout();
 
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop();
-      }
-
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao fazer logout: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erro ao fazer logout: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -199,10 +211,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            colorScheme.secondary,
-            colorScheme.primary,
-          ],
+          colors: [colorScheme.secondary, colorScheme.primary],
         ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
@@ -214,42 +223,23 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
         child: Padding(
           padding: const EdgeInsets.only(top: 16, bottom: 8),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Menu',
-                style: textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
+              Text('Menu', style: textTheme.titleLarge?.copyWith(color: Colors.white)),
               const SizedBox(height: 8),
-              Image.asset(
-                'assets/img/logo_white_app.png',
-                height: 100,
-              ),
+              Image.asset('assets/img/logo_white_app.png', height: 100),
               const SizedBox(height: 8),
               Observer(
                 builder: (_) {
-                  String firstName = 'Usuário';
-                  if (_usuarioController.usuario.nome.isNotEmpty) {
-                    final names = _usuarioController.usuario.nome.split(' ');
-                    firstName = names.first;
-                  }
-
+                  final nome = _usuarioController.usuario.nome;
+                  final firstName = nome.isNotEmpty ? nome.split(' ').first : 'Usuário';
                   return Text.rich(
                     TextSpan(
                       text: 'Olá, ',
-                      style: textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w300,
-                        color: Colors.white,
-                      ),
+                      style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w300, color: Colors.white),
                       children: [
                         TextSpan(
                           text: '$firstName!',
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
+                          style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700, color: Colors.white),
                         ),
                       ],
                     ),
@@ -268,24 +258,16 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
         title,
-        style: textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: Colors.grey[500],
-        ),
+        style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: Colors.grey[500]),
       ),
     );
   }
 
   Widget _buildSectionBlock(List<Widget> children) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
@@ -302,18 +284,12 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           dense: true,
-          title: Text(
-            title,
-            style: textTheme.bodyLarge,
-          ),
+          title: Text(title, style: textTheme.bodyLarge),
           subtitle: highlightedText != null
               ? RichText(
                   text: TextSpan(
                     text: subtitle,
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey[500],
-                    ),
+                    style: textTheme.bodySmall?.copyWith(fontSize: 12, color: Colors.grey[500]),
                     children: [
                       TextSpan(
                         text: highlightedText,
@@ -326,28 +302,11 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                     ],
                   ),
                 )
-              : Text(
-                  subtitle,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
-                ),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: colorScheme.secondary,
-            size: 30,
-          ),
+              : Text(subtitle, style: textTheme.bodySmall?.copyWith(fontSize: 10, color: Colors.grey[500])),
+          trailing: Icon(Icons.chevron_right, color: colorScheme.secondary, size: 30),
           onTap: onTap,
         ),
-        if (!isLast)
-          const Divider(
-            height: 1,
-            thickness: 0.5,
-            indent: 16,
-            endIndent: 16,
-            color: Colors.white,
-          ),
+        if (!isLast) const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: Colors.white),
       ],
     );
   }
@@ -362,17 +321,8 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
     return Column(
       children: [
         ListTile(
-          title: Text(
-            title,
-            style: textTheme.bodyLarge,
-          ),
-          subtitle: Text(
-            subtitle,
-            style: textTheme.bodySmall?.copyWith(
-              fontSize: 10,
-              color: Colors.grey[500],
-            ),
-          ),
+          title: Text(title, style: textTheme.bodyLarge),
+          subtitle: Text(subtitle, style: textTheme.bodySmall?.copyWith(fontSize: 10, color: Colors.grey[500])),
           trailing: Switch(
             value: value,
             onChanged: onChanged,
@@ -380,14 +330,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
             activeTrackColor: colorScheme.primary,
           ),
         ),
-        if (!isLast)
-          const Divider(
-            height: 1,
-            thickness: 0.5,
-            indent: 16,
-            endIndent: 16,
-            color: Colors.white,
-          ),
+        if (!isLast) const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: Colors.white),
       ],
     );
   }
@@ -402,31 +345,12 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
     return Column(
       children: [
         ListTile(
-          title: Text(
-            title,
-            style: textTheme.bodyLarge,
-          ),
-          subtitle: Text(
-            subtitle,
-            style: textTheme.bodySmall?.copyWith(
-              fontSize: 10,
-              color: Colors.grey[500],
-            ),
-          ),
-          trailing: Icon(
-            icon,
-            color: Colors.grey[500],
-          ),
+          title: Text(title, style: textTheme.bodyLarge),
+          subtitle: Text(subtitle, style: textTheme.bodySmall?.copyWith(fontSize: 10, color: Colors.grey[500])),
+          trailing: Icon(icon, color: Colors.grey[500]),
           onTap: onTap,
         ),
-        if (!isLast)
-          const Divider(
-            height: 1,
-            thickness: 0.5,
-            indent: 16,
-            endIndent: 16,
-            color: Colors.white,
-          ),
+        if (!isLast) const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: Colors.white),
       ],
     );
   }
