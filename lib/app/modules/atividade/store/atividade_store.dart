@@ -15,6 +15,7 @@ abstract class AtividadeStoreFactory {
         km: model.km,
         totalPago: model.totalPago,
         litros: model.litros,
+        precoLitro: model.precoLitro,
         tipoCombustivel: model.tipoCombustivel,
         estabelecimento: model.estabelecimento,
         numeroParcela: model.numeroParcela,
@@ -31,6 +32,7 @@ abstract class AtividadeStoreFactory {
         km: '',
         totalPago: '',
         litros: '',
+        precoLitro: '',
         tipoCombustivel: 'Gasolina',
         estabelecimento: '',
         numeroParcela: '',
@@ -63,6 +65,9 @@ abstract class _AtividadeStoreBase with Store {
   String litros;
 
   @observable
+  String precoLitro;
+
+  @observable
   String tipoCombustivel;
 
   @observable
@@ -88,6 +93,7 @@ abstract class _AtividadeStoreBase with Store {
     required this.km,
     required this.totalPago,
     required this.litros,
+    required this.precoLitro,
     required this.tipoCombustivel,
     required this.estabelecimento,
     required this.numeroParcela,
@@ -105,6 +111,7 @@ abstract class _AtividadeStoreBase with Store {
       km: km,
       totalPago: totalPago,
       litros: litros,
+      precoLitro: precoLitro,
       tipoCombustivel: tipoCombustivel,
       estabelecimento: estabelecimento,
       numeroParcela: numeroParcela,
