@@ -14,10 +14,10 @@ class SplashModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const SplashScreen());
+    r.child(Modular.initialRoute, child: (context) => const SplashScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
-    r.module('/$loginRoute', module: LoginModule());
-    r.module('/$bottomBarRoute', module: BottomBarModule());
+    r.module('/$loginRoute', module: LoginModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
+    r.module('/$bottomBarRoute', module: BottomBarModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     super.routes(r);
   }
