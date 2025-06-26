@@ -4,7 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 class RegistroModule extends Module {
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const RegistroScreen());
+    r.child(Modular.initialRoute, child: (context) => const RegistroScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     super.routes(r);
   }
