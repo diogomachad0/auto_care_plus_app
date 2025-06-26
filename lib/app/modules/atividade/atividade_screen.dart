@@ -3,9 +3,189 @@ import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/mapbox/mapbox_place_search.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:intl/intl.dart';
+
+class CurrencyInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$ ',
+    decimalDigits: 2,
+  );
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    double value = double.parse(numericString) / 100;
+
+    if (value > 999999.99) {
+      value = 999999.99;
+    }
+
+    String formattedValue = _formatter.format(value);
+
+    return TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
+
+class KmInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    int value = int.tryParse(numericString) ?? 0;
+
+    if (value > 999999) {
+      value = 999999;
+    }
+
+    String formattedValue = NumberFormat('#,###', 'pt_BR').format(value);
+
+    return TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
+
+class LitrosInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    String cleanText = newValue.text.replaceAll(RegExp(r'[^\d,.]'), '');
+
+    if (cleanText.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    String normalizedText = cleanText.replaceAll(',', '.');
+
+    double? value = double.tryParse(normalizedText);
+
+    if (value == null) {
+      return oldValue;
+    }
+
+    if (value > 500) {
+      value = 500;
+    }
+
+    String formattedValue;
+    if (value == value.toInt()) {
+      formattedValue = value.toInt().toString();
+    } else {
+      formattedValue = value.toStringAsFixed(2).replaceAll('.', ',');
+      formattedValue = formattedValue.replaceAll(RegExp(r',?0+$'), '');
+    }
+
+    return TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
+
+class PrecoLitroInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$ ',
+    decimalDigits: 3,
+  );
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    double value = double.parse(numericString) / 1000;
+
+    if (value > 99.999) {
+      value = 99.999;
+    }
+
+    String formattedValue = _formatter.format(value);
+
+    return TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
+
+class ParcelaInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    int value = int.tryParse(numericString) ?? 0;
+
+    if (value > 120) {
+      value = 120;
+    }
+
+    return TextEditingValue(
+      text: value.toString(),
+      selection: TextSelection.collapsed(offset: value.toString().length),
+    );
+  }
+}
 
 class AtividadeScreen extends StatefulWidget {
   final String? atividadeId;
@@ -21,6 +201,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   final TextEditingController _kmAtualController = TextEditingController();
   final TextEditingController _totalPagoController = TextEditingController();
   final TextEditingController _litrosController = TextEditingController();
+  final TextEditingController _precoLitroController = TextEditingController();
   final TextEditingController _estabelecimentoController = TextEditingController();
   final TextEditingController _numeroParcelaController = TextEditingController();
   final TextEditingController _observacoesController = TextEditingController();
@@ -71,6 +252,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _kmAtualController.clear();
     _totalPagoController.clear();
     _litrosController.clear();
+    _precoLitroController.clear();
     _estabelecimentoController.clear();
     _numeroParcelaController.clear();
     _observacoesController.clear();
@@ -99,6 +281,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
       _kmAtualController.text = atividade.km;
       _totalPagoController.text = atividade.totalPago;
       _litrosController.text = atividade.litros;
+      _precoLitroController.text = atividade.precoLitro;
       selectedFuelType = atividade.tipoCombustivel.isNotEmpty ? atividade.tipoCombustivel : 'Gasolina';
       _estabelecimentoController.text = atividade.estabelecimento;
       _numeroParcelaController.text = atividade.numeroParcela;
@@ -113,10 +296,36 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _controller.atividade.km = _kmAtualController.text;
     _controller.atividade.totalPago = _totalPagoController.text;
     _controller.atividade.litros = _litrosController.text;
+    _controller.atividade.precoLitro = _precoLitroController.text;
     _controller.atividade.tipoCombustivel = selectedFuelType;
     _controller.atividade.estabelecimento = _estabelecimentoController.text;
     _controller.atividade.numeroParcela = _numeroParcelaController.text;
     _controller.atividade.observacoes = _observacoesController.text;
+  }
+
+  void _calcularTotal() {
+    try {
+      String litrosText = _litrosController.text.replaceAll(',', '.');
+      String precoText = _precoLitroController.text.replaceAll(RegExp(r'[^\d,.]'), '').replaceAll(',', '.');
+
+      double litros = double.tryParse(litrosText) ?? 0;
+      double preco = double.tryParse(precoText) ?? 0;
+
+      if (litros > 0 && preco > 0) {
+        double total = litros * preco;
+
+        String totalFormatado = NumberFormat.currency(
+          locale: 'pt_BR',
+          symbol: 'R\$ ',
+          decimalDigits: 2,
+        ).format(total);
+
+        _totalPagoController.text = totalFormatado;
+        _controller.atividade.totalPago = totalFormatado;
+      }
+    } catch (e) {
+      print('Erro ao calcular total: $e');
+    }
   }
 
   @override
@@ -125,6 +334,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _kmAtualController.dispose();
     _totalPagoController.dispose();
     _litrosController.dispose();
+    _precoLitroController.dispose();
     _estabelecimentoController.dispose();
     _numeroParcelaController.dispose();
     _observacoesController.dispose();
@@ -164,7 +374,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 left: 16,
                 right: 16,
                 top: 16,
-                bottom: MediaQuery.of(context).viewPadding.bottom + 100,
+                bottom: MediaQuery.of(context).viewPadding.bottom + 30,
               ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -207,7 +417,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         Align(
           alignment: Alignment.center,
           child: Text(
-            'Selecione abaixo',
+            'Selecione abaixo o tipo de atividade que deseja cadastrar.',
             style: textTheme.bodySmall?.copyWith(
               color: Colors.grey[600],
             ),
@@ -219,57 +429,80 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   Widget _buildActivityTypeDropdown() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        width: 200,
-        height: 46,
-        decoration: BoxDecoration(
-          color: colorScheme.primary,
-          borderRadius: BorderRadius.circular(8),
+    return Observer(
+      builder: (_) => DropdownButtonFormField2<String>(
+        value: selectedActivityType,
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
         ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            dropdownColor: Colors.grey.shade200,
-            value: selectedActivityType,
-            icon: const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: Colors.white,
-            ),
-            style: textTheme.bodyMedium?.copyWith(),
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedActivityType = newValue!;
-                _clearFieldsOnTypeChange();
-              });
-            },
-            items: activityTypes.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    Icon(
-                      _getActivityIcon(value),
-                      color: value == selectedActivityType ? Colors.white : colorScheme.secondary,
-                    ),
-                    const SizedBox(width: 10),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        value,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: value == selectedActivityType ? colorScheme.onPrimary : colorScheme.secondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+        dropdownStyleData: DropdownStyleData(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          offset: const Offset(0, -4),
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          maxHeight: 200,
+        ),
+        buttonStyleData: ButtonStyleData(
+          height: 46,
+          width: 200,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: colorScheme.primary,
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
+        iconStyleData: const IconStyleData(
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white),
+        ),
+        style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        selectedItemBuilder: (context) {
+          return activityTypes.map((value) {
+            return Row(
+              children: [
+                Icon(
+                  _getActivityIcon(value),
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  value,
+                  style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+                ),
+              ],
+            );
+          }).toList();
+        },
+        items: activityTypes.map((value) {
+          final isSelected = value == selectedActivityType;
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Row(
+              children: [
+                Icon(
+                  _getActivityIcon(value),
+                  color: isSelected ? colorScheme.primary : colorScheme.secondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  value,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: isSelected ? colorScheme.primary : colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            selectedActivityType = newValue!;
+            _clearFieldsOnTypeChange();
+          });
+        },
       ),
     );
   }
@@ -278,12 +511,14 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _kmAtualController.clear();
     _totalPagoController.clear();
     _litrosController.clear();
+    _precoLitroController.clear();
     _estabelecimentoController.clear();
     _numeroParcelaController.clear();
 
     _controller.atividade.km = '';
     _controller.atividade.totalPago = '';
     _controller.atividade.litros = '';
+    _controller.atividade.precoLitro = '';
     _controller.atividade.estabelecimento = '';
     _controller.atividade.numeroParcela = '';
     _controller.atividade.latitude = '';
@@ -354,7 +589,11 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             ),
             child: Row(
               children: [
-                Icon(Icons.warning_rounded, color: Colors.amber, size: 30,),
+                Icon(
+                  Icons.warning_rounded,
+                  color: Colors.amber,
+                  size: 30,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: RichText(
@@ -389,7 +628,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 ),
               ],
             ),
-          );        }
+          );
+        }
 
         return Container(
           decoration: BoxDecoration(
@@ -430,17 +670,20 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   Widget _buildEstabelecimentoField() {
-    return MapboxPlaceSearch(
-      controller: _estabelecimentoController,
-      label: 'Estabelecimento',
-      onPlaceSelected: (address, lat, lng) {
-        _controller.setEstabelecimentoComCoordenadas(address, lat, lng);
-        print('Endereço selecionado: $address');
-        print('Coordenadas: $lat, $lng');
-      },
-      onChanged: (value) {
-        _controller.atividade.estabelecimento = value;
-      },
+    return SizedBox(
+      height: 46,
+      child: MapboxPlaceSearch(
+        controller: _estabelecimentoController,
+        label: 'Estabelecimento',
+        onPlaceSelected: (address, lat, lng) {
+          _controller.setEstabelecimentoComCoordenadas(address, lat, lng);
+          print('Endereço selecionado: $address');
+          print('Coordenadas: $lat, $lng');
+        },
+        onChanged: (value) {
+          _controller.atividade.estabelecimento = value;
+        },
+      ),
     );
   }
 
@@ -456,6 +699,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 child: TextFieldCustom(
                   label: 'Km',
                   controller: _kmAtualController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [KmInputFormatter()],
                   onChanged: (value) {
                     _controller.atividade.km = value;
                   },
@@ -464,21 +709,44 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
               const SizedBox(width: 16),
               Expanded(
                 child: TextFieldCustom(
+                  label: 'Litros',
+                  controller: _litrosController,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [LitrosInputFormatter()],
+                  onChanged: (value) {
+                    _controller.atividade.litros = value;
+                  },
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextFieldCustom(
+                  label: 'Preço por litro',
+                  controller: _precoLitroController,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [PrecoLitroInputFormatter()],
+                  onChanged: (value) {
+                    _controller.atividade.precoLitro = value;
+                    _calcularTotal();
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFieldCustom(
                   label: 'Total pago',
                   controller: _totalPagoController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [CurrencyInputFormatter()],
                   onChanged: (value) {
                     _controller.atividade.totalPago = value;
                   },
                 ),
               ),
             ],
-          ),
-          TextFieldCustom(
-            label: 'Litros',
-            controller: _litrosController,
-            onChanged: (value) {
-              _controller.atividade.litros = value;
-            },
           ),
           _buildFuelTypeDropdown(),
           const SizedBox(height: 16),
@@ -495,6 +763,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 child: TextFieldCustom(
                   label: 'Km',
                   controller: _kmAtualController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [KmInputFormatter()],
                   onChanged: (value) {
                     _controller.atividade.km = value;
                   },
@@ -505,6 +775,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 child: TextFieldCustom(
                   label: 'Total pago',
                   controller: _totalPagoController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [CurrencyInputFormatter()],
                   onChanged: (value) {
                     _controller.atividade.totalPago = value;
                   },
@@ -521,6 +793,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           TextFieldCustom(
             label: 'Total pago',
             controller: _totalPagoController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
             onChanged: (value) {
               _controller.atividade.totalPago = value;
             },
@@ -534,6 +808,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           TextFieldCustom(
             label: 'Total pago',
             controller: _totalPagoController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
             onChanged: (value) {
               _controller.atividade.totalPago = value;
             },
@@ -546,6 +822,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           TextFieldCustom(
             label: 'Total pago',
             controller: _totalPagoController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
             onChanged: (value) {
               _controller.atividade.totalPago = value;
             },
@@ -562,6 +840,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 child: TextFieldCustom(
                   label: 'Total pago',
                   controller: _totalPagoController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [CurrencyInputFormatter()],
                   onChanged: (value) {
                     _controller.atividade.totalPago = value;
                   },
@@ -572,6 +852,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
                 child: TextFieldCustom(
                   label: 'Número da parcela',
                   controller: _numeroParcelaController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [ParcelaInputFormatter()],
                   onChanged: (value) {
                     _controller.atividade.numeroParcela = value;
                   },
@@ -587,6 +869,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           TextFieldCustom(
             label: 'Total pago',
             controller: _totalPagoController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
             onChanged: (value) {
               _controller.atividade.totalPago = value;
             },
@@ -599,6 +883,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           TextFieldCustom(
             label: 'Total pago',
             controller: _totalPagoController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
             onChanged: (value) {
               _controller.atividade.totalPago = value;
             },
@@ -611,6 +897,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           TextFieldCustom(
             label: 'Total pago',
             controller: _totalPagoController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
             onChanged: (value) {
               _controller.atividade.totalPago = value;
             },
@@ -624,39 +912,66 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   }
 
   Widget _buildFuelTypeDropdown() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
+    return DropdownButtonFormField2<String>(
+      value: selectedFuelType,
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
       ),
-      child: DropdownButtonFormField<String>(
-        value: selectedFuelType,
-        decoration: InputDecoration(
-          labelText: 'Tipo de combustível',
-          labelStyle: textTheme.bodyMedium?.copyWith(
-            color: Colors.grey,
-          ),
-          filled: true,
-          fillColor: Colors.grey[200],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      dropdownStyleData: DropdownStyleData(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(12),
         ),
-        items: fuelTypes.map((String fuelType) {
-          return DropdownMenuItem<String>(
-            value: fuelType,
-            child: Text(fuelType),
-          );
-        }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            selectedFuelType = newValue!;
-            _controller.atividade.tipoCombustivel = newValue;
-          });
-        },
+        offset: const Offset(0, -2),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        maxHeight: 200,
       ),
+      buttonStyleData: ButtonStyleData(
+        height: 46,
+        width: 200,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      iconStyleData: const IconStyleData(
+        icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
+      ),
+      style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
+      selectedItemBuilder: (context) {
+        return fuelTypes.map((value) {
+          return Row(
+            children: [
+              const SizedBox(width: 10),
+              Text(
+                value,
+                style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
+              ),
+            ],
+          );
+        }).toList();
+      },
+      items: fuelTypes.map((value) {
+        final isSelected = value == selectedFuelType;
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              color: isSelected ? colorScheme.primary : colorScheme.secondary,
+            ),
+          ),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedFuelType = newValue!;
+          _controller.atividade.tipoCombustivel = newValue;
+        });
+      },
     );
   }
 
