@@ -24,7 +24,7 @@ class TimelineModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const TimelineScreen());
+    r.child(Modular.initialRoute, child: (context) => const TimelineScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     r.module('/$filtroRoute', module: FiltroModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
