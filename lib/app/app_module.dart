@@ -18,7 +18,7 @@ class AppModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.module(Modular.initialRoute, module: SplashModule());
+    r.module(Modular.initialRoute, module: SplashModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     super.routes(r);
   }
