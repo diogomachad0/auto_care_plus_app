@@ -6,47 +6,32 @@ import 'package:stylish_bottom_bar/model/bar_items.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class BottomBarScreen extends StatefulWidget {
-  final bool disableNavigationMenu;
-
-  const BottomBarScreen({super.key, required this.disableNavigationMenu});
+  const BottomBarScreen({super.key});
 
   @override
   State<BottomBarScreen> createState() => _BottomBarScreenState();
 }
 
 class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
-  int selectedIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.disableNavigationMenu) {
-        selectedIndex = 2;
-        Modular.to.navigate('./$homeRoute');
-      } else {
-        Modular.to.navigate('./$menuRoute');
-      }
-    });
-  }
+  int selectedIndex = 1;
 
   void _onTap(int index) {
     setState(() => selectedIndex = index);
     switch (index) {
       case 0:
-        Modular.to.navigate('../$menuRoute');
+        Modular.to.navigate('/$bottomBarRoute/$menuRoute');
         break;
       case 1:
-        Modular.to.navigate('../$homeRoute');
+        Modular.to.navigate('/$bottomBarRoute/$homeRoute');
         break;
       case 2:
-        Modular.to.navigate('../$atividadeRoute');
+        Modular.to.navigate('/$bottomBarRoute/$atividadeRoute');
         break;
       case 3:
-        Modular.to.navigate('../$timeLineRoute');
+        Modular.to.navigate('/$bottomBarRoute/$timeLineRoute');
         break;
       case 4:
-        Modular.to.navigate('../$mapaRoute');
+        Modular.to.navigate('/$bottomBarRoute/$mapaRoute');
         break;
     }
   }
@@ -61,7 +46,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
         height: 70,
         child: FloatingActionButton(
           onPressed: () {
-            Modular.to.navigate('../$atividadeRoute');
+            Modular.to.navigate('/$bottomBarRoute/$atividadeRoute');
           },
           backgroundColor: colorScheme.primary,
           elevation: 8,
@@ -83,86 +68,28 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
         currentIndex: selectedIndex,
         items: [
           BottomBarItem(
-            icon: const Icon(
-              Icons.menu_rounded,
-              color: Colors.white,
-              size: 36,
-            ),
-            title: Text(
-              'Menu',
-              style: textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-              ),
-            ),
-            selectedIcon: Icon(
-              Icons.menu_rounded,
-              color: colorScheme.secondary,
-              size: 36,
-            ),
+            icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 36),
+            title: Text('Menu', style: textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            selectedIcon: Icon(Icons.menu_rounded, color: colorScheme.secondary, size: 36),
           ),
           BottomBarItem(
-              icon: const Icon(
-                Icons.home_rounded,
-                color: Colors.white,
-                size: 36,
-              ),
-              title: Text(
-                'Início',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              selectedIcon: Icon(
-                Icons.home_rounded,
-                color: colorScheme.secondary,
-                size: 36,
-              )),
-          BottomBarItem(
-            icon: const Icon(
-              Icons.add_circle_outline,
-              color: Colors.white,
-            ),
-            title: Text(
-              '',
-              style: textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-              ),
-            ),
+            icon: const Icon(Icons.home_rounded, color: Colors.white, size: 36),
+            title: Text('Início', style: textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            selectedIcon: Icon(Icons.home_rounded, color: colorScheme.secondary, size: 36),
           ),
           BottomBarItem(
-              icon: const Icon(
-                Icons.timeline_rounded,
-                color: Colors.white,
-                size: 36,
-              ),
-              title: Text(
-                'Atividade',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              selectedIcon: Icon(
-                Icons.timeline_rounded,
-                color: colorScheme.secondary,
-                size: 36,
-              )),
+            icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+            title: Text('', style: textTheme.bodyMedium?.copyWith(color: Colors.white)),
+          ),
           BottomBarItem(
-            icon: const Icon(
-              Icons.location_on_sharp,
-              color: Colors.white,
-              size: 36,
-            ),
-            title: Text(
-              'Mapa',
-              style: textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-              ),
-            ),
-            selectedIcon: Icon(
-              Icons.location_on_sharp,
-              color: colorScheme.secondary,
-              size: 32,
-            ),
+            icon: const Icon(Icons.timeline_rounded, color: Colors.white, size: 36),
+            title: Text('Atividade', style: textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            selectedIcon: Icon(Icons.timeline_rounded, color: colorScheme.secondary, size: 36),
+          ),
+          BottomBarItem(
+            icon: const Icon(Icons.location_on_sharp, color: Colors.white, size: 36),
+            title: Text('Mapa', style: textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            selectedIcon: Icon(Icons.location_on_sharp, color: colorScheme.secondary, size: 32),
           ),
         ],
         onTap: _onTap,
