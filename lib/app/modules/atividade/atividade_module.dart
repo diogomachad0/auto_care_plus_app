@@ -22,7 +22,7 @@ class AtividadeModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const AtividadeScreen());
+    r.child(Modular.initialRoute, child: (context) => const AtividadeScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     super.routes(r);
   }
