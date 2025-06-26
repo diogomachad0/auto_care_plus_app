@@ -21,8 +21,7 @@ class VeiculoModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const VeiculoScreen());
-
+    r.child(Modular.initialRoute, child: (context) => const VeiculoScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     r.module('/$adicionarVeiculoRoute', module: AdicionarVeiculoModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
     r.module('/$editarVeiculoRoute', module: EditarVeiculoModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
