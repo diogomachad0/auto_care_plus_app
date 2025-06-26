@@ -20,7 +20,7 @@ class LembreteModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const LembreteScreen());
+    r.child(Modular.initialRoute, child: (context) => const LembreteScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     r.module('/$adicioanarLembreteRoute', module: AdicionarLembreteModule(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
     super.routes(r);
