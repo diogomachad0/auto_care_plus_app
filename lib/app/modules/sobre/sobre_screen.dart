@@ -74,13 +74,12 @@ class _SobreScreenState extends State<SobreScreen> with ThemeMixin {
             ),
             onPressed: () {
               Modular.to.navigate(menuRoute);
-              // TODO: arrumar depois
             },
           ),
           Expanded(
             child: Center(
               child: Text(
-                'Contato',
+                'Sobre nós',
                 style: textTheme.titleLarge?.copyWith(
                   color: Colors.white,
                 ),
