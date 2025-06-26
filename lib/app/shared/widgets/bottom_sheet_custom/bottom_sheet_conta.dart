@@ -24,6 +24,7 @@ class BottomSheetConta extends StatefulWidget {
   }) async {
     await showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -31,6 +32,7 @@ class BottomSheetConta extends StatefulWidget {
           topRight: Radius.circular(20),
         ),
       ),
+      useRootNavigator: true,
       builder: (context) {
         return BottomSheetConta(
           accounts: accounts,
@@ -50,17 +52,18 @@ class _BottomSheetContaState extends State<BottomSheetConta> with ThemeMixin {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+      padding: EdgeInsets.only(
+        left: 16.0,
+        right: 16.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Alterar contas',
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: textTheme.titleLarge?.copyWith(),
           ),
           const SizedBox(height: 16),
           ...widget.accounts.map((account) => _buildAccountItem(account)),
@@ -163,8 +166,7 @@ class _BottomSheetContaState extends State<BottomSheetConta> with ThemeMixin {
                 Navigator.of(context).pop();
               },
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(16),
@@ -177,7 +179,6 @@ class _BottomSheetContaState extends State<BottomSheetConta> with ThemeMixin {
   }
 }
 
-//todo: mockado para testes front end
 class UserAccount {
   final String id;
   final String name;
