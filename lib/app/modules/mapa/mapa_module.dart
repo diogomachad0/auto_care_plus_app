@@ -20,7 +20,7 @@ class MapaModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => MapaScreen());
+    r.child(Modular.initialRoute, child: (context) => MapaScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     super.routes(r);
   }
