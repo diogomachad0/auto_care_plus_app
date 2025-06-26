@@ -26,24 +26,26 @@ class ConfirmarBottomSheet extends StatefulWidget {
     VoidCallback? onConfirmar,
   }) async {
     return (await showModalBottomSheet(
-          context: context,
-          backgroundColor: Colors.white,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          builder: (context) {
-            return ConfirmarBottomSheet(
-              titulo: titulo,
-              mensagem: mensagem,
-              textoCancelar: textoCancelar,
-              textoConfirmar: textoConfirmar,
-              onConfirmar: onConfirmar,
-            );
-          },
-        )) ??
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      builder: (context) {
+        return ConfirmarBottomSheet(
+          titulo: titulo,
+          mensagem: mensagem,
+          textoCancelar: textoCancelar,
+          textoConfirmar: textoConfirmar,
+          onConfirmar: onConfirmar,
+        );
+      },
+    )) ??
         false;
   }
 
@@ -56,11 +58,14 @@ class _ConfirmarBottomSheetState extends State<ConfirmarBottomSheet>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+      padding: EdgeInsets.only(
+        left: 16.0,
+        right: 16.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -69,10 +74,13 @@ class _ConfirmarBottomSheetState extends State<ConfirmarBottomSheet>
                 color: colorScheme.secondary,
                 size: 42,
               ),
-              Text(
-                widget.titulo,
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.titulo,
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
