@@ -636,25 +636,47 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(8),
           ),
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField2<String>(
             value: selectedVeiculoId,
+            isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Selecione o veículo',
-              labelStyle: textTheme.bodyMedium?.copyWith(
-                color: Colors.grey,
-              ),
+              labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
               filled: true,
               fillColor: Colors.grey[200],
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              contentPadding: const EdgeInsets.only(right: 8),
             ),
+            buttonStyleData: ButtonStyleData(
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            dropdownStyleData: DropdownStyleData(
+              offset: const Offset(0, -2),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              maxHeight: 200,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            iconStyleData: const IconStyleData(
+              icon: Icon(Icons.keyboard_arrow_down_rounded),
+              iconEnabledColor: Colors.black54,
+            ),
+            style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
             items: veiculos.map((veiculo) {
               return DropdownMenuItem<String>(
                 value: veiculo.base.id,
-                child: Text('${veiculo.marca} ${veiculo.modelo} (${veiculo.placa})'),
+                child: Text(
+                  '${veiculo.marca} ${veiculo.modelo} (${veiculo.placa})',
+                  overflow: TextOverflow.ellipsis,
+                ),
               );
             }).toList(),
             onChanged: (String? newValue) {
