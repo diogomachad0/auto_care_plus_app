@@ -16,7 +16,7 @@ class ContaModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child(Modular.initialRoute, child: (context) => const ContaScreen());
+    r.child(Modular.initialRoute, child: (context) => const ContaScreen(), transition: TransitionType.fadeIn, duration: const Duration(milliseconds: 300));
 
     super.routes(r);
   }
