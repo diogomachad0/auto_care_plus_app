@@ -204,13 +204,14 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
         ),
         style: textTheme.bodyMedium,
         dropdownStyleData: DropdownStyleData(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            offset: const Offset(0, -2),
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            maxHeight: 200),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          offset: const Offset(0, -2),
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          maxHeight: 200,
+        ),
         buttonStyleData: const ButtonStyleData(
           padding: EdgeInsets.symmetric(horizontal: 8),
           height: 40,
