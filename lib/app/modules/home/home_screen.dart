@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/home/home_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -88,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Inicio',
+                'Início',
                 style: textTheme.titleLarge?.copyWith(
                   color: Colors.white,
                 ),
@@ -106,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
           width: double.infinity,
           height: 46,
           decoration: BoxDecoration(
@@ -117,103 +117,117 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
             builder: (_) {
               final veiculos = _controller.veiculos;
 
-              return DropdownButtonHideUnderline(
-                child: DropdownButton<String?>(
-                  dropdownColor: Colors.grey.shade200,
-                  value: _controller.veiculoSelecionadoId,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                  hint: const Row(
-                    children: [
-                      Icon(Icons.directions_car),
-                      SizedBox(width: 10),
-                    ],
+              return DropdownButtonFormField2<String?>(
+                isExpanded: true,
+                value: _controller.veiculoSelecionadoId,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                buttonStyleData: ButtonStyleData(
+                  height: 46,
+                  padding: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  selectedItemBuilder: (context) {
-                    return [
-                      null,
-                      ...veiculos.map((v) => v.base.id),
-                    ].map<Widget>((String? id) {
-                      final isAll = id == null;
-                      final veiculo = isAll
-                          ? null
-                          : veiculos.firstWhere(
-                              (v) => v.base.id == id,
-                              orElse: () => VeiculoStoreFactory.novo(),
-                            );
-
+                ),
+                dropdownStyleData: DropdownStyleData(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  offset: const Offset(0, -4),
+                ),
+                iconStyleData: const IconStyleData(
+                  icon: Icon(Icons.keyboard_arrow_down_rounded),
+                  iconEnabledColor: Colors.black54,
+                ),
+                hint: const Row(
+                  children: [
+                    Icon(Icons.directions_car),
+                  ],
+                ),
+                style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
+                selectedItemBuilder: (context) {
+                  return <Widget>[
+                    const Row(
+                      children: [
+                        Icon(Icons.south_east_rounded),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Todos os veículos',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ...veiculos.map((veiculo) {
                       return Row(
                         children: [
-                          Icon(isAll ? Icons.south_east_rounded : Icons.directions_car),
+                          const Icon(Icons.directions_car),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              isAll ? 'Todos os veículos' : '${veiculo!.modelo} - ${veiculo.placa}',
-                              style: textTheme.bodyMedium,
+                              '${veiculo.modelo} - ${veiculo.placa}',
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       );
-                    }).toList();
-                  },
-                  onChanged: (String? newValue) {
-                    _controller.setVeiculoSelecionado(newValue);
-                  },
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.south_east_rounded,
-                                color: _controller.veiculoSelecionadoId == null ? Colors.white : colorScheme.secondary,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Todos os veículos',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: _controller.veiculoSelecionadoId == null ? colorScheme.onPrimary : colorScheme.secondary,
-                                ),
-                              ),
-                            ],
+                    }).toList(),
+                  ];
+                },
+                items: [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.south_east_rounded,
+                          color: _controller.veiculoSelecionadoId == null
+                              ? colorScheme.primary
+                              : colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Todos os veículos',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: _controller.veiculoSelecionadoId == null
+                                ? colorScheme.primary
+                                : colorScheme.secondary,
                           ),
-                          const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.transparent),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ...veiculos.map((veiculo) {
+                    final isSelected = _controller.veiculoSelecionadoId == veiculo.base.id;
+                    return DropdownMenuItem<String?>(
+                      value: veiculo.base.id,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.directions_car,
+                            color: isSelected ? colorScheme.primary : colorScheme.secondary,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '${veiculo.modelo} - ${veiculo.placa}',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: isSelected ? colorScheme.primary : colorScheme.secondary,
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                    ...veiculos.map((veiculo) {
-                      final isSelected = _controller.veiculoSelecionadoId == veiculo.base.id;
-                      return DropdownMenuItem<String?>(
-                        value: veiculo.base.id,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.directions_car,
-                                  color: isSelected ? Colors.white : colorScheme.secondary,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  '${veiculo.modelo} - ${veiculo.placa}',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: isSelected ? colorScheme.onPrimary : colorScheme.secondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    );
+                  }).toList(),
+                ],
+                onChanged: (String? newValue) {
+                  _controller.setVeiculoSelecionado(newValue);
+                },
               );
             },
           ),
