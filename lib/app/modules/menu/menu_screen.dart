@@ -175,7 +175,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                       isLast: true,
                     ),
                   ]),
-                  const SizedBox(height: 24), // ✅ Espaço extra no final
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -305,7 +305,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                   ),
                 )
               : Text(subtitle, style: textTheme.bodySmall?.copyWith(fontSize: 10, color: Colors.grey[500])),
-          trailing: Icon(Icons.chevron_right, color: colorScheme.secondary, size: 30),
+          trailing: Icon(Icons.chevron_right_rounded, color: colorScheme.secondary, size: 30),
           onTap: onTap,
         ),
         if (!isLast) const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: Colors.white),
@@ -349,7 +349,7 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
         ListTile(
           title: Text(title, style: textTheme.bodyLarge),
           subtitle: Text(subtitle, style: textTheme.bodySmall?.copyWith(fontSize: 10, color: Colors.grey[500])),
-          trailing: Icon(icon, color: Colors.grey[500]),
+          trailing: Icon(icon, color: colorScheme.secondary),
           onTap: onTap,
         ),
         if (!isLast) const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16, color: Colors.white),
