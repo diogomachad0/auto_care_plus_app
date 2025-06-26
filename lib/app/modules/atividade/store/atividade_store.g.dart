@@ -120,6 +120,22 @@ mixin _$AtividadeStore on _AtividadeStoreBase, Store {
     });
   }
 
+  late final _$precoLitroAtom =
+      Atom(name: '_AtividadeStoreBase.precoLitro', context: context);
+
+  @override
+  String get precoLitro {
+    _$precoLitroAtom.reportRead();
+    return super.precoLitro;
+  }
+
+  @override
+  set precoLitro(String value) {
+    _$precoLitroAtom.reportWrite(value, super.precoLitro, () {
+      super.precoLitro = value;
+    });
+  }
+
   late final _$tipoCombustivelAtom =
       Atom(name: '_AtividadeStoreBase.tipoCombustivel', context: context);
 
@@ -226,6 +242,7 @@ data: ${data},
 km: ${km},
 totalPago: ${totalPago},
 litros: ${litros},
+precoLitro: ${precoLitro},
 tipoCombustivel: ${tipoCombustivel},
 estabelecimento: ${estabelecimento},
 numeroParcela: ${numeroParcela},
