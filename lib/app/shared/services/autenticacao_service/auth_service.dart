@@ -1,6 +1,6 @@
+import 'package:auto_care_plus_app/app/modules/usuario/usuario_controller.dart';
 import 'package:auto_care_plus_app/app/shared/database/local/database_local.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
-import 'package:auto_care_plus_app/app/modules/usuario/usuario_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
