@@ -8,6 +8,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'mapa_controller.dart';
+import 'widgets/simple_map_marker.dart';
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZGlvZ29tYWNoYWRvIiwiYSI6ImNtYjc2dXkwaDA3NGUyam4wMnJ4cHJyc2MifQ.UCZ3qN_mb80hb82sa6jmog';
 
@@ -129,7 +130,7 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  offset: const Offset(0, -4),  // *** Aqui o offset igual ***
+                  offset: const Offset(0, -4),
                 ),
                 iconStyleData: const IconStyleData(
                   icon: Icon(Icons.keyboard_arrow_down_rounded),
@@ -179,17 +180,13 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                       children: [
                         Icon(
                           Icons.south_east_rounded,
-                          color: controller.veiculoSelecionadoId == null
-                              ? colorScheme.primary
-                              : colorScheme.secondary,
+                          color: controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Todos os veículos',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: controller.veiculoSelecionadoId == null
-                                ? colorScheme.primary
-                                : colorScheme.secondary,
+                            color: controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -241,50 +238,34 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
         }
 
         final iconSize = _getResponsiveIconSize(context);
-        final shadowOffset = _getResponsiveShadowOffset(context);
-        final userIconSize = iconSize * 1.2;
 
-        List<Marker> markers = [
-          Marker(
-            point: controller.myPosition!,
-            builder: (context) {
-              return Icon(
-                Icons.person_pin_circle_rounded,
-                color: colorScheme.primary,
-                size: userIconSize,
-              );
-            },
-          ),
-        ];
+        List<Marker> markers = [];
 
         for (var atividade in controller.atividadesComLocalizacao) {
           if (atividade.hasCoordinates) {
             markers.add(
               Marker(
+                width: 90,
+                height: 55,
                 point: LatLng(atividade.latitudeAsDouble!, atividade.longitudeAsDouble!),
                 builder: (context) {
-                  return GestureDetector(
+                  String priceText = '0,00';
+                  if (atividade.totalPago.isNotEmpty) {
+                    String valor = atividade.totalPago;
+                    if (valor.startsWith('R\$')) {
+                      priceText = valor;
+                    } else {
+                      priceText = 'R\$ $valor';
+                    }
+                  } else {
+                    priceText = 'R\$ 0,00';
+                  }
+
+                  return SimpleMapMarker(
+                    price: priceText,
                     onTap: () {
                       _showAtividadeInfo(context, atividade);
                     },
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: shadowOffset,
-                          top: shadowOffset,
-                          child: Icon(
-                            Icons.location_on,
-                            color: Colors.black.withOpacity(0.2),
-                            size: iconSize,
-                          ),
-                        ),
-                        Icon(
-                          Icons.location_on,
-                          color: colorScheme.secondary,
-                          size: iconSize,
-                        ),
-                      ],
-                    ),
                   );
                 },
               ),
