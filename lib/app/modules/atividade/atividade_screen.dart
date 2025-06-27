@@ -1,6 +1,8 @@
 import 'package:auto_care_plus_app/app/modules/atividade/atividade_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_sucess.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/mapbox/mapbox_place_search.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -1040,25 +1042,14 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
       await _controller.save();
       _resetFormCompletely();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Atividade salva com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
+        await DialogSucess.show(context, 'Atividade salva com sucesso! Estará disponível no histórico de atividades.', autoClose: true);
         if (Navigator.canPop(context)) {
           Navigator.of(context).pop(true);
         }
       }
-    } catch (e) {
+    } catch (e, s) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        await DialogError.show(context, 'Erro ao salvar: ${e.toString()}', s);
       }
     }
   }
