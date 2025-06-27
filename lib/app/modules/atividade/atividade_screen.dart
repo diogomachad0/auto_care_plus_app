@@ -289,20 +289,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     });
   }
 
-  void _updateAtividadeStore() {
-    _controller.atividade.tipoAtividade = selectedActivityType;
-    _controller.atividade.veiculoId = selectedVeiculoId ?? '';
-    _controller.atividade.data = _dataController.text;
-    _controller.atividade.km = _kmAtualController.text;
-    _controller.atividade.totalPago = _totalPagoController.text;
-    _controller.atividade.litros = _litrosController.text;
-    _controller.atividade.precoLitro = _precoLitroController.text;
-    _controller.atividade.tipoCombustivel = selectedFuelType;
-    _controller.atividade.estabelecimento = _estabelecimentoController.text;
-    _controller.atividade.numeroParcela = _numeroParcelaController.text;
-    _controller.atividade.observacoes = _observacoesController.text;
-  }
-
   void _calcularTotal() {
     try {
       String litrosText = _litrosController.text.replaceAll(',', '.');
@@ -1032,12 +1018,11 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         child: FilledButton(
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 46),
-            backgroundColor: _controller.isFormValid ? colorScheme.primary : Colors.grey,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: _controller.isFormValid ? () => _saveAtividade(context) : null,
+onPressed: () => _saveAtividade(context),
           child: Text(
             'Cadastrar',
             style: textTheme.bodyMedium?.copyWith(
@@ -1052,7 +1037,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
   Future<void> _saveAtividade(BuildContext context) async {
     try {
-      _updateAtividadeStore();
       await _controller.save();
       _resetFormCompletely();
       if (mounted) {
