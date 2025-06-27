@@ -394,6 +394,12 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
         return Colors.yellow;
       case 'Serviço Mecânico':
         return Colors.green;
+      case 'Financiamento':
+        return Colors.purple;
+      case 'Compras':
+        return Colors.teal;
+      case 'Impostos':
+        return Colors.indigo;
       case 'Outros':
         return Colors.cyan;
       default:

@@ -51,12 +51,16 @@ abstract class _HomeControllerBase with Store {
 
   @computed
   Map<String, double> get gastosCategorizados {
+    // ATUALIZADO: Adicionadas as novas categorias
     final gastos = <String, double>{
       'Reabastecimento': 0.0,
       'Troca de Óleo': 0.0,
       'Lavagem': 0.0,
       'Seguro': 0.0,
       'Serviço Mecânico': 0.0,
+      'Financiamento': 0.0,
+      'Compras': 0.0,
+      'Impostos': 0.0,
       'Outros': 0.0,
     };
 
@@ -135,6 +139,7 @@ abstract class _HomeControllerBase with Store {
     }
   }
 
+  // ATUALIZADO: Corrigido o mapeamento das categorias
   String _mapearCategoria(String tipoAtividade) {
     switch (tipoAtividade.toLowerCase()) {
       case 'abastecimento':
@@ -148,9 +153,13 @@ abstract class _HomeControllerBase with Store {
       case 'serviço mecânico':
         return 'Serviço Mecânico';
       case 'financiamento':
+        return 'Financiamento';
       case 'compras':
+        return 'Compras';
       case 'impostos':
+        return 'Impostos';
       case 'outros':
+        return 'Outros';
       default:
         return 'Outros';
     }
