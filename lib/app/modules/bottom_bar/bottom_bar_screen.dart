@@ -38,25 +38,29 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
 
   @override
   Widget build(BuildContext context) {
+    bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
       extendBody: true,
       body: const RouterOutlet(),
-      floatingActionButton: SizedBox(
-        width: 70,
-        height: 70,
-        child: FloatingActionButton(
-          onPressed: () {
-            Modular.to.navigate('/$bottomBarRoute/$atividadeRoute');
-          },
-          backgroundColor: colorScheme.primary,
-          elevation: 8,
-          child: Icon(
-            Icons.add_rounded,
-            color: colorScheme.onPrimary,
-            size: 40,
-          ),
-        ),
-      ),
+      floatingActionButton: isKeyboardVisible
+          ? null
+          : SizedBox(
+              width: 70,
+              height: 70,
+              child: FloatingActionButton(
+                onPressed: () {
+                  Modular.to.navigate('/$bottomBarRoute/$atividadeRoute');
+                },
+                backgroundColor: colorScheme.primary,
+                elevation: 8,
+                child: Icon(
+                  Icons.add_rounded,
+                  color: colorScheme.onPrimary,
+                  size: 40,
+                ),
+              ),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: StylishBottomBar(
         option: AnimatedBarOptions(
@@ -78,8 +82,8 @@ class _BottomBarScreenState extends State<BottomBarScreen> with ThemeMixin {
             selectedIcon: Icon(Icons.home_rounded, color: colorScheme.secondary, size: 36),
           ),
           BottomBarItem(
-            icon: const Icon(Icons.add_circle_outline, color: Colors.white),
-            title: Text('', style: textTheme.bodyMedium?.copyWith(color: Colors.white)),
+            icon: Icon(Icons.add_circle_outline, color: colorScheme.primary),
+            title: Text('', style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary)),
           ),
           BottomBarItem(
             icon: const Icon(Icons.timeline_rounded, color: Colors.white, size: 36),
