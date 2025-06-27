@@ -19,9 +19,9 @@ class CurrencyInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
@@ -50,9 +50,9 @@ class CurrencyInputFormatter extends TextInputFormatter {
 class KmInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }
@@ -81,9 +81,9 @@ class KmInputFormatter extends TextInputFormatter {
 class LitrosInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }
@@ -130,9 +130,9 @@ class PrecoLitroInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
@@ -161,9 +161,9 @@ class PrecoLitroInputFormatter extends TextInputFormatter {
 class ParcelaInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }
@@ -1022,7 +1022,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-onPressed: () => _saveAtividade(context),
+          onPressed: _controller.isFormValid ? () => _saveAtividade(context) : null,
           child: Text(
             'Cadastrar',
             style: textTheme.bodyMedium?.copyWith(
