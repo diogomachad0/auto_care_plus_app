@@ -18,7 +18,7 @@ class UsuarioRepository extends TableRepositoryLocal<UsuarioModel> implements IU
         ${BaseRepository.dataHoraUltimaAlteracao} TEXT,
         nome TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
-        telefone TEXT NOT NULL,
+        telefone TEXT,
         senha TEXT NOT NULL
       );
     ''');
@@ -58,9 +58,6 @@ class UsuarioRepository extends TableRepositoryLocal<UsuarioModel> implements IU
     }
     if (entity.email.isEmpty) {
       throw Exception('E-mail é obrigatório');
-    }
-    if (entity.telefone.isEmpty) {
-      throw Exception('Telefone é obrigatório');
     }
     if (entity.senha.isEmpty) {
       throw Exception('Senha é obrigatória');

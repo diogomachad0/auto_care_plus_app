@@ -8,20 +8,20 @@ class UsuarioStore = _UsuarioStoreBase with _$UsuarioStore;
 
 abstract class UsuarioStoreFactory {
   static UsuarioStore fromModel(UsuarioModel model) => UsuarioStore(
-        base: BaseStoreFactory.fromEntity(model.base),
-        nome: model.nome,
-        email: model.email,
-        telefone: model.telefone,
-        senha: model.senha,
-      );
+    base: BaseStoreFactory.fromEntity(model.base),
+    nome: model.nome,
+    email: model.email,
+    telefone: model.telefone,
+    senha: model.senha,
+  );
 
   static UsuarioStore novo() => UsuarioStore(
-        base: BaseStoreFactory.novo(),
-        nome: '',
-        email: '',
-        telefone: '',
-        senha: '',
-      );
+    base: BaseStoreFactory.novo(),
+    nome: '',
+    email: '',
+    telefone: '',
+    senha: '',
+  );
 }
 
 abstract class _UsuarioStoreBase with Store {
@@ -60,7 +60,7 @@ abstract class _UsuarioStoreBase with Store {
 
   @computed
   bool get isValid {
-    return nome.isNotEmpty && email.isNotEmpty && telefone.isNotEmpty && senha.isNotEmpty;
+    return nome.isNotEmpty && email.isNotEmpty && senha.isNotEmpty;
   }
 
   @computed
