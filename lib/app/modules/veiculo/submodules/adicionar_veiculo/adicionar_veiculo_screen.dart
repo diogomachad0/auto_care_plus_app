@@ -7,6 +7,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:intl/intl.dart';
+
+class KmInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    int value = int.tryParse(numericString) ?? 0;
+
+    if (value > 999999) {
+      value = 999999;
+    }
+
+    String formattedValue = NumberFormat('#,###', 'pt_BR').format(value);
+
+    return TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
 
 class AdicionarVeiculoScreen extends StatefulWidget {
   const AdicionarVeiculoScreen({super.key});
@@ -172,10 +204,13 @@ class _AdicionarVeiculoScreenState extends State<AdicionarVeiculoScreen> with Th
             Expanded(
               child: TextFieldCustom(
                 label: 'Quilometragem',
-                onlyNumbers: true,
-                onChanged: (v) => controller.veiculo.quilometragem = int.tryParse(v) ?? 0,
+                keyboardType: TextInputType.number,
+                onChanged: (v) {
+                  String numericString = v.replaceAll(RegExp(r'[^\d]'), '');
+                  controller.veiculo.quilometragem = int.tryParse(numericString) ?? 0;
+                },
                 inputFormatters: [
-                  LengthLimitingTextInputFormatter(6),
+                  KmInputFormatter(),
                 ],
               ),
             ),

@@ -3,8 +3,41 @@ import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:intl/intl.dart';
+
+class KmInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (numericString.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    int value = int.tryParse(numericString) ?? 0;
+
+    if (value > 999999) {
+      value = 999999;
+    }
+
+    String formattedValue = NumberFormat('#,###', 'pt_BR').format(value);
+
+    return TextEditingValue(
+      text: formattedValue,
+      selection: TextSelection.collapsed(offset: formattedValue.length),
+    );
+  }
+}
 
 class EditarVeiculoScreen extends StatefulWidget {
   const EditarVeiculoScreen({super.key});
@@ -64,7 +97,11 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
         _marcaController.text = controller.veiculo.marca ?? '';
         _anoController.text = controller.veiculo.ano.toString() ?? '';
         _placaController.text = controller.veiculo.placa ?? '';
-        _quilometragemController.text = controller.veiculo.quilometragem.toString() ?? '';
+
+        if (controller.veiculo.quilometragem > 0) {
+          _quilometragemController.text = NumberFormat('#,###', 'pt_BR').format(controller.veiculo.quilometragem);
+        }
+
         _observacoesController.text = controller.veiculo.observacoes ?? '';
 
         setState(() {
@@ -303,7 +340,11 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                 child: TextField(
                   controller: _quilometragemController,
                   keyboardType: TextInputType.number,
-                  onChanged: (v) => controller.veiculo.quilometragem = int.tryParse(v) ?? 0,
+                  inputFormatters: [KmInputFormatter()],
+                  onChanged: (v) {
+                    String numericString = v.replaceAll(RegExp(r'[^\d]'), '');
+                    controller.veiculo.quilometragem = int.tryParse(numericString) ?? 0;
+                  },
                   decoration: InputDecoration(
                     labelText: 'Quilometragem',
                     labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
@@ -425,7 +466,6 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                     Modular.to.navigate(veiculoRoute);
                   } catch (e, s) {
                     await DialogError.show(context, 'Erro ao salvar veículo: \nErro: ${e.toString()}', s);
-
                   }
                 }
               : null,
