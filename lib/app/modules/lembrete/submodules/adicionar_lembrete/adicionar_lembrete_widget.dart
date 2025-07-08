@@ -76,7 +76,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
                   style: textTheme.bodyMedium,
                 ),
                 Text(
-                  'Você receberá uma notificação às 00:00 da data agendada',
+                  'Você receberá uma notificação às 12:00 da data agendada',
                   style: textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -101,7 +101,6 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
       ),
     );
   }
-
   Widget _buildButtons() {
     return Row(
       children: [
