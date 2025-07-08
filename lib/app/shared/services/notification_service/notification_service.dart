@@ -1,153 +1,75 @@
-import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz_data;
 
 class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
-  factory NotificationService() => _instance;
-  NotificationService._internal();
+  static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
 
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+  static Future<void> initialize() async {
+    tz.initializeTimeZones();
 
-  Future<void> initialize() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings initializationSettingsIOS =
-    DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
 
-    const InitializationSettings initializationSettings =
-    InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-
-    await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
-    );
-
-    await _requestPermissions();
+    await _notifications.initialize(initializationSettings);
   }
-
-  Future<void> _requestPermissions() async {
-    if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
-    }
-
-    await _flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-  }
-
-  void _onDidReceiveNotificationResponse(NotificationResponse response) {}
 
   Future<void> showLembreteNotification({
     required int id,
     required String titulo,
     required DateTime data,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
+    final scheduledDate = DateTime(
+      data.year,
+      data.month,
+      data.day,
+      12,
+      0,
+      0,
+    );
+
+    final tz.TZDateTime scheduledTZ = tz.TZDateTime.from(scheduledDate, tz.local);
+
+    if (scheduledTZ.isBefore(tz.TZDateTime.now(tz.local))) {
+      print('Data do lembrete é no passado, não será agendado: $scheduledDate');
+      return;
+    }
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'lembrete_channel',
       'Lembretes',
-      channelDescription: 'Notificações de lembretes do Auto Care Plus',
+      channelDescription: 'Notificações de lembretes do AutoCare+',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
-      color: Color(0xFF0D80BF),
     );
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-    DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
-    final String formattedDate = DateFormat('dd/MM/yyyy').format(data);
-
-    await _flutterLocalNotificationsPlugin.show(
+    await _notifications.zonedSchedule(
       id,
-      'Lembrete: $titulo',
-      'Data: $formattedDate',
+      'Lembrete - AutoCare+',
+      titulo,
+      scheduledTZ,
       platformChannelSpecifics,
-      payload: 'lembrete_$id',
-    );
-  }
-
-  Future<void> scheduleLembreteNotification({
-    required int id,
-    required String titulo,
-    required DateTime data,
-  }) async {
-    tz_data.initializeTimeZones();
-
-    final DateTime notificationTime = data.isBefore(DateTime.now())
-        ? DateTime.now().add(const Duration(seconds: 2))
-        : data;
-
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'lembrete_scheduled_channel',
-      'Lembretes Agendados',
-      channelDescription: 'Notificações agendadas de lembretes',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF0D80BF),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-    DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
-    final String formattedDate = DateFormat('dd/MM/yyyy').format(data);
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      'Lembrete: $titulo',
-      'Data agendada: $formattedDate',
-      tz.TZDateTime.from(notificationTime, tz.local),
-      platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'lembrete_scheduled_$id',
-    );
+    print('Notificação agendada para: $scheduledDate (ID: $id)');
   }
 
   Future<void> cancelNotification(int id) async {
-    await _flutterLocalNotificationsPlugin.cancel(id);
+    await _notifications.cancel(id);
+    print('Notificação cancelada (ID: $id)');
   }
 
   Future<void> cancelAllNotifications() async {
-    await _flutterLocalNotificationsPlugin.cancelAll();
+    await _notifications.cancelAll();
+  }
+
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await _notifications.pendingNotificationRequests();
   }
 }
