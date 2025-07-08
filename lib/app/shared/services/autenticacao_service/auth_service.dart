@@ -181,7 +181,7 @@ class AuthService {
       await _saveGoogleUserData();
 
       _resetControllers();
-      Modular.to.navigate('$bottomBarRoute/$homeRoute');
+      Modular.to.navigate('$entrarRoute/$bottomBarRoute/$homeRoute');
     } on FirebaseAuthException catch (e) {
       String message = 'Erro ao fazer login com Google';
       switch (e.code) {
