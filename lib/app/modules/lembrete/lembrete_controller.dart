@@ -34,28 +34,34 @@ abstract class _LembreteControllerBase with Store {
     final model = lembrete.toModel();
     await _service.saveOrUpdate(model);
 
-    // Se o lembrete deve notificar, criar a notificação
     if (lembrete.notificar) {
-      await _showLembreteNotification(model);
+      await _scheduleNotification(model);
     }
 
     await load();
   }
 
-  Future<void> _showLembreteNotification(dynamic lembreteModel) async {
-    final int notificationId = '${lembreteModel.titulo}${lembreteModel.data.millisecondsSinceEpoch}'.hashCode;
+  Future<void> _scheduleNotification(dynamic lembreteModel) async {
+    final int notificationId = _generateNotificationId(lembreteModel);
 
     await _notificationService.showLembreteNotification(
       id: notificationId,
       titulo: lembreteModel.titulo,
       data: lembreteModel.data,
     );
+
+    print('Lembrete agendado: ${lembreteModel.titulo} para ${lembreteModel.data} às 12:00:00');
+  }
+
+  int _generateNotificationId(dynamic lembreteModel) {
+    return '${lembreteModel.titulo}${lembreteModel.data.millisecondsSinceEpoch}'.hashCode;
   }
 
   Future<void> delete(LembreteStore lembrete) async {
     if (lembrete.notificar) {
-      final int notificationId = '${lembrete.titulo}${lembrete.data.millisecondsSinceEpoch}'.hashCode;
+      final int notificationId = _generateNotificationId(lembrete.toModel());
       await _notificationService.cancelNotification(notificationId);
+      print('Notificação cancelada para: ${lembrete.titulo}');
     }
 
     await _service.delete(lembrete.toModel());
@@ -67,5 +73,21 @@ abstract class _LembreteControllerBase with Store {
     lembrete.titulo = titulo;
     lembrete.data = data;
     lembrete.notificar = notificar;
+  }
+
+  Future<void> rescheduleAllNotifications() async {
+    for (var lembreteItem in lembretes) {
+      if (lembreteItem.notificar && lembreteItem.data.isAfter(DateTime.now())) {
+        await _scheduleNotification(lembreteItem.toModel());
+      }
+    }
+  }
+
+  Future<void> debugPendingNotifications() async {
+    final pending = await _notificationService.getPendingNotifications();
+    print('Notificações pendentes: ${pending.length}');
+    for (var notification in pending) {
+      print('ID: ${notification.id}, Título: ${notification.title}, Body: ${notification.body}');
+    }
   }
 }
