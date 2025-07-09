@@ -39,9 +39,7 @@ class _NotificacoesDialogState extends State<NotificacoesDialog> with ThemeMixin
               children: [
                 Text(
                   'Notificações',
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: textTheme.titleMedium?.copyWith(),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
