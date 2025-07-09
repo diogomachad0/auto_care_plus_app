@@ -6,6 +6,7 @@ import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_fie
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegistroScreen extends StatefulWidget {
   const RegistroScreen({super.key});
@@ -22,13 +23,11 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
   void initState() {
     super.initState();
     _authService = AuthService();
-
     _authService.nomeController.addListener(_updateButtonState);
     _authService.emailControllerRegister.addListener(_updateButtonState);
     _authService.telefoneController.addListener(_updateButtonState);
     _authService.passwordControllerRegister.addListener(_updateButtonState);
     _authService.confirmarSenhaController.addListener(_updateButtonState);
-
     _authService.isErrorGeneric.addListener(_handleError);
   }
 
@@ -39,7 +38,6 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
     _authService.telefoneController.removeListener(_updateButtonState);
     _authService.passwordControllerRegister.removeListener(_updateButtonState);
     _authService.confirmarSenhaController.removeListener(_updateButtonState);
-
     _authService.isErrorGeneric.removeListener(_handleError);
     _authService.dispose();
     super.dispose();
@@ -51,10 +49,7 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
 
   void _handleError() {
     if (_authService.isErrorGeneric.value) {
-      final errorMessage = _authService.errorMessage.value.isNotEmpty
-          ? _authService.errorMessage.value
-          : 'Erro desconhecido';
-
+      final errorMessage = _authService.errorMessage.value.isNotEmpty ? _authService.errorMessage.value : 'Erro desconhecido';
       DialogError.show(context, errorMessage, StackTrace.current);
       _authService.clearError();
     }
@@ -64,19 +59,16 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
     if (value == null || value.trim().isEmpty) {
       return 'Nome é obrigatório';
     }
-
     final names = value.trim().split(' ');
     if (names.length < 2) {
       return 'Digite nome e sobrenome';
     }
-
     for (String name in names) {
       if (name.isEmpty) continue;
       if (name[0] != name[0].toUpperCase()) {
         return 'Cada nome deve começar com letra maiúscula';
       }
     }
-
     return null;
   }
 
@@ -84,16 +76,13 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
     if (value == null || value.trim().isEmpty) {
       return 'E-mail é obrigatório';
     }
-
     if (value[0] != value[0].toLowerCase()) {
       return 'E-mail não deve começar com letra maiúscula';
     }
-
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Digite um e-mail válido';
     }
-
     return null;
   }
 
@@ -101,22 +90,17 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
     if (value == null || value.trim().isEmpty) {
       return 'Telefone é obrigatório';
     }
-
     final numbersOnly = value.replaceAll(RegExp(r'[^\d]'), '');
-
     if (numbersOnly.length != 11) {
       return 'Telefone deve ter 11 dígitos';
     }
-
     final areaCode = int.tryParse(numbersOnly.substring(0, 2));
     if (areaCode == null || areaCode < 11 || areaCode > 99) {
       return 'Código de área inválido';
     }
-
     if (numbersOnly[2] != '9') {
       return 'Número deve ser de celular (9º dígito deve ser 9)';
     }
-
     return null;
   }
 
@@ -124,11 +108,9 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
     if (value == null || value.trim().isEmpty) {
       return 'Senha é obrigatória';
     }
-
     if (value.length < 6) {
       return 'Senha deve ter pelo menos 6 caracteres';
     }
-
     return null;
   }
 
@@ -136,17 +118,14 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
     if (value == null || value.trim().isEmpty) {
       return 'Confirmação de senha é obrigatória';
     }
-
     if (value != _authService.passwordControllerRegister.text) {
       return 'Senhas não coincidem';
     }
-
     return null;
   }
 
   String _formatPhone(String value) {
     final numbersOnly = value.replaceAll(RegExp(r'[^\d]'), '');
-
     if (numbersOnly.length <= 2) {
       return numbersOnly;
     } else if (numbersOnly.length <= 7) {
@@ -166,12 +145,22 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
   }
 
   bool _isFormValid() {
-    return _validateNome(_authService.nomeController.text) == null &&
-        _validateEmail(_authService.emailControllerRegister.text) == null &&
-        _validateTelefone(_authService.telefoneController.text) == null &&
-        _validateSenha(_authService.passwordControllerRegister.text) == null &&
-        _validateConfirmarSenha(_authService.confirmarSenhaController.text) == null &&
-        _aceitoTermos;
+    return _validateNome(_authService.nomeController.text) == null && _validateEmail(_authService.emailControllerRegister.text) == null && _validateTelefone(_authService.telefoneController.text) == null && _validateSenha(_authService.passwordControllerRegister.text) == null && _validateConfirmarSenha(_authService.confirmarSenhaController.text) == null && _aceitoTermos;
+  }
+
+  Future<void> _abrirPoliticaPrivacidade() async {
+    const urlString = 'https://www.freeprivacypolicy.com/live/d7baf1b2-4ff6-406a-a6d4-02fcaa24acb4';
+
+    try {
+      await launchUrl(
+        Uri.parse(urlString),
+        mode: LaunchMode.externalApplication,
+      );
+      print('✅ Sucesso com método 1');
+      return;
+    } catch (e1) {
+      print('❌ Método 1 falhou: $e1');
+    }
   }
 
   Widget _buildRegisterButton() {
@@ -179,7 +168,6 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
       valueListenable: _authService.isLoading,
       builder: (context, isLoading, child) {
         final isFormValid = _isFormValid();
-
         return FilledButton(
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 46),
@@ -340,29 +328,15 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
                                 ),
                                 const SizedBox(height: 16),
                                 _buildRegisterButton(),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text('Ler ', style: textTheme.bodySmall),
-                                    GestureDetector(
-                                      onTap: () {},
-                                      child: Text('Termos de Uso',
-                                          style: textTheme.bodySmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          )),
+                                TextButton(
+                                  onPressed: _abrirPoliticaPrivacidade,
+                                  child: Text(
+                                    'Ler Termos de Uso e Política de Privacidade',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.secondary,
                                     ),
-                                    Text(' e ', style: textTheme.bodySmall),
-                                    GestureDetector(
-                                      onTap: () {},
-                                      child: Text('Política de Privacidade',
-                                          style: textTheme.bodySmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                                const SizedBox(height: 4),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
