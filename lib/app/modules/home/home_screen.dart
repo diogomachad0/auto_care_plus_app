@@ -1,12 +1,13 @@
 import 'package:auto_care_plus_app/app/modules/home/home_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/services/notification_service/notification_service.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-import '../veiculo/store/veiculo_store.dart';
+import '../lembrete/lembrete_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,16 +18,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
   late final HomeController _controller;
+  late final LembreteController _lembreteController;
 
   @override
   void initState() {
     super.initState();
     _controller = Modular.get<HomeController>();
+    _lembreteController = Modular.get<LembreteController>();
     _loadData();
   }
 
   Future<void> _loadData() async {
     await _controller.load();
+    await _lembreteController.load();
+    NotificationService.verificarLembretesVencidos(_lembreteController.lembretes);
   }
 
   @override
@@ -51,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _buildSectionTitleWithNotifications('GASTOS'),
                         _buildExpensesSection(),
                         _buildNotificationsSection(),
                       ],
@@ -187,17 +193,13 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       children: [
                         Icon(
                           Icons.south_east_rounded,
-                          color: _controller.veiculoSelecionadoId == null
-                              ? colorScheme.primary
-                              : colorScheme.secondary,
+                          color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                         ),
                         const SizedBox(width: 10),
                         Text(
                           'Todos os veículos',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: _controller.veiculoSelecionadoId == null
-                                ? colorScheme.primary
-                                : colorScheme.secondary,
+                            color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -236,11 +238,67 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
     );
   }
 
+  Widget _buildSectionTitleWithNotifications(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: Colors.grey[500]),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {
+              _showNotificacoesDialog().then((_) {
+                setState(() {});
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Stack(
+                children: [
+                  Icon(
+                    Icons.notifications_outlined,
+                    size: 24,
+                    color: Colors.grey[600],
+                  ),
+                  if (NotificationService.notificacoes.isNotEmpty && NotificationService.notificacoes.any((lembrete) => !NotificationService.isLida(lembrete.id)))
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showNotificacoesDialog() {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _NotificacoesDialog();
+      },
+    );
+  }
+
   Widget _buildExpensesSection() {
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
-        padding: const EdgeInsets.only(top: 0, bottom: 22, left: 16, right: 16),
+        padding: const EdgeInsets.only(top: 16, bottom: 22, left: 16, right: 16),
         child: Observer(
           builder: (_) {
             final gastos = _controller.gastosCategorizados;
@@ -256,17 +314,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                     Text(
                       'R\$ ${totalGastos.toStringAsFixed(2).replaceAll('.', ',')}',
                       style: textTheme.titleMedium,
-                    ),
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.all(4),
-                      ),
-                      onPressed: () {},
-                      icon: const Icon(Icons.filter_list, size: 16, color: Colors.black87),
-                      label: Text(
-                        'Filtros',
-                        style: textTheme.bodySmall,
-                      ),
                     ),
                   ],
                 ),
@@ -478,4 +525,197 @@ class ExpenseCategory {
   final Color color;
 
   ExpenseCategory(this.name, this.value, this.color);
+}
+
+class _NotificacoesDialog extends StatefulWidget {
+  @override
+  State<_NotificacoesDialog> createState() => _NotificacoesDialogState();
+}
+
+class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixin {
+  @override
+  void initState() {
+    super.initState();
+    NotificationService.marcarTodasComoLidas();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notificacoes = NotificationService.notificacoes;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      elevation: 0,
+      backgroundColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.6,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Notificações',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: notificacoes.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.separated(
+                      itemCount: notificacoes.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final lembrete = notificacoes[index];
+                        return _buildNotificacaoItem(lembrete);
+                      },
+                    ),
+            ),
+            if (notificacoes.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      NotificationService.limparNotificacoes();
+                    });
+                  },
+                  child: Text(
+                    'Limpar todas',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.notifications_off_outlined,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhuma notificação',
+            style: textTheme.titleMedium?.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Você não possui notificações no momento',
+            style: textTheme.bodySmall?.copyWith(
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificacaoItem(dynamic lembrete) {
+    final dataNotificacao = DateTime(
+      lembrete.data.year,
+      lembrete.data.month,
+      lembrete.data.day,
+      12,
+      0,
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              Icons.notifications,
+              color: colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Lembrete - AutoCare+',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  lembrete.titulo,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _formatarDataHora(dataNotificacao),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatarDataHora(DateTime dateTime) {
+    final agora = DateTime.now();
+    final diferenca = agora.difference(dateTime);
+
+    if (diferenca.inMinutes < 1) {
+      return 'Agora mesmo';
+    } else if (diferenca.inMinutes < 60) {
+      return 'há ${diferenca.inMinutes} min';
+    } else if (diferenca.inHours < 24) {
+      return 'há ${diferenca.inHours}h';
+    } else if (diferenca.inDays < 7) {
+      return 'há ${diferenca.inDays} dias';
+    } else {
+      return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
+    }
+  }
 }
