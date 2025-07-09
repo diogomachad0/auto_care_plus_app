@@ -122,17 +122,6 @@ class _MenuScreenState extends State<MenuScreen> with ThemeMixin {
                     ),
                   ]),
                   const SizedBox(height: 16),
-                  _buildSectionTitle('DEFINIÇÃO DO TEMA'),
-                  _buildSectionBlock([
-                    _buildMenuListItem(
-                      title: 'Tema',
-                      subtitle: 'Escolha o tema que deseja aplicar no aplicativo',
-                      onTap: () {},
-                      isFirst: true,
-                      isLast: true,
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
                   _buildSectionTitle('CONFIGURAÇÕES DA CONTA'),
                   _buildSectionBlock([
                     _buildMenuListItem(
