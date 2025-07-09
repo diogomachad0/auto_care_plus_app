@@ -1,9 +1,24 @@
+import 'package:auto_care_plus_app/app/modules/lembrete/store/lembrete_store.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+
+  static final List<LembreteStore> _notificacoesDispararadas = [];
+  static final Set<String> _notificacoesLidas = <String>{};
+
+  static List<LembreteStore> get notificacoes => List.unmodifiable(_notificacoesDispararadas);
+
+  static int get notificacaoNaoLidasCount => _notificacoesDispararadas.where((lembrete) => !_notificacoesLidas.contains(lembrete.id)).length;
+
+  static bool get hasNotificacoesNaoLidas {
+    print('Total notificações: ${_notificacoesDispararadas.length}');
+    print('Notificações lidas: ${_notificacoesLidas.length}');
+    print('Não lidas: $notificacaoNaoLidasCount');
+    return notificacaoNaoLidasCount > 0;
+  }
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
@@ -71,5 +86,52 @@ class NotificationService {
 
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
+  }
+
+  static void verificarLembretesVencidos(List<LembreteStore> lembretes) {
+    final agora = DateTime.now();
+    print('Verificando lembretes vencidos. Total lembretes: ${lembretes.length}');
+
+    for (var lembrete in lembretes) {
+      if (lembrete.notificar) {
+        final dataNotificacao = DateTime(
+          lembrete.data.year,
+          lembrete.data.month,
+          lembrete.data.day,
+          12,
+          0,
+        );
+
+        print('Lembrete: ${lembrete.titulo}, Data: $dataNotificacao, Agora: $agora');
+
+        if ((dataNotificacao.isBefore(agora) || dataNotificacao.isAtSameMomentAs(agora))) {
+          final jaExiste = _notificacoesDispararadas.any((n) => n.id == lembrete.id);
+
+          if (!jaExiste) {
+            _notificacoesDispararadas.insert(0, lembrete);
+            print('Notificação adicionada: ${lembrete.titulo}');
+          }
+        }
+      }
+    }
+
+    print('Total notificações disparadas: ${_notificacoesDispararadas.length}');
+  }
+
+  static void marcarTodasComoLidas() {
+    for (var lembrete in _notificacoesDispararadas) {
+      _notificacoesLidas.add(lembrete.id);
+    }
+    print('Todas notificações marcadas como lidas');
+  }
+
+  static bool isLida(String lembreteId) {
+    return _notificacoesLidas.contains(lembreteId);
+  }
+
+  static void limparNotificacoes() {
+    _notificacoesDispararadas.clear();
+    _notificacoesLidas.clear();
+    print('Todas notificações limpas');
   }
 }
