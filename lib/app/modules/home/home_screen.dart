@@ -51,14 +51,12 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                   onRefresh: _loadData,
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom + 30,
+                      bottom: MediaQuery.of(context).padding.bottom + 50,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionTitleWithNotifications('GASTOS'),
                         _buildExpensesSection(),
-                        _buildNotificationsSection(),
                       ],
                     ),
                   ),
@@ -193,13 +191,17 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       children: [
                         Icon(
                           Icons.south_east_rounded,
-                          color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
+                          color: _controller.veiculoSelecionadoId == null
+                              ? colorScheme.primary
+                              : colorScheme.secondary,
                         ),
                         const SizedBox(width: 10),
                         Text(
                           'Todos os veículos',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
+                            color: _controller.veiculoSelecionadoId == null
+                                ? colorScheme.primary
+                                : colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -238,50 +240,108 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
     );
   }
 
-  Widget _buildSectionTitleWithNotifications(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: Colors.grey[500]),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () {
-              _showNotificacoesDialog().then((_) {
-                setState(() {});
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Stack(
-                children: [
-                  Icon(
-                    Icons.notifications_outlined,
-                    size: 24,
-                    color: Colors.grey[600],
-                  ),
-                  if (NotificationService.notificacoes.isNotEmpty && NotificationService.notificacoes.any((lembrete) => !NotificationService.isLida(lembrete.id)))
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
+  Widget _buildExpensesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 32, right: 16, top: 8, bottom: 0),
+          child: Row(
+            children: [
+              Text(
+                'GASTOS',
+                style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[500]
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () {
+                  _showNotificacoesDialog().then((_) {
+                    setState(() {});
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  child: Stack(
+                    children: [
+                      Icon(
+                        Icons.notifications_on_rounded,
+                        size: 24,
+                        color: colorScheme.secondary,
+                      ),
+                      if (NotificationService.notificacoes.isNotEmpty &&
+                          NotificationService.notificacoes.any((lembrete) =>
+                          !NotificationService.isLida(lembrete.id)))
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
                         ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Card dos gastos
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Observer(
+              builder: (_) {
+                final gastos = _controller.gastosCategorizados;
+                final totalGastos = _controller.totalGastos;
+                final expenses = gastos.entries.map((entry) => ExpenseCategory(entry.key, entry.value, _getColorForCategory(entry.key))).toList();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'R\$ ${totalGastos.toStringAsFixed(2).replaceAll('.', ',')}',
+                          style: textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Relatórios',
+                      style: textTheme.titleMedium,
+                    ),
+                    Text(
+                      'Relatório de gastos registrados',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300,
                       ),
                     ),
-                ],
-              ),
+                    const SizedBox(height: 8),
+                    ...expenses.map((expense) => _buildExpenseItem(expense)),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 200,
+                      child: Center(child: _buildExpenseChart(expenses, totalGastos)),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -291,56 +351,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       builder: (BuildContext context) {
         return _NotificacoesDialog();
       },
-    );
-  }
-
-  Widget _buildExpensesSection() {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16, bottom: 22, left: 16, right: 16),
-        child: Observer(
-          builder: (_) {
-            final gastos = _controller.gastosCategorizados;
-            final totalGastos = _controller.totalGastos;
-            final expenses = gastos.entries.map((entry) => ExpenseCategory(entry.key, entry.value, _getColorForCategory(entry.key))).toList();
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'R\$ ${totalGastos.toStringAsFixed(2).replaceAll('.', ',')}',
-                      style: textTheme.titleMedium,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Relatórios',
-                  style: textTheme.titleMedium,
-                ),
-                Text(
-                  'Relatório de gastos registrados',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ...expenses.map((expense) => _buildExpenseItem(expense)),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 200,
-                  child: Center(child: _buildExpenseChart(expenses, totalGastos)),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
     );
   }
 
@@ -578,13 +588,13 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
               child: notificacoes.isEmpty
                   ? _buildEmptyState()
                   : ListView.separated(
-                      itemCount: notificacoes.length,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final lembrete = notificacoes[index];
-                        return _buildNotificacaoItem(lembrete);
-                      },
-                    ),
+                itemCount: notificacoes.length,
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final lembrete = notificacoes[index];
+                  return _buildNotificacaoItem(lembrete);
+                },
+              ),
             ),
             if (notificacoes.isNotEmpty) ...[
               const SizedBox(height: 16),
