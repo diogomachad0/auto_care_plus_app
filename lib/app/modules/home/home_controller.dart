@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/atividade/services/atividade_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/store/atividade_store.dart';
+import 'package:auto_care_plus_app/app/modules/home/home_screen.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/store/veiculo_store.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +97,6 @@ abstract class _HomeControllerBase with Store {
     final gastosPorMes = <String, double>{};
     final now = DateTime.now();
 
-    // ALTERADO: Apenas 3 meses (atual e 2 anteriores)
     for (int i = 2; i >= 0; i--) {
       final mes = DateTime(now.year, now.month - i, 1);
       final chave = _formatarMesAno(mes);
@@ -129,9 +129,9 @@ abstract class _HomeControllerBase with Store {
   List<MonthlyExpense> get gastosMensaisLista {
     final gastos = gastosMensais;
     final cores = [
-      const Color(0xFF42A5F5), // Azul claro
-      const Color(0xFF1E88E5), // Azul médio
-      const Color(0xFF1565C0), // Azul escuro
+      const Color(0xFF42A5F5),
+      const Color(0xFF1E88E5),
+      const Color(0xFF1565C0),
     ];
 
     return gastos.entries.map((entry) {
@@ -189,15 +189,7 @@ abstract class _HomeControllerBase with Store {
   }
 
   double _parseValor(String? valor) {
-    if (valor == null || valor.isEmpty) return 0.0;
-
-    try {
-      String valorLimpo = valor.replaceAll(RegExp(r'[^\d,.]'), '');
-      valorLimpo = valorLimpo.replaceAll(',', '.');
-      return double.parse(valorLimpo);
-    } catch (e) {
-      return 0.0;
-    }
+    return CurrencyParser.parseToDouble(valor);
   }
 
   String _mapearCategoria(String tipoAtividade) {
@@ -229,12 +221,10 @@ abstract class _HomeControllerBase with Store {
     if (dataString.isEmpty) return null;
 
     try {
-      // Formato ISO 8601 (2024-01-15T10:30:00.000Z)
       if (dataString.contains('T')) {
         return DateTime.parse(dataString);
       }
 
-      // Formato brasileiro (15/01/2024)
       if (dataString.contains('/')) {
         final partes = dataString.split('/');
         if (partes.length == 3) {
@@ -245,7 +235,6 @@ abstract class _HomeControllerBase with Store {
         }
       }
 
-      // Formato americano (2024-01-15)
       if (dataString.contains('-') && dataString.length == 10) {
         final partes = dataString.split('-');
         if (partes.length == 3) {

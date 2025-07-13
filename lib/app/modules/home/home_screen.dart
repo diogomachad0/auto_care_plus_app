@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:auto_care_plus_app/app/modules/home/home_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/services/notification_service/notification_service.dart';
@@ -7,6 +8,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+
 import '../lembrete/lembrete_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -272,8 +274,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                         size: 24,
                         color: colorScheme.secondary,
                       ),
-                      if (NotificationService.notificacoes.isNotEmpty &&
-                          NotificationService.notificacoes.any((lembrete) => !NotificationService.isLida(lembrete.id)))
+                      if (NotificationService.notificacoes.isNotEmpty && NotificationService.notificacoes.any((lembrete) => !NotificationService.isLida(lembrete.id)))
                         Positioned(
                           right: 0,
                           top: 0,
@@ -293,7 +294,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
             ),
           ),
         ),
-        // Título "GASTOS"
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Text(
@@ -304,7 +304,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
             ),
           ),
         ),
-        // Card dos gastos
         Card(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: Padding(
@@ -341,13 +340,8 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       ),
                     ),
                     const SizedBox(height: 8),
-
-                    // Lista de categorias (sempre visível)
                     ...expenses.map((expense) => _buildExpenseItem(expense)),
-
                     const SizedBox(height: 16),
-
-                    // Área do gráfico deslizável - TAMANHO ORIGINAL
                     SizedBox(
                       height: 200,
                       child: PageView(
@@ -358,17 +352,12 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                           });
                         },
                         children: [
-                          // Gráfico de pizza (categorias) - TAMANHO ORIGINAL
                           Center(child: _buildExpenseChart(expenses, totalGastos)),
-                          // Gráfico de barras (mensal) - 3 MESES
                           Center(child: _buildMonthlyChart(monthlyExpenses)),
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
-                    // Indicadores de página
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -393,9 +382,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       height: 8,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: _currentChartIndex == index
-            ? colorScheme.primary
-            : Colors.grey[300],
+        color: _currentChartIndex == index ? colorScheme.primary : Colors.grey[300],
       ),
     );
   }
@@ -417,9 +404,8 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
     return Column(
       children: [
         Text(
-          'Últimos 3 meses', // ALTERADO: título atualizado
-          style: textTheme.titleMedium?.copyWith(
-          ),
+          'Últimos 3 meses',
+          style: textTheme.titleMedium?.copyWith(),
         ),
         const SizedBox(height: 16),
         Expanded(
@@ -479,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                     BarChartRodData(
                       toY: entry.value.value,
                       color: entry.value.color,
-                      width: 40, // ALTERADO: largura das barras aumentada para 3 meses
+                      width: 40,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(4),
                         topRight: Radius.circular(4),
@@ -573,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
         PieChartSectionData(
           color: Colors.grey[300],
           value: 1,
-          radius: 50, // MANTIDO: raio original
+          radius: 50,
           showTitle: false,
         )
       ];
@@ -583,7 +569,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       return PieChartSectionData(
         color: expense.color,
         value: expense.value,
-        radius: 50, // MANTIDO: raio original
+        radius: 50,
         showTitle: false,
       );
     }).toList();
@@ -737,13 +723,13 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
                 child: notificacoes.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
-                  itemCount: notificacoes.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final lembrete = notificacoes[index];
-                    return _buildNotificacaoItem(lembrete);
-                  },
-                ),
+                        itemCount: notificacoes.length,
+                        separatorBuilder: (context, index) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final lembrete = notificacoes[index];
+                          return _buildNotificacaoItem(lembrete);
+                        },
+                      ),
               ),
               if (notificacoes.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -875,5 +861,37 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
     } else {
       return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
     }
+  }
+}
+
+class CurrencyParser {
+  static double parseToDouble(String? value) {
+    if (value == null || value.isEmpty) return 0.0;
+
+    try {
+      String cleanValue = value.replaceAll(RegExp(r'[^\d,.]'), '');
+
+      if (cleanValue.isEmpty) return 0.0;
+
+      if (cleanValue.contains(',') && cleanValue.contains('.')) {
+        cleanValue = cleanValue.replaceAll('.', '').replaceAll(',', '.');
+      } else if (cleanValue.contains(',') && !cleanValue.contains('.')) {
+        cleanValue = cleanValue.replaceAll(',', '.');
+      } else if (cleanValue.contains('.') && !cleanValue.contains(',')) {
+        List<String> parts = cleanValue.split('.');
+        if (parts.length > 2 || (parts.length == 2 && parts[1].length != 2)) {
+          cleanValue = cleanValue.replaceAll('.', '');
+        }
+      }
+
+      return double.parse(cleanValue);
+    } catch (e) {
+      print('Erro ao fazer parse do valor: $value - $e');
+      return 0.0;
+    }
+  }
+
+  static String formatToCurrency(double value) {
+    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
   }
 }
