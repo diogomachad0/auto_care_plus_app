@@ -1,6 +1,7 @@
 import 'package:auto_care_plus_app/app/modules/atividade/atividade_controller.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/store/atividade_store.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -130,7 +131,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                 ),
                 buttonStyleData: ButtonStyleData(
                   height: 46,
-                  padding: const EdgeInsets.only(left: 0, right: 12), // <<< esquerda 0, direita 12
+                  padding: const EdgeInsets.only(left: 0, right: 12),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
@@ -263,17 +264,37 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           return RefreshIndicator(
             onRefresh: _loadData,
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: MediaQuery.of(context).padding.bottom + 30,
+              ),
               itemCount: timelineItems.length,
               itemBuilder: (context, index) {
                 final item = timelineItems[index];
                 final isFirst = index == 0;
                 final isLast = index == timelineItems.length - 1;
 
+                int? activityIndex;
+                if (!item.isSpecial && !item.isWelcome) {
+                  final originalAtividades = _controller.atividadesFiltradas;
+                  for (int i = 0; i < originalAtividades.length; i++) {
+                    final atividade = originalAtividades[i];
+                    if (atividade.tipoAtividade == item.title &&
+                        _parseDate(atividade.data).day == item.date.day &&
+                        _parseDate(atividade.data).month == item.date.month &&
+                        _parseDate(atividade.data).year == item.date.year) {
+                      activityIndex = i;
+                      break;
+                    }
+                  }
+                }
+
                 return _buildTimelineTile(
                   item: item,
                   isFirst: isFirst,
                   isLast: isLast,
+                  activityIndex: activityIndex,
                 );
               },
             ),
@@ -380,28 +401,18 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
 
     items = items.reversed.toList();
 
-    if (items.isNotEmpty && _controller.veiculoSelecionadoId == null) {
-      items.add(TimelineItem(
-        title: 'Você iniciou o controle de despesas do seu veículo com Auto Care!',
-        date: DateTime.now().subtract(Duration(days: items.length + 1)),
-        icon: Icons.star,
-        iconColor: Colors.white,
-        iconBackgroundColor: const Color(0xFF4CAF50),
-        isSpecial: true,
-        emoji: '🎉',
-      ));
-    }
+    items.add(TimelineItem(
+      title: 'Você iniciou o controle de despesas do seu veículo com Auto Care!',
+      date: DateTime.now().subtract(Duration(days: items.length + 1)),
+      icon: Icons.star,
+      iconColor: Colors.white,
+      iconBackgroundColor: const Color(0xFF4CAF50),
+      isSpecial: true,
+      emoji: '🎉',
+    ));
 
     if (_controller.veiculoSelecionadoId == null) {
-      items.add(TimelineItem(
-        title: 'Bem vindo ao',
-        subtitle: 'AUTO CARE+',
-        date: DateTime.now().subtract(Duration(days: items.length + 2)),
-        icon: Icons.chat_bubble,
-        iconColor: Colors.white,
-        iconBackgroundColor: const Color(0xFF005E91),
-        isWelcome: true,
-      ));
+
     }
 
     return items;
@@ -442,6 +453,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
     return DateTime.now();
   }
 
+// Correção do método _buildDetailsForAtividade na TimelineScreen
   List<TimelineDetail> _buildDetailsForAtividade(AtividadeStore atividade) {
     final details = <TimelineDetail>[];
 
@@ -454,9 +466,44 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
               text: '${atividade.km} Km',
             ));
           }
+          if (atividade.litros.isNotEmpty) {
+            details.add(TimelineDetail(
+              icon: Icons.local_gas_station,
+              text: '${atividade.litros} L',
+            ));
+          }
+          if (atividade.precoLitro.isNotEmpty) {
+            details.add(TimelineDetail(
+              icon: Icons.attach_money,
+              text: '${atividade.precoLitro}/L',
+            ));
+          }
+          if (atividade.tipoCombustivel.isNotEmpty) {
+            details.add(TimelineDetail(
+              icon: Icons.local_gas_station,
+              text: atividade.tipoCombustivel,
+            ));
+          }
           break;
 
         case 'Troca de óleo':
+          if (atividade.km.isNotEmpty) {
+            details.add(TimelineDetail(
+              icon: Icons.speed,
+              text: '${atividade.km} Km',
+            ));
+          }
+          break;
+
+        case 'Lavagem':
+        // Não há campos específicos além do estabelecimento e valor
+          break;
+
+        case 'Seguro':
+        // Não há campos específicos além do valor
+          break;
+
+        case 'Serviço mecânico':
           if (atividade.km.isNotEmpty) {
             details.add(TimelineDetail(
               icon: Icons.speed,
@@ -473,12 +520,33 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
             ));
           }
           break;
+
+        case 'Compras':
+        // Não há campos específicos além do valor
+          break;
+
+        case 'Impostos':
+        // Não há campos específicos além do valor
+          break;
+
+        case 'Outros':
+        // Não há campos específicos além do estabelecimento e valor
+          break;
       }
 
+      // Adicionar estabelecimento para todos os tipos que têm
       if (atividade.estabelecimento.isNotEmpty) {
         details.add(TimelineDetail(
           icon: Icons.location_on,
           text: atividade.estabelecimento,
+        ));
+      }
+
+      // Adicionar observações se existirem
+      if (atividade.observacoes.isNotEmpty) {
+        details.add(TimelineDetail(
+          icon: Icons.note,
+          text: atividade.observacoes,
         ));
       }
     } catch (e) {
@@ -487,7 +555,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
 
     return details;
   }
-
   double? _getPriceFromAtividade(AtividadeStore atividade) {
     try {
       String priceString = '';
@@ -562,6 +629,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
     required TimelineItem item,
     required bool isFirst,
     required bool isLast,
+    int? activityIndex,
   }) {
     return TimelineTile(
       alignment: TimelineAlign.manual,
@@ -573,36 +641,36 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         height: item.isWelcome ? 120 : 44,
         indicator: item.isWelcome
             ? Align(
-                alignment: Alignment.centerLeft,
-                child: Image.asset(
-                  'assets/img/logo_black_app.png',
-                ),
-              )
+          alignment: Alignment.centerLeft,
+          child: Image.asset(
+            'assets/img/logo_black_app.png',
+          ),
+        )
             : Container(
-                decoration: BoxDecoration(
-                  color: item.iconBackgroundColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: item.emoji != null
-                      ? Text(
-                          item.emoji!,
-                          style: const TextStyle(fontSize: 24),
-                        )
-                      : Icon(
-                          item.icon,
-                          color: item.iconColor,
-                          size: 22,
-                        ),
-                ),
+          decoration: BoxDecoration(
+            color: item.iconBackgroundColor,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
+            ],
+          ),
+          child: Center(
+            child: item.emoji != null
+                ? Text(
+              item.emoji!,
+              style: const TextStyle(fontSize: 24),
+            )
+                : Icon(
+              item.icon,
+              color: item.iconColor,
+              size: 22,
+            ),
+          ),
+        ),
         drawGap: true,
       ),
       beforeLineStyle: const LineStyle(
@@ -618,36 +686,34 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: item.isWelcome
                             ? RichText(
-                                text: TextSpan(
-                                  text: '${item.title} ',
-                                  style: textTheme.bodyMedium?.copyWith(),
-                                  children: [
-                                    TextSpan(text: item.subtitle, style: textTheme.bodyMedium?.copyWith()),
-                                  ],
-                                ),
-                              )
+                          text: TextSpan(
+                            text: '${item.title} ',
+                            style: textTheme.bodyMedium?.copyWith(),
+                            children: [
+                              TextSpan(text: item.subtitle, style: textTheme.bodyMedium?.copyWith()),
+                            ],
+                          ),
+                        )
                             : item.isSpecial
-                                ? Text(
-                                    item.title,
-                                    style: textTheme.bodyMedium?.copyWith(),
-                                  )
-                                : Text(
-                                    item.title,
-                                    style: textTheme.bodyMedium,
-                                  ),
+                            ? Text(
+                          item.title,
+                          style: textTheme.bodyMedium?.copyWith(),
+                        )
+                            : Text(
+                          item.title,
+                          style: textTheme.bodyMedium,
+                        ),
                       ),
-                      if (!item.isSpecial && !item.isWelcome)
+                      if (!item.isSpecial && !item.isWelcome) ...[
                         Text(
                           _formatDateShort(item.date),
                           style: textTheme.bodyMedium?.copyWith(
@@ -655,60 +721,119 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                             color: const Color(0xFF9E9E9E),
                           ),
                         ),
-                    ],
-                  ),
-                  if (!item.isSpecial && !item.isWelcome) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDateFull(item.date),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF9E9E9E),
-                      ),
-                    ),
-                  ],
-                  if (!item.isSpecial && !item.isWelcome && item.details.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    ...item.details.map((detail) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                detail.icon,
-                                size: 14,
-                                color: const Color(0xFF9E9E9E),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  detail.text,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: const Color(0xFF9E9E9E),
-                                  ),
+                        if (activityIndex != null)
+                          PopupMenuButton<String>(
+                            offset: const Offset(-2, 8),
+                            color: colorScheme.onPrimary,
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.grey,
+                            ),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(16)),
+                            ),
+                            onSelected: (value) async {
+                              if (value == 'delete') {
+                                try {
+                                  final atividades = _controller.atividadesFiltradas;
+                                  if (activityIndex < atividades.length) {
+                                    await _controller.delete(atividades[activityIndex]);
+                                  }
+                                } catch (e, s) {
+                                  await DialogError.show(context, 'Erro ao deletar atividade \nErro: ${e.toString()}', s);
+                                }
+                              }
+                            },
+                            itemBuilder: (BuildContext context) => [
+                              PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_forever_rounded, color: colorScheme.error),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Excluir',
+                                      style: textTheme.bodyMedium,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        )),
+                      ],
+                    ],
+                  ),
+                  if (!item.isSpecial && !item.isWelcome) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 12,
+                          color: const Color(0xFF9E9E9E),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatDateFull(item.date),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF9E9E9E),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (!item.isSpecial && !item.isWelcome && item.details.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    ...item.details.map((detail) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            detail.icon,
+                            size: 14,
+                            color: const Color(0xFF9E9E9E),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              detail.text,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: const Color(0xFF9E9E9E),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
                   ],
                   if (!item.isSpecial && !item.isWelcome && item.price != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
                         'R\$ ${item.price!.toStringAsFixed(2).replaceAll('.', ',')}',
                         style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
                   ],
                   if (item.isSpecial) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      _formatDateShort(item.date),
-                      style: textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF9E9E9E),
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 12,
+                          color: const Color(0xFF9E9E9E),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatDateShort(item.date),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF9E9E9E),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
