@@ -39,6 +39,21 @@ mixin _$HomeController on _HomeControllerBase, Store {
       (_$totalGastosComputed ??= Computed<double>(() => super.totalGastos,
               name: '_HomeControllerBase.totalGastos'))
           .value;
+  Computed<Map<String, double>>? _$gastosMensaisComputed;
+
+  @override
+  Map<String, double> get gastosMensais => (_$gastosMensaisComputed ??=
+          Computed<Map<String, double>>(() => super.gastosMensais,
+              name: '_HomeControllerBase.gastosMensais'))
+      .value;
+  Computed<List<MonthlyExpense>>? _$gastosMensaisListaComputed;
+
+  @override
+  List<MonthlyExpense> get gastosMensaisLista =>
+      (_$gastosMensaisListaComputed ??= Computed<List<MonthlyExpense>>(
+              () => super.gastosMensaisLista,
+              name: '_HomeControllerBase.gastosMensaisLista'))
+          .value;
 
   late final _$veiculosAtom =
       Atom(name: '_HomeControllerBase.veiculos', context: context);
@@ -129,7 +144,9 @@ isLoading: ${isLoading},
 nomeVeiculoSelecionado: ${nomeVeiculoSelecionado},
 atividadesFiltradas: ${atividadesFiltradas},
 gastosCategorizados: ${gastosCategorizados},
-totalGastos: ${totalGastos}
+totalGastos: ${totalGastos},
+gastosMensais: ${gastosMensais},
+gastosMensaisLista: ${gastosMensaisLista}
     ''';
   }
 }
