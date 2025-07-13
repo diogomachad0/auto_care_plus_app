@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:auto_care_plus_app/app/modules/home/home_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/services/notification_service/notification_service.dart';
@@ -6,7 +7,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-
 import '../lembrete/lembrete_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,13 +19,22 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
   late final HomeController _controller;
   late final LembreteController _lembreteController;
+  late PageController _chartPageController;
+  int _currentChartIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _controller = Modular.get<HomeController>();
     _lembreteController = Modular.get<LembreteController>();
+    _chartPageController = PageController();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _chartPageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -46,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                 if (_controller.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 return RefreshIndicator(
                   onRefresh: _loadData,
                   child: SingleChildScrollView(
@@ -120,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
           child: Observer(
             builder: (_) {
               final veiculos = _controller.veiculos;
-
               return DropdownButtonFormField2<String?>(
                 isExpanded: true,
                 value: _controller.veiculoSelecionadoId,
@@ -191,17 +198,13 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       children: [
                         Icon(
                           Icons.south_east_rounded,
-                          color: _controller.veiculoSelecionadoId == null
-                              ? colorScheme.primary
-                              : colorScheme.secondary,
+                          color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                         ),
                         const SizedBox(width: 10),
                         Text(
                           'Todos os veículos',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: _controller.veiculoSelecionadoId == null
-                                ? colorScheme.primary
-                                : colorScheme.secondary,
+                            color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -245,25 +248,23 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 32, right: 16, top: 8, bottom: 0),
-          child: Row(
-            children: [
-              Text(
-                'GASTOS',
-                style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[500]
+          padding: const EdgeInsets.only(right: 8, top: 8),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () {
+                _showNotificacoesDialog().then((_) {
+                  setState(() {});
+                });
+              },
+              child: Card(
+                color: Colors.grey[200],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  _showNotificacoesDialog().then((_) {
-                    setState(() {});
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
                   child: Stack(
                     children: [
                       Icon(
@@ -272,8 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                         color: colorScheme.secondary,
                       ),
                       if (NotificationService.notificacoes.isNotEmpty &&
-                          NotificationService.notificacoes.any((lembrete) =>
-                          !NotificationService.isLida(lembrete.id)))
+                          NotificationService.notificacoes.any((lembrete) => !NotificationService.isLida(lembrete.id)))
                         Positioned(
                           right: 0,
                           top: 0,
@@ -290,7 +290,18 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                   ),
                 ),
               ),
-            ],
+            ),
+          ),
+        ),
+        // Título "GASTOS"
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            'GASTOS',
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[500],
+            ),
           ),
         ),
         // Card dos gastos
@@ -303,6 +314,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                 final gastos = _controller.gastosCategorizados;
                 final totalGastos = _controller.totalGastos;
                 final expenses = gastos.entries.map((entry) => ExpenseCategory(entry.key, entry.value, _getColorForCategory(entry.key))).toList();
+                final monthlyExpenses = _controller.gastosMensaisLista;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,15 +341,154 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       ),
                     ),
                     const SizedBox(height: 8),
+
+                    // Lista de categorias (sempre visível)
                     ...expenses.map((expense) => _buildExpenseItem(expense)),
+
                     const SizedBox(height: 16),
+
+                    // Área do gráfico deslizável - TAMANHO ORIGINAL
                     SizedBox(
                       height: 200,
-                      child: Center(child: _buildExpenseChart(expenses, totalGastos)),
+                      child: PageView(
+                        controller: _chartPageController,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentChartIndex = index;
+                          });
+                        },
+                        children: [
+                          // Gráfico de pizza (categorias) - TAMANHO ORIGINAL
+                          Center(child: _buildExpenseChart(expenses, totalGastos)),
+                          // Gráfico de barras (mensal) - 3 MESES
+                          Center(child: _buildMonthlyChart(monthlyExpenses)),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Indicadores de página
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildPageIndicator(0),
+                        const SizedBox(width: 8),
+                        _buildPageIndicator(1),
+                      ],
                     ),
                   ],
                 );
               },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPageIndicator(int index) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _currentChartIndex == index
+            ? colorScheme.primary
+            : Colors.grey[300],
+      ),
+    );
+  }
+
+  Widget _buildMonthlyChart(List<MonthlyExpense> monthlyExpenses) {
+    if (monthlyExpenses.isEmpty || monthlyExpenses.every((e) => e.value == 0)) {
+      return Center(
+        child: Text(
+          'Nenhum gasto registrado',
+          style: textTheme.bodyMedium?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+      );
+    }
+
+    final maxValue = monthlyExpenses.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+
+    return Column(
+      children: [
+        Text(
+          'Últimos 3 meses', // ALTERADO: título atualizado
+          style: textTheme.titleMedium?.copyWith(
+          ),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              maxY: maxValue * 1.2,
+              barTouchData: BarTouchData(
+                touchTooltipData: BarTouchTooltipData(
+                  tooltipBgColor: Colors.blueGrey,
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    return BarTooltipItem(
+                      'R\$ ${rod.toY.toStringAsFixed(2).replaceAll('.', ',')}',
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              titlesData: FlTitlesData(
+                show: true,
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (double value, TitleMeta meta) {
+                      if (value.toInt() < monthlyExpenses.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            monthlyExpenses[value.toInt()].month,
+                            style: textTheme.bodySmall,
+                          ),
+                        );
+                      }
+                      return const Text('');
+                    },
+                    reservedSize: 30,
+                  ),
+                ),
+                leftTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              barGroups: monthlyExpenses.asMap().entries.map((entry) {
+                return BarChartGroupData(
+                  x: entry.key,
+                  barRods: [
+                    BarChartRodData(
+                      toY: entry.value.value,
+                      color: entry.value.color,
+                      width: 40, // ALTERADO: largura das barras aumentada para 3 meses
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(4),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+              gridData: const FlGridData(show: false),
             ),
           ),
         ),
@@ -394,7 +545,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
           child: PieChart(
             PieChartData(
               sectionsSpace: 0.5,
-              centerSpaceRadius: 60,
+              centerSpaceRadius: 50,
               sections: _getChartSections(expenses),
               borderData: FlBorderData(show: false),
             ),
@@ -417,13 +568,12 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
 
   List<PieChartSectionData> _getChartSections(List<ExpenseCategory> expenses) {
     final nonZeroExpenses = expenses.where((e) => e.value > 0).toList();
-
     if (nonZeroExpenses.isEmpty) {
       return [
         PieChartSectionData(
           color: Colors.grey[300],
           value: 1,
-          radius: 50,
+          radius: 50, // MANTIDO: raio original
           showTitle: false,
         )
       ];
@@ -433,7 +583,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       return PieChartSectionData(
         color: expense.color,
         value: expense.value,
-        radius: 50,
+        radius: 50, // MANTIDO: raio original
         showTitle: false,
       );
     }).toList();
@@ -552,70 +702,70 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
   @override
   Widget build(BuildContext context) {
     final notificacoes = NotificationService.notificacoes;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 0,
-      backgroundColor: Colors.white,
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.6,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Notificações',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+      child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.6,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Notificações',
+                    style: textTheme.titleMedium?.copyWith(),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: notificacoes.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.separated(
-                itemCount: notificacoes.length,
-                separatorBuilder: (context, index) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final lembrete = notificacoes[index];
-                  return _buildNotificacaoItem(lembrete);
-                },
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
-            ),
-            if (notificacoes.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      NotificationService.limparNotificacoes();
-                    });
+              const SizedBox(height: 8),
+              Expanded(
+                child: notificacoes.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.separated(
+                  itemCount: notificacoes.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final lembrete = notificacoes[index];
+                    return _buildNotificacaoItem(lembrete);
                   },
-                  child: Text(
-                    'Limpar todas',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: Colors.red,
+                ),
+              ),
+              if (notificacoes.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        NotificationService.limparNotificacoes();
+                      });
+                    },
+                    child: Text(
+                      'Limpar todas',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: Colors.red,
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -659,7 +809,6 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
       12,
       0,
     );
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       child: Row(
@@ -715,7 +864,6 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
   String _formatarDataHora(DateTime dateTime) {
     final agora = DateTime.now();
     final diferenca = agora.difference(dateTime);
-
     if (diferenca.inMinutes < 1) {
       return 'Agora mesmo';
     } else if (diferenca.inMinutes < 60) {
