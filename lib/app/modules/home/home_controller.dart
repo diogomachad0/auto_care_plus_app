@@ -2,11 +2,20 @@ import 'package:auto_care_plus_app/app/modules/atividade/services/atividade_serv
 import 'package:auto_care_plus_app/app/modules/atividade/store/atividade_store.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/store/veiculo_store.dart';
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 part 'home_controller.g.dart';
 
 class HomeController = _HomeControllerBase with _$HomeController;
+
+class MonthlyExpense {
+  final String month;
+  final double value;
+  final Color color;
+
+  MonthlyExpense(this.month, this.value, this.color);
+}
 
 abstract class _HomeControllerBase with Store {
   final IVeiculoService _veiculoService;
@@ -51,7 +60,6 @@ abstract class _HomeControllerBase with Store {
 
   @computed
   Map<String, double> get gastosCategorizados {
-    // ATUALIZADO: Adicionadas as novas categorias
     final gastos = <String, double>{
       'Reabastecimento': 0.0,
       'Troca de Óleo': 0.0,
@@ -81,6 +89,59 @@ abstract class _HomeControllerBase with Store {
   @computed
   double get totalGastos {
     return gastosCategorizados.values.fold(0.0, (sum, valor) => sum + valor);
+  }
+
+  @computed
+  Map<String, double> get gastosMensais {
+    final gastosPorMes = <String, double>{};
+    final now = DateTime.now();
+
+    // ALTERADO: Apenas 3 meses (atual e 2 anteriores)
+    for (int i = 2; i >= 0; i--) {
+      final mes = DateTime(now.year, now.month - i, 1);
+      final chave = _formatarMesAno(mes);
+      gastosPorMes[chave] = 0.0;
+    }
+
+    for (var atividade in atividadesFiltradas) {
+      if (atividade.data.isNotEmpty) {
+        try {
+          DateTime? dataAtividade = _parseData(atividade.data);
+
+          if (dataAtividade != null) {
+            final chave = _formatarMesAno(dataAtividade);
+            final valor = _parseValor(atividade.totalPago);
+
+            if (gastosPorMes.containsKey(chave)) {
+              gastosPorMes[chave] = gastosPorMes[chave]! + valor;
+            }
+          }
+        } catch (e) {
+          print('Erro ao parsear data: ${atividade.data} - $e');
+        }
+      }
+    }
+
+    return gastosPorMes;
+  }
+
+  @computed
+  List<MonthlyExpense> get gastosMensaisLista {
+    final gastos = gastosMensais;
+    final cores = [
+      const Color(0xFF42A5F5), // Azul claro
+      const Color(0xFF1E88E5), // Azul médio
+      const Color(0xFF1565C0), // Azul escuro
+    ];
+
+    return gastos.entries.map((entry) {
+      final index = gastos.keys.toList().indexOf(entry.key);
+      return MonthlyExpense(
+        _formatarMesParaExibicao(entry.key),
+        entry.value,
+        cores[index % cores.length],
+      );
+    }).toList();
   }
 
   Future<void> loadVeiculos() async {
@@ -139,7 +200,6 @@ abstract class _HomeControllerBase with Store {
     }
   }
 
-  // ATUALIZADO: Corrigido o mapeamento das categorias
   String _mapearCategoria(String tipoAtividade) {
     switch (tipoAtividade.toLowerCase()) {
       case 'abastecimento':
@@ -163,5 +223,60 @@ abstract class _HomeControllerBase with Store {
       default:
         return 'Outros';
     }
+  }
+
+  DateTime? _parseData(String dataString) {
+    if (dataString.isEmpty) return null;
+
+    try {
+      // Formato ISO 8601 (2024-01-15T10:30:00.000Z)
+      if (dataString.contains('T')) {
+        return DateTime.parse(dataString);
+      }
+
+      // Formato brasileiro (15/01/2024)
+      if (dataString.contains('/')) {
+        final partes = dataString.split('/');
+        if (partes.length == 3) {
+          final dia = int.parse(partes[0]);
+          final mes = int.parse(partes[1]);
+          final ano = int.parse(partes[2]);
+          return DateTime(ano, mes, dia);
+        }
+      }
+
+      // Formato americano (2024-01-15)
+      if (dataString.contains('-') && dataString.length == 10) {
+        final partes = dataString.split('-');
+        if (partes.length == 3) {
+          final ano = int.parse(partes[0]);
+          final mes = int.parse(partes[1]);
+          final dia = int.parse(partes[2]);
+          return DateTime(ano, mes, dia);
+        }
+      }
+
+      return DateTime.parse(dataString);
+    } catch (e) {
+      print('Erro ao parsear data: $dataString - $e');
+      return null;
+    }
+  }
+
+  String _formatarMesAno(DateTime data) {
+    return '${data.year}-${data.month.toString().padLeft(2, '0')}';
+  }
+
+  String _formatarMesParaExibicao(String chave) {
+    final partes = chave.split('-');
+    final ano = int.parse(partes[0]);
+    final mes = int.parse(partes[1]);
+
+    final nomesMeses = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    return nomesMeses[mes - 1];
   }
 }
