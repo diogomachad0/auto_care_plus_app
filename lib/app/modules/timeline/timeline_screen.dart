@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/atividade/atividade_controller.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/store/atividade_store.dart';
+import 'package:auto_care_plus_app/app/modules/home/home_screen.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -165,9 +166,9 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                     final veiculo = isAll
                         ? null
                         : veiculos.firstWhere(
-                          (v) => v.base.id == id,
-                      orElse: () => VeiculoStoreFactory.novo(),
-                    );
+                            (v) => v.base.id == id,
+                            orElse: () => VeiculoStoreFactory.novo(),
+                          );
 
                     return Row(
                       children: [
@@ -175,9 +176,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            isAll
-                                ? 'Todos os veículos'
-                                : '${veiculo!.modelo} - ${veiculo.placa}',
+                            isAll ? 'Todos os veículos' : '${veiculo!.modelo} - ${veiculo.placa}',
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -192,17 +191,13 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                       children: [
                         Icon(
                           Icons.south_east_rounded,
-                          color: _controller.veiculoSelecionadoId == null
-                              ? colorScheme.primary
-                              : colorScheme.secondary,
+                          color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Todos os veículos',
                           style: textTheme.bodyMedium?.copyWith(
-                            color: _controller.veiculoSelecionadoId == null
-                                ? colorScheme.primary
-                                : colorScheme.secondary,
+                            color: _controller.veiculoSelecionadoId == null ? colorScheme.primary : colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -280,10 +275,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                   final originalAtividades = _controller.atividadesFiltradas;
                   for (int i = 0; i < originalAtividades.length; i++) {
                     final atividade = originalAtividades[i];
-                    if (atividade.tipoAtividade == item.title &&
-                        _parseDate(atividade.data).day == item.date.day &&
-                        _parseDate(atividade.data).month == item.date.month &&
-                        _parseDate(atividade.data).year == item.date.year) {
+                    if (atividade.tipoAtividade == item.title && _parseDate(atividade.data).day == item.date.day && _parseDate(atividade.data).month == item.date.month && _parseDate(atividade.data).year == item.date.year) {
                       activityIndex = i;
                       break;
                     }
@@ -411,9 +403,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
       emoji: '🎉',
     ));
 
-    if (_controller.veiculoSelecionadoId == null) {
-
-    }
+    if (_controller.veiculoSelecionadoId == null) {}
 
     return items;
   }
@@ -453,7 +443,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
     return DateTime.now();
   }
 
-// Correção do método _buildDetailsForAtividade na TimelineScreen
   List<TimelineDetail> _buildDetailsForAtividade(AtividadeStore atividade) {
     final details = <TimelineDetail>[];
 
@@ -496,11 +485,9 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           break;
 
         case 'Lavagem':
-        // Não há campos específicos além do estabelecimento e valor
           break;
 
         case 'Seguro':
-        // Não há campos específicos além do valor
           break;
 
         case 'Serviço mecânico':
@@ -522,19 +509,15 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           break;
 
         case 'Compras':
-        // Não há campos específicos além do valor
           break;
 
         case 'Impostos':
-        // Não há campos específicos além do valor
           break;
 
         case 'Outros':
-        // Não há campos específicos além do estabelecimento e valor
           break;
       }
 
-      // Adicionar estabelecimento para todos os tipos que têm
       if (atividade.estabelecimento.isNotEmpty) {
         details.add(TimelineDetail(
           icon: Icons.location_on,
@@ -542,7 +525,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         ));
       }
 
-      // Adicionar observações se existirem
       if (atividade.observacoes.isNotEmpty) {
         details.add(TimelineDetail(
           icon: Icons.note,
@@ -555,23 +537,16 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
 
     return details;
   }
+
   double? _getPriceFromAtividade(AtividadeStore atividade) {
     try {
-      String priceString = '';
-
       if (atividade.totalPago.isNotEmpty) {
-        priceString = atividade.totalPago;
-      }
-
-      if (priceString.isNotEmpty) {
-        priceString = priceString.replaceAll(RegExp(r'[^\d,.]'), '');
-        priceString = priceString.replaceAll(',', '.');
-        return double.parse(priceString);
+        final valor = CurrencyParser.parseToDouble(atividade.totalPago);
+        return valor > 0 ? valor : null;
       }
     } catch (e) {
-      print('Erro ao fazer parse do preço: $e');
+      print('Erro ao fazer parse do preço: ${atividade.totalPago} - $e');
     }
-
     return null;
   }
 
@@ -641,36 +616,36 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         height: item.isWelcome ? 120 : 44,
         indicator: item.isWelcome
             ? Align(
-          alignment: Alignment.centerLeft,
-          child: Image.asset(
-            'assets/img/logo_black_app.png',
-          ),
-        )
+                alignment: Alignment.centerLeft,
+                child: Image.asset(
+                  'assets/img/logo_black_app.png',
+                ),
+              )
             : Container(
-          decoration: BoxDecoration(
-            color: item.iconBackgroundColor,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                decoration: BoxDecoration(
+                  color: item.iconBackgroundColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: item.emoji != null
+                      ? Text(
+                          item.emoji!,
+                          style: const TextStyle(fontSize: 24),
+                        )
+                      : Icon(
+                          item.icon,
+                          color: item.iconColor,
+                          size: 22,
+                        ),
+                ),
               ),
-            ],
-          ),
-          child: Center(
-            child: item.emoji != null
-                ? Text(
-              item.emoji!,
-              style: const TextStyle(fontSize: 24),
-            )
-                : Icon(
-              item.icon,
-              color: item.iconColor,
-              size: 22,
-            ),
-          ),
-        ),
         drawGap: true,
       ),
       beforeLineStyle: const LineStyle(
@@ -695,23 +670,23 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                       Expanded(
                         child: item.isWelcome
                             ? RichText(
-                          text: TextSpan(
-                            text: '${item.title} ',
-                            style: textTheme.bodyMedium?.copyWith(),
-                            children: [
-                              TextSpan(text: item.subtitle, style: textTheme.bodyMedium?.copyWith()),
-                            ],
-                          ),
-                        )
+                                text: TextSpan(
+                                  text: '${item.title} ',
+                                  style: textTheme.bodyMedium?.copyWith(),
+                                  children: [
+                                    TextSpan(text: item.subtitle, style: textTheme.bodyMedium?.copyWith()),
+                                  ],
+                                ),
+                              )
                             : item.isSpecial
-                            ? Text(
-                          item.title,
-                          style: textTheme.bodyMedium?.copyWith(),
-                        )
-                            : Text(
-                          item.title,
-                          style: textTheme.bodyMedium,
-                        ),
+                                ? Text(
+                                    item.title,
+                                    style: textTheme.bodyMedium?.copyWith(),
+                                  )
+                                : Text(
+                                    item.title,
+                                    style: textTheme.bodyMedium,
+                                  ),
                       ),
                       if (!item.isSpecial && !item.isWelcome) ...[
                         Text(
@@ -784,26 +759,26 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                   if (!item.isSpecial && !item.isWelcome && item.details.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     ...item.details.map((detail) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            detail.icon,
-                            size: 14,
-                            color: const Color(0xFF9E9E9E),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              detail.text,
-                              style: textTheme.bodySmall?.copyWith(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                detail.icon,
+                                size: 14,
                                 color: const Color(0xFF9E9E9E),
                               ),
-                            ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  detail.text,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: const Color(0xFF9E9E9E),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    )),
+                        )),
                   ],
                   if (!item.isSpecial && !item.isWelcome && item.price != null) ...[
                     const SizedBox(height: 8),
