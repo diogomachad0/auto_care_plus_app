@@ -1,5 +1,6 @@
 import 'package:auto_care_plus_app/app/modules/atividade/services/atividade_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/atividade/store/atividade_store.dart';
+import 'package:auto_care_plus_app/app/modules/home/home_screen.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/services/veiculo_service_interface.dart';
 import 'package:auto_care_plus_app/app/modules/veiculo/store/veiculo_store.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -203,14 +204,8 @@ abstract class _AtividadeControllerBase with Store {
   @computed
   double get totalGastoGeral {
     return atividadesFiltradas.fold(0.0, (total, atividade) {
-      try {
-        if (atividade.totalPago.isNotEmpty) {
-          String priceString = atividade.totalPago.replaceAll(RegExp(r'[^\d,.]'), '');
-          priceString = priceString.replaceAll(',', '.');
-          return total + double.parse(priceString);
-        }
-      } catch (e) {
-        print('Erro ao calcular total gasto: $e');
+      if (atividade.totalPago.isNotEmpty) {
+        return total + CurrencyParser.parseToDouble(atividade.totalPago);
       }
       return total;
     });
@@ -219,14 +214,8 @@ abstract class _AtividadeControllerBase with Store {
   @computed
   double get totalGastoAbastecimento {
     return abastecimentos.fold(0.0, (total, atividade) {
-      try {
-        if (atividade.totalPago.isNotEmpty) {
-          String priceString = atividade.totalPago.replaceAll(RegExp(r'[^\d,.]'), '');
-          priceString = priceString.replaceAll(',', '.');
-          return total + double.parse(priceString);
-        }
-      } catch (e) {
-        print('Erro ao calcular total abastecimento: $e');
+      if (atividade.totalPago.isNotEmpty) {
+        return total + CurrencyParser.parseToDouble(atividade.totalPago);
       }
       return total;
     });
@@ -236,14 +225,8 @@ abstract class _AtividadeControllerBase with Store {
   double get totalGastoManutencao {
     final manutencoes = [...trocasOleo, ...servicosMecanicos];
     return manutencoes.fold(0.0, (total, atividade) {
-      try {
-        if (atividade.totalPago.isNotEmpty) {
-          String priceString = atividade.totalPago.replaceAll(RegExp(r'[^\d,.]'), '');
-          priceString = priceString.replaceAll(',', '.');
-          return total + double.parse(priceString);
-        }
-      } catch (e) {
-        print('Erro ao calcular total manutenção: $e');
+      if (atividade.totalPago.isNotEmpty) {
+        return total + CurrencyParser.parseToDouble(atividade.totalPago);
       }
       return total;
     });
