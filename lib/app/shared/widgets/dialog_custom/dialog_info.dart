@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -57,31 +56,36 @@ class _DialogInfoState extends State<DialogInfo> with ThemeMixin, SingleTickerPr
       contentPadding: const EdgeInsets.all(16),
       actionsPadding: const EdgeInsets.all(12),
       shadowColor: Colors.black,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ScaleTransition(
-            scale: _animation,
-            child: Icon(
-              Icons.info_rounded,
-              color: colorScheme.primary,
-              size: 70,
-            ),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 500),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ScaleTransition(
+                scale: _animation,
+                child: Icon(
+                  Icons.info_rounded,
+                  color: colorScheme.primary,
+                  size: 70,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  widget.title,
+                  style: textTheme.titleMedium,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.message,
+                style: textTheme.bodyMedium,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              widget.title,
-              style: textTheme.titleMedium,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            widget.message,
-            style: textTheme.bodyMedium,
-          ),
-        ],
+        ),
       ),
       actions: [
         FilledButton(
