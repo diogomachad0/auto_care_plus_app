@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 import '../veiculo/store/veiculo_store.dart';
+import 'submodules/filtro_widget.dart';
 
 class TimelineScreen extends StatefulWidget {
   const TimelineScreen({super.key});
@@ -23,6 +24,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
   late final AtividadeController _controller;
   bool _isLoading = true;
   String? _error;
+  FiltroData? _filtroAtivo;
 
   @override
   void initState() {
@@ -37,12 +39,10 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         _isLoading = true;
         _error = null;
       });
-
       await Future.wait([
         _controller.loadVeiculos(),
         _controller.load(),
       ]);
-
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -56,6 +56,18 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         });
       }
     }
+  }
+
+  void _showFilter() {
+    showFiltroWidget(
+      context,
+      filtroAtual: _filtroAtivo,
+      onSave: (FiltroData filtro) {
+        setState(() {
+          _filtroAtivo = filtro.hasFilters ? filtro : null;
+        });
+      },
+    );
   }
 
   @override
@@ -91,12 +103,38 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         children: [
           const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const SizedBox(width: 48),
               Text(
                 'Atividade',
                 style: textTheme.titleLarge?.copyWith(
                   color: Colors.white,
+                ),
+              ),
+              IconButton(
+                onPressed: _showFilter,
+                icon: Stack(
+                  children: [
+                    const Icon(
+                      Icons.filter_list,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    if (_filtroAtivo?.hasFilters == true)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.orange,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -121,7 +159,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           child: Observer(
             builder: (_) {
               final veiculos = _controller.veiculos;
-
               return DropdownButtonFormField2<String?>(
                 isExpanded: true,
                 value: _controller.veiculoSelecionadoId,
@@ -166,10 +203,9 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                     final veiculo = isAll
                         ? null
                         : veiculos.firstWhere(
-                            (v) => v.base.id == id,
-                            orElse: () => VeiculoStoreFactory.novo(),
-                          );
-
+                          (v) => v.base.id == id,
+                      orElse: () => VeiculoStoreFactory.novo(),
+                    );
                     return Row(
                       children: [
                         Icon(isAll ? Icons.south_east_rounded : Icons.directions_car),
@@ -251,7 +287,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
       builder: (_) {
         try {
           final timelineItems = _buildTimelineItems();
-
           if (timelineItems.isEmpty) {
             return _buildEmptyState();
           }
@@ -267,15 +302,23 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
               itemCount: timelineItems.length,
               itemBuilder: (context, index) {
                 final item = timelineItems[index];
-                final isFirst = index == 0;
+
+                if (item.isMonthHeader) {
+                  return _buildMonthHeader(item.title);
+                }
+
+                final isFirst = index == 0 || (index > 0 && timelineItems[index - 1].isMonthHeader);
                 final isLast = index == timelineItems.length - 1;
 
                 int? activityIndex;
                 if (!item.isSpecial && !item.isWelcome) {
-                  final originalAtividades = _controller.atividadesFiltradas;
+                  final originalAtividades = _getFilteredActivities();
                   for (int i = 0; i < originalAtividades.length; i++) {
                     final atividade = originalAtividades[i];
-                    if (atividade.tipoAtividade == item.title && _parseDate(atividade.data).day == item.date.day && _parseDate(atividade.data).month == item.date.month && _parseDate(atividade.data).year == item.date.year) {
+                    if (atividade.tipoAtividade == item.title &&
+                        _parseDate(atividade.data).day == item.date.day &&
+                        _parseDate(atividade.data).month == item.date.month &&
+                        _parseDate(atividade.data).year == item.date.year) {
                       activityIndex = i;
                       break;
                     }
@@ -295,6 +338,41 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           return _buildErrorState(error: e.toString());
         }
       },
+    );
+  }
+
+  Widget _buildMonthHeader(String monthYear) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Container(
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 1,
+                color: const Color(0xFFE0E0E0),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                monthYear.toUpperCase(),
+                style: textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF9E9E9E),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                height: 1,
+                color: const Color(0xFFE0E0E0),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -337,6 +415,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
     return Observer(
       builder: (_) {
         final isFiltered = _controller.veiculoSelecionadoId != null;
+        final hasActiveFilters = _filtroAtivo?.hasFilters == true;
         final veiculoNome = _controller.nomeVeiculoSelecionado;
 
         return Center(
@@ -344,34 +423,49 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.timeline,
+                hasActiveFilters ? Icons.filter_list_off : Icons.timeline,
                 size: 64,
                 color: Colors.grey[400],
               ),
               const SizedBox(height: 16),
               Text(
-                'Nenhuma atividade encontrada',
+                hasActiveFilters
+                    ? 'Nenhuma atividade encontrada com os filtros aplicados'
+                    : 'Nenhuma atividade encontrada',
                 style: textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                isFiltered ? 'Não há atividades para o veículo $veiculoNome' : 'Adicione sua primeira atividade para começar!',
+                hasActiveFilters
+                    ? 'Tente ajustar os filtros para ver mais resultados'
+                    : isFiltered
+                    ? 'Não há atividades para o veículo $veiculoNome'
+                    : 'Adicione sua primeira atividade para começar!',
                 style: textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (isFiltered) ...[
-                const SizedBox(height: 16),
+              const SizedBox(height: 16),
+              if (hasActiveFilters)
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _filtroAtivo = null;
+                    });
+                  },
+                  child: const Text('Limpar Filtros'),
+                )
+              else if (isFiltered)
                 TextButton(
                   onPressed: () {
                     _controller.setVeiculoSelecionado(null);
                   },
                   child: const Text('Ver todas as atividades'),
                 ),
-              ],
             ],
           ),
         );
@@ -379,8 +473,35 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
     );
   }
 
+  List<AtividadeStore> _getFilteredActivities() {
+    var atividades = _controller.atividadesFiltradas;
+
+    if (_filtroAtivo != null) {
+      atividades = atividades.where((atividade) {
+        if (_filtroAtivo!.tipoAtividade != null &&
+            atividade.tipoAtividade != _filtroAtivo!.tipoAtividade) {
+          return false;
+        }
+
+        final atividadeDate = _parseDate(atividade.data);
+        if (_filtroAtivo!.dataInicio != null &&
+            atividadeDate.isBefore(_filtroAtivo!.dataInicio!)) {
+          return false;
+        }
+        if (_filtroAtivo!.dataFim != null &&
+            atividadeDate.isAfter(_filtroAtivo!.dataFim!.add(const Duration(days: 1)))) {
+          return false;
+        }
+
+        return true;
+      }).toList();
+    }
+
+    return atividades;
+  }
+
   List<TimelineItem> _buildTimelineItems() {
-    final atividades = _controller.atividadesFiltradas;
+    final atividades = _getFilteredActivities();
     var items = <TimelineItem>[];
 
     for (var atividade in atividades) {
@@ -393,19 +514,50 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
 
     items = items.reversed.toList();
 
-    items.add(TimelineItem(
-      title: 'Você iniciou o controle de despesas do seu veículo com Auto Care!',
-      date: DateTime.now().subtract(Duration(days: items.length + 1)),
-      icon: Icons.star,
-      iconColor: Colors.white,
-      iconBackgroundColor: const Color(0xFF4CAF50),
-      isSpecial: true,
-      emoji: '🎉',
-    ));
+    if (_filtroAtivo == null || !_filtroAtivo!.hasFilters) {
+      items.add(TimelineItem(
+        title: 'Você iniciou o controle de despesas do seu veículo com Auto Care!',
+        date: DateTime.now().subtract(Duration(days: items.length + 1)),
+        icon: Icons.star,
+        iconColor: Colors.white,
+        iconBackgroundColor: colorScheme.secondary,
+        isSpecial: true,
+        emoji: '🎉',
+      ));
+    }
 
-    if (_controller.veiculoSelecionadoId == null) {}
+    final itemsWithHeaders = <TimelineItem>[];
+    String? currentMonth;
 
-    return items;
+    for (int i = 0; i < items.length; i++) {
+      final item = items[i];
+      final monthYear = _formatMonthYear(item.date);
+
+      if (currentMonth != monthYear) {
+        itemsWithHeaders.add(TimelineItem(
+          title: monthYear,
+          date: item.date,
+          icon: Icons.calendar_today,
+          iconColor: Colors.transparent,
+          iconBackgroundColor: Colors.transparent,
+          isMonthHeader: true,
+        ));
+        currentMonth = monthYear;
+      }
+
+      itemsWithHeaders.add(item);
+    }
+
+    return itemsWithHeaders;
+  }
+
+  String _formatMonthYear(DateTime date) {
+    try {
+      return DateFormat('MMMM yyyy', 'pt_BR').format(date);
+    } catch (e) {
+      const months = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      return '${months[date.month]} ${date.year}';
+    }
   }
 
   TimelineItem _createTimelineItemFromAtividade(AtividadeStore atividade) {
@@ -440,6 +592,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
     } catch (e) {
       print('Erro ao fazer parse da data: $dateString - $e');
     }
+
     return DateTime.now();
   }
 
@@ -474,7 +627,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
             ));
           }
           break;
-
         case 'Troca de óleo':
           if (atividade.km.isNotEmpty) {
             details.add(TimelineDetail(
@@ -483,13 +635,10 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
             ));
           }
           break;
-
         case 'Lavagem':
           break;
-
         case 'Seguro':
           break;
-
         case 'Serviço mecânico':
           if (atividade.km.isNotEmpty) {
             details.add(TimelineDetail(
@@ -498,7 +647,6 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
             ));
           }
           break;
-
         case 'Financiamento':
           if (atividade.numeroParcela.isNotEmpty) {
             details.add(TimelineDetail(
@@ -507,13 +655,10 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
             ));
           }
           break;
-
         case 'Compras':
           break;
-
         case 'Impostos':
           break;
-
         case 'Outros':
           break;
       }
@@ -578,25 +723,25 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
   Color _getColorForAtividade(String tipoAtividade) {
     switch (tipoAtividade) {
       case 'Abastecimento':
-        return const Color(0xFF2196F3);
+        return colorScheme.secondary;
       case 'Troca de óleo':
-        return const Color(0xFF4CAF50);
+        return colorScheme.secondary;
       case 'Lavagem':
-        return const Color(0xFF00BCD4);
+        return colorScheme.secondary;
       case 'Seguro':
-        return const Color(0xFF9C27B0);
+        return colorScheme.secondary;
       case 'Serviço mecânico':
-        return const Color(0xFFFF9800);
+        return colorScheme.secondary;
       case 'Financiamento':
-        return const Color(0xFFE91E63);
+        return colorScheme.secondary;
       case 'Compras':
-        return const Color(0xFF2196F3);
+        return colorScheme.secondary;
       case 'Impostos':
-        return const Color(0xFFF44336);
+        return colorScheme.secondary;
       case 'Outros':
-        return const Color(0xFF607D8B);
+        return colorScheme.secondary;
       default:
-        return const Color(0xFF9E9E9E);
+        return colorScheme.secondary;
     }
   }
 
@@ -616,36 +761,36 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         height: item.isWelcome ? 120 : 44,
         indicator: item.isWelcome
             ? Align(
-                alignment: Alignment.centerLeft,
-                child: Image.asset(
-                  'assets/img/logo_black_app.png',
-                ),
-              )
+          alignment: Alignment.centerLeft,
+          child: Image.asset(
+            'assets/img/logo_black_app.png',
+          ),
+        )
             : Container(
-                decoration: BoxDecoration(
-                  color: item.iconBackgroundColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: item.emoji != null
-                      ? Text(
-                          item.emoji!,
-                          style: const TextStyle(fontSize: 24),
-                        )
-                      : Icon(
-                          item.icon,
-                          color: item.iconColor,
-                          size: 22,
-                        ),
-                ),
+          decoration: BoxDecoration(
+            color: item.iconBackgroundColor,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
+            ],
+          ),
+          child: Center(
+            child: item.emoji != null
+                ? Text(
+              item.emoji!,
+              style: const TextStyle(fontSize: 24),
+            )
+                : Icon(
+              item.icon,
+              color: item.iconColor,
+              size: 22,
+            ),
+          ),
+        ),
         drawGap: true,
       ),
       beforeLineStyle: const LineStyle(
@@ -661,7 +806,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -670,23 +815,23 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                       Expanded(
                         child: item.isWelcome
                             ? RichText(
-                                text: TextSpan(
-                                  text: '${item.title} ',
-                                  style: textTheme.bodyMedium?.copyWith(),
-                                  children: [
-                                    TextSpan(text: item.subtitle, style: textTheme.bodyMedium?.copyWith()),
-                                  ],
-                                ),
-                              )
+                          text: TextSpan(
+                            text: '${item.title} ',
+                            style: textTheme.bodyMedium?.copyWith(),
+                            children: [
+                              TextSpan(text: item.subtitle, style: textTheme.bodyMedium?.copyWith()),
+                            ],
+                          ),
+                        )
                             : item.isSpecial
-                                ? Text(
-                                    item.title,
-                                    style: textTheme.bodyMedium?.copyWith(),
-                                  )
-                                : Text(
-                                    item.title,
-                                    style: textTheme.bodyMedium,
-                                  ),
+                            ? Text(
+                          item.title,
+                          style: textTheme.bodyMedium?.copyWith(),
+                        )
+                            : Text(
+                          item.title,
+                          style: textTheme.bodyMedium,
+                        ),
                       ),
                       if (!item.isSpecial && !item.isWelcome) ...[
                         Text(
@@ -710,7 +855,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                             onSelected: (value) async {
                               if (value == 'delete') {
                                 try {
-                                  final atividades = _controller.atividadesFiltradas;
+                                  final atividades = _getFilteredActivities();
                                   if (activityIndex < atividades.length) {
                                     await _controller.delete(atividades[activityIndex]);
                                   }
@@ -746,7 +891,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                           size: 12,
                           color: const Color(0xFF9E9E9E),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 6),
                         Text(
                           _formatDateFull(item.date),
                           style: textTheme.bodySmall?.copyWith(
@@ -757,28 +902,25 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                     ),
                   ],
                   if (!item.isSpecial && !item.isWelcome && item.details.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    ...item.details.map((detail) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                detail.icon,
-                                size: 14,
-                                color: const Color(0xFF9E9E9E),
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  detail.text,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: const Color(0xFF9E9E9E),
-                                  ),
-                                ),
-                              ),
-                            ],
+                    const SizedBox(height: 2),
+                    ...item.details.map((detail) => Row(
+                      children: [
+                        Icon(
+                          detail.icon,
+                          size: 14,
+                          color: const Color(0xFF9E9E9E),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            detail.text,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: const Color(0xFF9E9E9E),
+                            ),
                           ),
-                        )),
+                        ),
+                      ],
+                    )),
                   ],
                   if (!item.isSpecial && !item.isWelcome && item.price != null) ...[
                     const SizedBox(height: 8),
@@ -859,6 +1001,7 @@ class TimelineItem {
   final double? price;
   final bool isSpecial;
   final bool isWelcome;
+  final bool isMonthHeader;
   final String? emoji;
 
   TimelineItem({
@@ -872,6 +1015,7 @@ class TimelineItem {
     this.price,
     this.isSpecial = false,
     this.isWelcome = false,
+    this.isMonthHeader = false,
     this.emoji,
   });
 }
