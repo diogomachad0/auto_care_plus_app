@@ -1,3 +1,4 @@
+import 'package:auto_care_plus_app/app/modules/home/home_screen.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_info.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -159,16 +160,16 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                     ),
                     ...veiculos.map((veiculo) {
                       return Row(
-                        children: [
+                          children: [
                           const Icon(Icons.directions_car),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              '${veiculo.modelo} - ${veiculo.placa}',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                      SizedBox(width: 10),
+                      Expanded(
+                      child: Text(
+                      '${veiculo.modelo} - ${veiculo.placa}',
+                      overflow: TextOverflow.ellipsis,
+                      ),
+                      ),
+                      ]
                       );
                     }).toList(),
                   ];
@@ -237,40 +238,28 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           );
         }
 
-        final iconSize = _getResponsiveIconSize(context);
-
         List<Marker> markers = [];
 
-        for (var atividade in controller.atividadesComLocalizacao) {
-          if (atividade.hasCoordinates) {
-            markers.add(
-              Marker(
-                width: 90,
-                height: 55,
-                point: LatLng(atividade.latitudeAsDouble!, atividade.longitudeAsDouble!),
-                builder: (context) {
-                  String priceText = '0,00';
-                  if (atividade.totalPago.isNotEmpty) {
-                    String valor = atividade.totalPago;
-                    if (valor.startsWith('R\$')) {
-                      priceText = valor;
-                    } else {
-                      priceText = 'R\$ $valor';
-                    }
-                  } else {
-                    priceText = 'R\$ 0,00';
-                  }
+        // Usa atividades agrupadas ao invés de individuais
+        for (var grupo in controller.atividadesAgrupadas) {
+          final priceText = 'R\$ ${grupo.valorTotal.toStringAsFixed(2).replaceAll('.', ',')}';
 
-                  return SimpleMapMarker(
-                    price: priceText,
-                    onTap: () {
-                      _showAtividadeInfo(context, atividade);
-                    },
-                  );
-                },
-              ),
-            );
-          }
+          markers.add(
+            Marker(
+              width: 90,
+              height: 65,
+              point: grupo.coordenadas,
+              builder: (context) {
+                return SimpleMapMarker(
+                  price: priceText,
+                  activityCount: grupo.atividades.length,
+                  onTap: () {
+                    _showAtividadesInfo(context, grupo);
+                  },
+                );
+              },
+            ),
+          );
         }
 
         return FlutterMap(
@@ -296,21 +285,35 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
     );
   }
 
-  void _showAtividadeInfo(BuildContext context, atividade) {
-    String message = 'Estabelecimento: ${atividade.estabelecimento}\n'
-        'Data: ${atividade.data}';
+  void _showAtividadesInfo(BuildContext context, AtividadeAgrupada grupo) {
+    String message = 'Estabelecimento: ${grupo.estabelecimento}\n';
+    message += 'Total de atividades: ${grupo.atividades.length}\n';
+    message += 'Valor total: R\$ ${grupo.valorTotal.toStringAsFixed(2).replaceAll('.', ',')}\n\n';
 
-    if (atividade.totalPago.isNotEmpty) {
-      message += '\nTotal pago: R\$ ${atividade.totalPago}';
-    }
+    message += 'Detalhes das atividades:\n';
 
-    if (atividade.km.isNotEmpty) {
-      message += '\nKm: ${atividade.km}';
+    for (int i = 0; i < grupo.atividades.length; i++) {
+      final atividade = grupo.atividades[i];
+      message += '${i + 1}. ${atividade.tipoAtividade}\n';
+      message += '   Data: ${atividade.data}\n';
+
+      if (atividade.totalPago.isNotEmpty) {
+        final valor = CurrencyParser.parseToDouble(atividade.totalPago);
+        message += '   Valor: R\$ ${valor.toStringAsFixed(2).replaceAll('.', ',')}\n';
+      }
+
+      if (atividade.km.isNotEmpty) {
+        message += '   Km: ${atividade.km}\n';
+      }
+
+      if (i < grupo.atividades.length - 1) {
+        message += '\n';
+      }
     }
 
     DialogInfo.show(
       context,
-      atividade.tipoAtividade,
+      'Atividades no local',
       message,
     );
   }
