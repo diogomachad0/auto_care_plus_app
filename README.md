@@ -6,19 +6,6 @@
 
 🚗 Aplicativo para controle de manutenção, despesas e informações dos veículos de forma simples e eficiente.
 
----
-
-## 🔧 Funcionalidades principais
-
-- Cadastro de veículos
-- Registro de manutenções e abastecimentos
-- Controle de quilometragem e tipo de combustível
-- Histórico de gastos
-- Autenticação via Firebase
-- Armazenamento local com SQLite
-
----
-
 ## 🧰 Tecnologias
 
 - Flutter **3.22.2**
