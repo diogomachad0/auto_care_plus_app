@@ -63,6 +63,7 @@ dependencies:
   shared_preferences: ^2.2.2
   http: ^0.13.6
   url_launcher: ^6.2.2
+  carousel_slider: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -101,6 +102,8 @@ flutter:
     - assets/img/banners/amico.png
     - assets/img/banners/pana.png
     - assets/img/banners/conta.png
+    - assets/img/dicas/dicas1.png
+    - assets/img/dicas/dicas2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
