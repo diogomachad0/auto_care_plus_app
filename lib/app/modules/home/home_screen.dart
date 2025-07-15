@@ -8,6 +8,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 import '../lembrete/lembrete_controller.dart';
 
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
   late final LembreteController _lembreteController;
   late PageController _chartPageController;
   int _currentChartIndex = 0;
+  int _currentTipIndex = 0;
 
   @override
   void initState() {
@@ -67,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildExpensesSection(),
+                        _buildTipsSection(),
                       ],
                     ),
                   ),
@@ -322,15 +325,14 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
+                          'Relatórios',
+                          style: textTheme.titleMedium,
+                        ),
+                        Text(
                           'R\$ ${totalGastos.toStringAsFixed(2).replaceAll('.', ',')}',
                           style: textTheme.titleMedium,
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Relatórios',
-                      style: textTheme.titleMedium,
                     ),
                     Text(
                       'Relatório de gastos registrados',
@@ -339,8 +341,8 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                         fontWeight: FontWeight.w300,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    ...expenses.map((expense) => _buildExpenseItem(expense)),
+                    const SizedBox(height: 16),
+                    ...expenses.where((expense) => expense.value > 0).map((expense) => _buildExpenseItem(expense)),
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 200,
@@ -493,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
 
   Widget _buildExpenseItem(ExpenseCategory expense) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           Container(
@@ -598,6 +600,82 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       default:
         return Colors.grey;
     }
+  }
+
+  Widget _buildTipsSection() {
+    final List<String> tipImages = [
+      'assets/img/dicas/dicas1.png',
+      'assets/img/dicas/dicas2.png',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16, left: 32),
+          child: Text(
+            'DICAS',
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[500],
+            ),
+          ),
+        ),
+        CarouselSlider.builder(
+          itemCount: tipImages.length,
+          itemBuilder: (BuildContext context, int index, int realIndex) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    tipImages[index],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
+            );
+          },
+          options: CarouselOptions(
+            height: 200,
+            autoPlay: true,
+            enlargeCenterPage: true,
+            aspectRatio: 16 / 9,
+
+            viewportFraction: 1,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentTipIndex = index;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(tipImages.length, (index) => _buildTipPageIndicator(index)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTipPageIndicator(int index) {
+    return Container(
+      width: 8,
+      height: 8,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _currentTipIndex == index ? colorScheme.primary : Colors.grey[300],
+      ),
+    );
   }
 
   Widget _buildNotificationsSection() {
@@ -723,13 +801,13 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
                 child: notificacoes.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
-                        itemCount: notificacoes.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final lembrete = notificacoes[index];
-                          return _buildNotificacaoItem(lembrete);
-                        },
-                      ),
+                  itemCount: notificacoes.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final lembrete = notificacoes[index];
+                    return _buildNotificacaoItem(lembrete);
+                  },
+                ),
               ),
               if (notificacoes.isNotEmpty) ...[
                 const SizedBox(height: 16),
