@@ -31,26 +31,42 @@ abstract class _LembreteControllerBase with Store {
 
   @action
   Future<void> save() async {
-    final model = lembrete.toModel();
-    await _service.saveOrUpdate(model);
+    try {
+      final model = lembrete.toModel();
+      await _service.saveOrUpdate(model);
 
-    if (lembrete.notificar) {
-      await _scheduleNotification(model);
+      if (lembrete.notificar) {
+        await _scheduleNotification(model);
+      }
+
+      _resetLembrete();
+
+      await load();
+    } catch (e) {
+      print('Erro ao salvar lembrete: $e');
+      rethrow;
     }
+  }
 
-    await load();
+  @action
+  void _resetLembrete() {
+    lembrete = LembreteStoreFactory.novo();
   }
 
   Future<void> _scheduleNotification(dynamic lembreteModel) async {
-    final int notificationId = _generateNotificationId(lembreteModel);
+    try {
+      final int notificationId = _generateNotificationId(lembreteModel);
 
-    await _notificationService.showLembreteNotification(
-      id: notificationId,
-      titulo: lembreteModel.titulo,
-      data: lembreteModel.data,
-    );
+      await _notificationService.showLembreteNotification(
+        id: notificationId,
+        titulo: lembreteModel.titulo,
+        data: lembreteModel.data,
+      );
 
-    print('Lembrete agendado: ${lembreteModel.titulo} para ${lembreteModel.data} às 12:00:00');
+      print('Lembrete agendado: ${lembreteModel.titulo} para ${lembreteModel.data} às 12:00:00');
+    } catch (e) {
+      print('Erro ao agendar notificação: $e');
+    }
   }
 
   int _generateNotificationId(dynamic lembreteModel) {
@@ -58,18 +74,27 @@ abstract class _LembreteControllerBase with Store {
   }
 
   Future<void> delete(LembreteStore lembrete) async {
-    if (lembrete.notificar) {
-      final int notificationId = _generateNotificationId(lembrete.toModel());
-      await _notificationService.cancelNotification(notificationId);
-      print('Notificação cancelada para: ${lembrete.titulo}');
-    }
+    try {
+      if (lembrete.notificar) {
+        final int notificationId = _generateNotificationId(lembrete.toModel());
+        await _notificationService.cancelNotification(notificationId);
+        print('Notificação cancelada para: ${lembrete.titulo}');
+      }
 
-    await _service.delete(lembrete.toModel());
-    lembretes.remove(lembrete);
+      await _service.delete(lembrete.toModel());
+      lembretes.remove(lembrete);
+    } catch (e) {
+      print('Erro ao deletar lembrete: $e');
+      rethrow;
+    }
   }
 
   @action
   void updateLembrete(String titulo, DateTime data, bool notificar) {
+    if (lembrete.id.isEmpty) {
+      lembrete = LembreteStoreFactory.novo();
+    }
+
     lembrete.titulo = titulo;
     lembrete.data = data;
     lembrete.notificar = notificar;

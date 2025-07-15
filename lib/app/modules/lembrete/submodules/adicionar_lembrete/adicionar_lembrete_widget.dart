@@ -16,6 +16,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _dataController = TextEditingController();
   bool _notificar = false;
+  bool _isLoading = false;
 
   final controller = Modular.get<LembreteController>();
 
@@ -101,12 +102,13 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
       ),
     );
   }
+
   Widget _buildButtons() {
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () {
+            onPressed: _isLoading ? null : () {
               Modular.to.pop();
             },
             style: OutlinedButton.styleFrom(
@@ -125,26 +127,7 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: () async {
-              if (_tituloController.text.isEmpty || _dataController.text.isEmpty) return;
-              try {
-                final parts = _dataController.text.split('/');
-                final data = DateTime(
-                  int.parse(parts[2]),
-                  int.parse(parts[1]),
-                  int.parse(parts[0]),
-                );
-                controller.updateLembrete(
-                  _tituloController.text,
-                  data,
-                  _notificar,
-                );
-                await controller.save();
-                Modular.to.pop(true);
-              } catch (e, s) {
-                await DialogError.show(context, 'Erro ao salvar o lembrete: \nErro: ${e.toString()}', s);
-              }
-            },
+            onPressed: _isLoading ? null : _salvarLembrete,
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
               shape: RoundedRectangleBorder(
@@ -152,7 +135,16 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
               ),
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: Text(
+            child: _isLoading
+                ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+                : Text(
               'Salvar',
               style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
@@ -162,6 +154,78 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
         ),
       ],
     );
+  }
+
+  Future<void> _salvarLembrete() async {
+    if (_tituloController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, informe o título do lembrete')),
+      );
+      return;
+    }
+
+    if (_dataController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, selecione uma data')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final parts = _dataController.text.split('/');
+      if (parts.length != 3) {
+        throw Exception('Formato de data inválido');
+      }
+
+      final data = DateTime(
+        int.parse(parts[2]),
+        int.parse(parts[1]),
+        int.parse(parts[0]),
+      );
+
+      final hoje = DateTime.now();
+      final dataHoje = DateTime(hoje.year, hoje.month, hoje.day);
+
+      if (data.isBefore(dataHoje)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A data do lembrete não pode ser no passado')),
+        );
+        return;
+      }
+
+      controller.updateLembrete(
+        _tituloController.text.trim(),
+        data,
+        _notificar,
+      );
+
+      await controller.save();
+
+      if (mounted) {
+        Modular.to.pop(true);
+      }
+    } catch (e, s) {
+      print('Erro ao salvar lembrete: $e');
+      print('Stack trace: $s');
+
+      if (mounted) {
+        await DialogError.show(
+            context,
+            'Erro ao salvar o lembrete: \nErro: ${e.toString()}',
+            s
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
