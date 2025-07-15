@@ -886,7 +886,6 @@ class CurrencyParser {
 
       return double.parse(cleanValue);
     } catch (e) {
-      print('Erro ao fazer parse do valor: $value - $e');
       return 0.0;
     }
   }

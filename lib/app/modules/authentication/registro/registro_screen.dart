@@ -156,10 +156,8 @@ class _RegistroScreenState extends State<RegistroScreen> with ThemeMixin {
         Uri.parse(urlString),
         mode: LaunchMode.externalApplication,
       );
-      print('✅ Sucesso com método 1');
       return;
     } catch (e1) {
-      print('❌ Método 1 falhou: $e1');
     }
   }
 

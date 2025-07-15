@@ -125,7 +125,6 @@ abstract class _AtividadeControllerBase with Store {
         veiculos.add(VeiculoStoreFactory.fromModel(veiculo));
       }
     } catch (e) {
-      print('Erro ao carregar veículos: $e');
       veiculos.clear();
     }
   }
@@ -243,7 +242,6 @@ abstract class _AtividadeControllerBase with Store {
         final dataAtividade = _parseDate(atividade.data);
         return dataAtividade.isAfter(inicio.subtract(const Duration(days: 1))) && dataAtividade.isBefore(fim.add(const Duration(days: 1)));
       } catch (e) {
-        print('Erro ao filtrar por período: $e');
         return false;
       }
     }).toList();
@@ -263,7 +261,6 @@ abstract class _AtividadeControllerBase with Store {
         return DateTime(year, month, day);
       }
     } catch (e) {
-      print('Erro ao fazer parse da data: $dateString - $e');
     }
     return DateTime.now();
   }

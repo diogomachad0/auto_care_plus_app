@@ -117,7 +117,6 @@ abstract class _HomeControllerBase with Store {
             }
           }
         } catch (e) {
-          print('Erro ao parsear data: ${atividade.data} - $e');
         }
       }
     }
@@ -154,7 +153,6 @@ abstract class _HomeControllerBase with Store {
         veiculos.add(VeiculoStoreFactory.fromModel(veiculo));
       }
     } catch (e) {
-      print('Erro ao carregar veículos: $e');
     } finally {
       isLoading = false;
     }
@@ -170,7 +168,6 @@ abstract class _HomeControllerBase with Store {
         atividades.add(AtividadeStoreFactory.fromModel(atividade));
       }
     } catch (e) {
-      print('Erro ao carregar atividades: $e');
     } finally {
       isLoading = false;
     }
@@ -247,7 +244,6 @@ abstract class _HomeControllerBase with Store {
 
       return DateTime.parse(dataString);
     } catch (e) {
-      print('Erro ao parsear data: $dataString - $e');
       return null;
     }
   }

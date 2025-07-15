@@ -23,17 +23,11 @@ class UsuarioService extends BaseService<UsuarioModel, IUsuarioRepository> imple
 
   @override
   Future<UsuarioModel> saveOrUpdate(UsuarioModel usuario, {String? uri}) async {
-    print('=== USUARIO SERVICE - SAVE OR UPDATE ===');
-    print('Salvando usuário: ${usuario.nome} - ${usuario.email}');
-
     final savedUser = await super.saveOrUpdate(usuario, uri: uri);
-    print('✅ Usuário salvo no banco local');
 
     try {
       await updateFirebaseProfile(savedUser);
-      print('✅ Perfil Firebase sincronizado');
     } catch (e) {
-      print('⚠️ Aviso: Não foi possível sincronizar com Firebase: $e');
       if (e.toString().contains('Um email de verificação foi enviado')) {
         rethrow;
       }
@@ -48,19 +42,13 @@ class UsuarioService extends BaseService<UsuarioModel, IUsuarioRepository> imple
       final user = _firebaseAuth.currentUser;
       if (user == null) throw Exception('Usuário não autenticado');
 
-      print('=== VALIDANDO SENHA ATUAL ===');
-      print('Email do usuário: ${user.email}');
-
       final credential = EmailAuthProvider.credential(
         email: user.email!,
         password: currentPassword,
       );
 
       await user.reauthenticateWithCredential(credential);
-      print('✅ Senha atual validada com sucesso');
     } catch (e) {
-      print('❌ Erro ao validar senha atual: $e');
-
       if (e.toString().contains('wrong-password')) {
         throw Exception('Senha atual incorreta');
       }
@@ -73,33 +61,21 @@ class UsuarioService extends BaseService<UsuarioModel, IUsuarioRepository> imple
     try {
       final firebaseUser = _firebaseAuth.currentUser;
       if (firebaseUser == null) {
-        print('⚠️ Usuário não autenticado no Firebase, pulando sincronização');
         return;
       }
 
-      print('=== ATUALIZANDO PERFIL NO FIREBASE ===');
-      print('Nome atual: ${firebaseUser.displayName} -> Novo: ${usuario.nome}');
-      print('Email atual: ${firebaseUser.email} -> Novo: ${usuario.email}');
-
       if (firebaseUser.displayName != usuario.nome) {
         await firebaseUser.updateDisplayName(usuario.nome);
-        print('✅ Nome atualizado no Firebase');
       }
 
       if (firebaseUser.email != usuario.email) {
-        print('📧 Iniciando alteração de email...');
-
         await firebaseUser.verifyBeforeUpdateEmail(usuario.email);
-        print('✅ Email de verificação enviado para: ${usuario.email}');
 
         throw Exception('Um email de verificação foi enviado para ${usuario.email}. Verifique sua caixa de entrada para confirmar a alteração.');
       }
 
       await firebaseUser.reload();
-      print('✅ Perfil Firebase atualizado com sucesso');
     } catch (e) {
-      print('❌ Erro ao atualizar perfil Firebase: $e');
-
       if (e.toString().contains('requires-recent-login')) {
         throw Exception('Para alterar dados sensíveis, você precisa fazer login novamente');
       } else if (e.toString().contains('operation-not-allowed')) {
@@ -126,21 +102,15 @@ class UsuarioService extends BaseService<UsuarioModel, IUsuarioRepository> imple
       final user = _firebaseAuth.currentUser;
       if (user == null) throw Exception('Usuário não autenticado');
 
-      print('=== ATUALIZANDO SENHA NO FIREBASE ===');
-
       final credential = EmailAuthProvider.credential(
         email: user.email!,
         password: currentPassword,
       );
 
       await user.reauthenticateWithCredential(credential);
-      print('✅ Reautenticação realizada');
 
       await user.updatePassword(newPassword);
-      print('✅ Senha atualizada no Firebase');
     } catch (e) {
-      print('❌ Erro ao atualizar senha: $e');
-
       if (e.toString().contains('wrong-password')) {
         throw Exception('Senha atual incorreta');
       }
@@ -154,18 +124,13 @@ class UsuarioService extends BaseService<UsuarioModel, IUsuarioRepository> imple
       final user = _firebaseAuth.currentUser;
       if (user == null) throw Exception('Usuário não autenticado');
 
-      print('=== EXCLUINDO CONTA ===');
-
       final localUser = await getCurrentUser();
       if (localUser != null) {
         await delete(localUser);
-        print('✅ Usuário excluído do banco local');
       }
 
       await user.delete();
-      print('✅ Conta excluída do Firebase');
     } catch (e) {
-      print('❌ Erro ao excluir conta: $e');
       throw Exception('Erro ao deletar conta do Firebase: $e');
     }
   }

@@ -1,7 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:async';
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZGlvZ29tYWNoYWRvIiwiYSI6ImNtYjc2dXkwaDA3NGUyam4wMnJ4cHJyc2MifQ.UCZ3qN_mb80hb82sa6jmog';
 
@@ -79,45 +80,45 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
               ),
               child: _isLoading
                   ? const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              )
-                  : ListView.builder(
-                shrinkWrap: true,
-                itemCount: _suggestions.length,
-                itemBuilder: (context, index) {
-                  final place = _suggestions[index];
-                  return ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: Text(
-                      place.placeName,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      place.context,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(),
                       ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _suggestions.length,
+                      itemBuilder: (context, index) {
+                        final place = _suggestions[index];
+                        return ListTile(
+                          leading: const Icon(Icons.location_on),
+                          title: Text(
+                            place.placeName,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          subtitle: Text(
+                            place.context,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          onTap: () {
+                            widget.controller.text = place.placeName;
+                            widget.onPlaceSelected?.call(
+                              place.placeName,
+                              place.latitude,
+                              place.longitude,
+                            );
+                            _removeOverlay();
+                            _focusNode.unfocus();
+                            setState(() {
+                              _suggestions.clear();
+                            });
+                          },
+                        );
+                      },
                     ),
-                    onTap: () {
-                      widget.controller.text = place.placeName;
-                      widget.onPlaceSelected?.call(
-                        place.placeName,
-                        place.latitude,
-                        place.longitude,
-                      );
-                      _removeOverlay();
-                      _focusNode.unfocus();
-                      setState(() {
-                        _suggestions.clear();
-                      });
-                    },
-                  );
-                },
-              ),
             ),
           ),
         ),
@@ -167,11 +168,7 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
           _suggestions = features.map((feature) {
             final coordinates = feature['center'] as List;
             final placeName = feature['place_name'] as String;
-            final context = feature['context'] != null
-                ? (feature['context'] as List)
-                .map((c) => c['text'])
-                .join(', ')
-                : '';
+            final context = feature['context'] != null ? (feature['context'] as List).map((c) => c['text']).join(', ') : '';
 
             return MapboxPlace(
               placeName: placeName,
@@ -190,7 +187,6 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
         }
       }
     } catch (e) {
-      print('Erro ao buscar lugares: $e');
       setState(() {
         _isLoading = false;
         _suggestions.clear();
@@ -224,13 +220,13 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             suffixIcon: _isLoading
                 ? const Padding(
-              padding: EdgeInsets.all(12),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
                 : const Icon(Icons.search),
           ),
         ),

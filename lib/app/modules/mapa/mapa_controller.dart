@@ -31,9 +31,10 @@ abstract class _MapaControllerBase with Store {
   LatLng? myPosition;
 
   @computed
-  get atividadesComLocalizacao => _atividadeController.atividadesFiltradas
-      .where((atividade) => atividade.hasCoordinates)
-      .toList();
+  get atividadesComLocalizacao =>
+      _atividadeController.atividadesFiltradas
+          .where((atividade) => atividade.hasCoordinates)
+          .toList();
 
   @computed
   List<AtividadeAgrupada> get atividadesAgrupadas {
@@ -99,15 +100,12 @@ abstract class _MapaControllerBase with Store {
     try {
       Position position = await _determinePosition();
       myPosition = LatLng(position.latitude, position.longitude);
-      print('Localização atual: $myPosition');
 
       await Future.wait([
         _atividadeController.loadVeiculos(),
         _atividadeController.load(),
       ]);
-    } catch (e) {
-      print('Erro ao obter localização: $e');
-    }
+    } catch (e) {}
   }
 
   Future<Position> _determinePosition() async {

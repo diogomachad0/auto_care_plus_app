@@ -81,9 +81,7 @@ class DatabaseLocal {
 
     try {
       await Directory(databasesPath).create(recursive: true);
-    } catch (ex) {
-      print('Erro ao criar diretório $ex');
-    }
+    } catch (ex) {}
 
     return path;
   }
@@ -117,9 +115,6 @@ class DatabaseLocal {
             onOpen: _onOpen,
           );
           await _onConfigureAfterOpenDatabase(_db!);
-
-          // Registra se estamos usando banco temporário ou de usuário
-          print('Banco aberto: ${_isUsingTempDb ? "TEMPORÁRIO" : "USUÁRIO: $_currentUserId"}');
         }
       });
     }
@@ -161,9 +156,7 @@ class DatabaseLocal {
       }
       final tempPath = join(databasesPath, _tempDbName);
 
-      // Verifica se o banco temporário existe
       if (!await File(tempPath).exists()) {
-        print('Banco temporário não existe, não há dados para migrar');
         return;
       }
 
@@ -193,15 +186,8 @@ class DatabaseLocal {
         await userDb.insert('atividades', atividade);
       }
 
-      print('Migração de dados concluída com sucesso');
-
-      // Opcional: Deletar o banco temporário após a migração
       await File(tempPath).delete();
-      print('Banco temporário deletado após migração');
-
-    } catch (e) {
-      print('Erro durante a migração de dados: $e');
-    }
+    } catch (e) {}
   }
 
   /// Método para limpar o banco quando o usuário faz logout
@@ -223,11 +209,8 @@ class DatabaseLocal {
       final file = File(path);
       if (await file.exists()) {
         await file.delete();
-        print('Banco de dados do usuário deletado: $path');
       }
-    } catch (e) {
-      print('Erro ao deletar banco de dados: $e');
-    }
+    } catch (e) {}
   }
 
   /// Lista todos os bancos de dados existentes (para debug/admin)
@@ -243,12 +226,8 @@ class DatabaseLocal {
       final directory = Directory(databasesPath);
       final files = await directory.list().toList();
 
-      return files
-          .where((file) => file.path.contains(_baseNameDb) && file.path.endsWith('.db'))
-          .map((file) => basename(file.path))
-          .toList();
+      return files.where((file) => file.path.contains(_baseNameDb) && file.path.endsWith('.db')).map((file) => basename(file.path)).toList();
     } catch (e) {
-      print('Erro ao listar bancos de dados: $e');
       return [];
     }
   }

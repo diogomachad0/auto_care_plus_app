@@ -43,7 +43,6 @@ abstract class _LembreteControllerBase with Store {
 
       await load();
     } catch (e) {
-      print('Erro ao salvar lembrete: $e');
       rethrow;
     }
   }
@@ -62,11 +61,7 @@ abstract class _LembreteControllerBase with Store {
         titulo: lembreteModel.titulo,
         data: lembreteModel.data,
       );
-
-      print('Lembrete agendado: ${lembreteModel.titulo} para ${lembreteModel.data} às 12:00:00');
-    } catch (e) {
-      print('Erro ao agendar notificação: $e');
-    }
+    } catch (e) {}
   }
 
   int _generateNotificationId(dynamic lembreteModel) {
@@ -78,13 +73,11 @@ abstract class _LembreteControllerBase with Store {
       if (lembrete.notificar) {
         final int notificationId = _generateNotificationId(lembrete.toModel());
         await _notificationService.cancelNotification(notificationId);
-        print('Notificação cancelada para: ${lembrete.titulo}');
       }
 
       await _service.delete(lembrete.toModel());
       lembretes.remove(lembrete);
     } catch (e) {
-      print('Erro ao deletar lembrete: $e');
       rethrow;
     }
   }
@@ -105,14 +98,6 @@ abstract class _LembreteControllerBase with Store {
       if (lembreteItem.notificar && lembreteItem.data.isAfter(DateTime.now())) {
         await _scheduleNotification(lembreteItem.toModel());
       }
-    }
-  }
-
-  Future<void> debugPendingNotifications() async {
-    final pending = await _notificationService.getPendingNotifications();
-    print('Notificações pendentes: ${pending.length}');
-    for (var notification in pending) {
-      print('ID: ${notification.id}, Título: ${notification.title}, Body: ${notification.body}');
     }
   }
 }

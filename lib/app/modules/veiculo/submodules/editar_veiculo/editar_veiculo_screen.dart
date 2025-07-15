@@ -114,7 +114,6 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
         setState(() {
           _loading = false;
         });
-        print('Erro ao carregar veículo: $e');
       }
     }
   }

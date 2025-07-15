@@ -209,9 +209,6 @@ class _AdicionarLembreteWidgetState extends State<AdicionarLembreteWidget> with 
         Modular.to.pop(true);
       }
     } catch (e, s) {
-      print('Erro ao salvar lembrete: $e');
-      print('Stack trace: $s');
-
       if (mounted) {
         await DialogError.show(
             context,

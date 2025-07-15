@@ -56,7 +56,6 @@ abstract class _SplashControllerBase with Store {
         Modular.to.navigate('/$loginRoute');
       }
     } catch (e) {
-      print('Erro ao verificar autenticação: $e');
       _setLoading(false);
       Modular.to.navigate('/$loginRoute/$entrarRoute');
     }

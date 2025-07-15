@@ -45,7 +45,6 @@ abstract class _ContaControllerBase with Store {
       _updateControllers();
     } catch (e) {
       errorMessage = 'Erro ao carregar dados do usuário: ${e.toString()}';
-      print(errorMessage);
     } finally {
       isLoading = false;
     }
@@ -70,35 +69,19 @@ abstract class _ContaControllerBase with Store {
       final nomeChanged = nomeController.text.trim() != _usuarioController.usuario.nome;
       final telefoneChanged = telefoneController.text.replaceAll(RegExp(r'[^\d]'), '') != _usuarioController.usuario.telefone;
 
-      print('=== VALIDANDO ALTERAÇÃO DE PERFIL ===');
-      print('Email original: $_originalEmail');
-      print('Email novo: ${emailController.text.trim()}');
-      print('Email foi alterado: $emailChanged');
-      print('Nome foi alterado: $nomeChanged');
-      print('Telefone foi alterado: $telefoneChanged');
-
       if (emailChanged && senhaAtualController.text.isEmpty) {
-        print('❌ Tentativa de alterar email sem senha - mostrando dialog');
         showEmailPasswordDialog = true;
         return false;
       }
 
       if (emailChanged) {
-        print('📧 Email foi alterado, validando senha atual...');
         try {
           await _usuarioService.validateCurrentPassword(senhaAtualController.text);
-          print('✅ Senha atual validada com sucesso');
         } catch (e) {
           errorMessage = 'Senha atual incorreta';
-          print('❌ Senha atual incorreta: $e');
           return false;
         }
       }
-
-      print('=== ATUALIZANDO PERFIL ===');
-      print('Nome: ${nomeController.text.trim()}');
-      print('Email: ${emailController.text.trim()}');
-      print('Telefone: ${telefoneController.text.replaceAll(RegExp(r'[^\d]'), '')}');
 
       _usuarioController.usuario.nome = nomeController.text.trim();
       _usuarioController.usuario.email = emailController.text.trim();
@@ -131,7 +114,6 @@ abstract class _ContaControllerBase with Store {
       }
 
       errorMessage = e.toString().replaceAll('Exception: ', '');
-      print('Erro ao atualizar perfil: $e');
       return false;
     } finally {
       isLoading = false;
@@ -155,7 +137,6 @@ abstract class _ContaControllerBase with Store {
         return false;
       }
 
-      print('=== ATUALIZANDO SENHA ===');
 
       await _usuarioService.updatePassword(
         senhaAtualController.text,
@@ -173,7 +154,6 @@ abstract class _ContaControllerBase with Store {
       return true;
     } catch (e) {
       errorMessage = e.toString().replaceAll('Exception: ', '');
-      print('Erro ao atualizar senha: $e');
       return false;
     } finally {
       isLoading = false;
@@ -186,7 +166,6 @@ abstract class _ContaControllerBase with Store {
       isLoading = true;
       errorMessage = '';
 
-      print('=== EXCLUINDO CONTA ===');
 
       await _usuarioService.deleteAccount();
       _usuarioController.usuario = UsuarioStoreFactory.novo();
@@ -194,7 +173,6 @@ abstract class _ContaControllerBase with Store {
       return true;
     } catch (e) {
       errorMessage = e.toString().replaceAll('Exception: ', '');
-      print('Erro ao excluir conta: $e');
       return false;
     } finally {
       isLoading = false;

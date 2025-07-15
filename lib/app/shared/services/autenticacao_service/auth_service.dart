@@ -172,8 +172,6 @@ class AuthService {
       UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
       user = userCredential.user;
 
-      print('Google Sign-In successful: ${user?.displayName} (${user?.email})');
-
       // Após login bem-sucedido, inicializa o banco do usuário
       await _initializeUserDatabase();
 
@@ -206,7 +204,6 @@ class AuthService {
       }
       _setErrorGeneric(true, message);
     } catch (e) {
-      print('Google Sign-In error: $e');
       _setErrorGeneric(true, 'Erro inesperado ao fazer login com Google');
     }
   }
@@ -277,12 +274,7 @@ class AuthService {
         telefoneController.text.replaceAll(RegExp(r'[^\d]'), ''), // Remove formatação
         passwordControllerRegister.text,
       );
-
-      print('Dados do usuário salvos na tabela local');
-    } catch (e) {
-      print('Erro ao salvar dados do usuário na tabela local: $e');
-      // Não vamos falhar o registro por causa disso
-    }
+    } catch (e) {}
   }
 
   /// NOVO MÉTODO - Salva os dados do Google na tabela local
@@ -303,12 +295,8 @@ class AuthService {
             'google_auth', // Senha placeholder para login com Google
           );
         }
-
-        print('Dados do Google salvos na tabela local');
       }
-    } catch (e) {
-      print('Erro ao salvar dados do Google na tabela local: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> logout() async {
@@ -342,11 +330,7 @@ class AuthService {
         // Apenas força a abertura do banco do usuário
         await databaseLocal.getDb();
       }
-
-      print('Banco de dados do usuário inicializado: ${user?.uid}');
-    } catch (e) {
-      print('Erro ao inicializar banco do usuário: $e');
-    }
+    } catch (e) {}
   }
 
   /// Obtém a instância do banco de dados do usuário atual

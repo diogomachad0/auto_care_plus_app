@@ -14,9 +14,6 @@ class NotificationService {
   static int get notificacaoNaoLidasCount => _notificacoesDispararadas.where((lembrete) => !_notificacoesLidas.contains(lembrete.id)).length;
 
   static bool get hasNotificacoesNaoLidas {
-    print('Total notificações: ${_notificacoesDispararadas.length}');
-    print('Notificações lidas: ${_notificacoesLidas.length}');
-    print('Não lidas: $notificacaoNaoLidasCount');
     return notificacaoNaoLidasCount > 0;
   }
 
@@ -47,7 +44,6 @@ class NotificationService {
     final tz.TZDateTime scheduledTZ = tz.TZDateTime.from(scheduledDate, tz.local);
 
     if (scheduledTZ.isBefore(tz.TZDateTime.now(tz.local))) {
-      print('Data do lembrete é no passado, não será agendado: $scheduledDate');
       return;
     }
 
@@ -71,13 +67,10 @@ class NotificationService {
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
-
-    print('Notificação agendada para: $scheduledDate (ID: $id)');
   }
 
   Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
-    print('Notificação cancelada (ID: $id)');
   }
 
   Future<void> cancelAllNotifications() async {
@@ -90,8 +83,6 @@ class NotificationService {
 
   static void verificarLembretesVencidos(List<LembreteStore> lembretes) {
     final agora = DateTime.now();
-    print('Verificando lembretes vencidos. Total lembretes: ${lembretes.length}');
-
     for (var lembrete in lembretes) {
       if (lembrete.notificar) {
         final dataNotificacao = DateTime(
@@ -102,27 +93,21 @@ class NotificationService {
           0,
         );
 
-        print('Lembrete: ${lembrete.titulo}, Data: $dataNotificacao, Agora: $agora');
-
         if ((dataNotificacao.isBefore(agora) || dataNotificacao.isAtSameMomentAs(agora))) {
           final jaExiste = _notificacoesDispararadas.any((n) => n.id == lembrete.id);
 
           if (!jaExiste) {
             _notificacoesDispararadas.insert(0, lembrete);
-            print('Notificação adicionada: ${lembrete.titulo}');
           }
         }
       }
     }
-
-    print('Total notificações disparadas: ${_notificacoesDispararadas.length}');
   }
 
   static void marcarTodasComoLidas() {
     for (var lembrete in _notificacoesDispararadas) {
       _notificacoesLidas.add(lembrete.id);
     }
-    print('Todas notificações marcadas como lidas');
   }
 
   static bool isLida(String lembreteId) {
@@ -132,6 +117,5 @@ class NotificationService {
   static void limparNotificacoes() {
     _notificacoesDispararadas.clear();
     _notificacoesLidas.clear();
-    print('Todas notificações limpas');
   }
 }

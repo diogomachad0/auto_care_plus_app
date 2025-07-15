@@ -312,7 +312,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         _controller.atividade.totalPago = totalFormatado;
       }
     } catch (e) {
-      print('Erro ao calcular total: $e');
     }
   }
 
@@ -687,8 +686,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         label: 'Estabelecimento',
         onPlaceSelected: (address, lat, lng) {
           _controller.setEstabelecimentoComCoordenadas(address, lat, lng);
-          print('Endereço selecionado: $address');
-          print('Coordenadas: $lat, $lng');
         },
         onChanged: (value) {
           _controller.atividade.estabelecimento = value;
