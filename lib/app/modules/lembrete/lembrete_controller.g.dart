@@ -53,6 +53,17 @@ mixin _$LembreteController on _LembreteControllerBase, Store {
       ActionController(name: '_LembreteControllerBase', context: context);
 
   @override
+  void _resetLembrete() {
+    final _$actionInfo = _$_LembreteControllerBaseActionController.startAction(
+        name: '_LembreteControllerBase._resetLembrete');
+    try {
+      return super._resetLembrete();
+    } finally {
+      _$_LembreteControllerBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void updateLembrete(String titulo, DateTime data, bool notificar) {
     final _$actionInfo = _$_LembreteControllerBaseActionController.startAction(
         name: '_LembreteControllerBase.updateLembrete');

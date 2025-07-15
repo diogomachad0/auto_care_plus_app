@@ -17,6 +17,14 @@ mixin _$MapaController on _MapaControllerBase, Store {
               () => super.atividadesComLocalizacao,
               name: '_MapaControllerBase.atividadesComLocalizacao'))
           .value;
+  Computed<List<AtividadeAgrupada>>? _$atividadesAgrupadasComputed;
+
+  @override
+  List<AtividadeAgrupada> get atividadesAgrupadas =>
+      (_$atividadesAgrupadasComputed ??= Computed<List<AtividadeAgrupada>>(
+              () => super.atividadesAgrupadas,
+              name: '_MapaControllerBase.atividadesAgrupadas'))
+          .value;
   Computed<dynamic>? _$veiculosComputed;
 
   @override
@@ -82,6 +90,7 @@ mixin _$MapaController on _MapaControllerBase, Store {
     return '''
 myPosition: ${myPosition},
 atividadesComLocalizacao: ${atividadesComLocalizacao},
+atividadesAgrupadas: ${atividadesAgrupadas},
 veiculos: ${veiculos},
 veiculoSelecionadoId: ${veiculoSelecionadoId},
 nomeVeiculoSelecionado: ${nomeVeiculoSelecionado}
