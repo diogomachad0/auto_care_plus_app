@@ -31,7 +31,9 @@ class CustomLoading extends StatelessWidget {
               ? Text(
                   textButton,
                 )
-              : const CircularProgressIndicator(
+              : CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: ThemeLight.colorScheme.primary,
                 ),
         );
       },
