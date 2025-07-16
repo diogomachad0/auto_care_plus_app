@@ -280,8 +280,11 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: colorScheme.secondary,
+        ),
       );
     }
 
@@ -605,13 +608,13 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
           if (atividade.litros.isNotEmpty) {
             details.add(TimelineDetail(
               icon: Icons.local_gas_station,
-              text: '${atividade.litros} L',
+              text: '${atividade.litros}L',
             ));
           }
           if (atividade.precoLitro.isNotEmpty) {
             details.add(TimelineDetail(
               icon: Icons.attach_money,
-              text: '${atividade.precoLitro}/L',
+              text: '${atividade.precoLitro.replaceAll(RegExp(r'[^\d,\.]'), '')}/L',
             ));
           }
           if (atividade.tipoCombustivel.isNotEmpty) {
@@ -666,7 +669,7 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
 
       if (atividade.observacoes.isNotEmpty) {
         details.add(TimelineDetail(
-          icon: Icons.note,
+          icon: Icons.note_add,
           text: atividade.observacoes,
         ));
       }
