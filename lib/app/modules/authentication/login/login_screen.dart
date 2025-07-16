@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> with ThemeMixin {
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                    color: colorScheme.primary,
                   ),
                 )
               : Image.asset(
