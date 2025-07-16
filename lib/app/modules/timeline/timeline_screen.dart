@@ -112,29 +112,35 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
                   color: Colors.white,
                 ),
               ),
-              IconButton(
-                onPressed: _showFilter,
-                icon: Stack(
-                  children: [
-                    const Icon(
-                      Icons.filter_list,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    if (_filtroAtivo?.hasFilters == true)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.orange,
-                            shape: BoxShape.circle,
-                          ),
+              GestureDetector(
+                onTap: _showFilter,
+                child: SizedBox(
+                  width: 48,
+                  height: 28,
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        const Icon(
+                          Icons.filter_list,
+                          color: Colors.white,
+                          size: 28,
                         ),
-                      ),
-                  ],
+                        if (_filtroAtivo?.hasFilters == true)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
