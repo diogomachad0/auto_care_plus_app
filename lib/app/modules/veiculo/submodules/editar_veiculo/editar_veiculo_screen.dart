@@ -2,6 +2,8 @@ import 'package:auto_care_plus_app/app/modules/veiculo/veiculo_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/route/route.dart';
 import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/text_field_custom/text_field_custom.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -228,17 +230,130 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
   Widget _buildForm() {
     return Column(
       children: [
+        TextFieldCustom(
+          controller: _modeloController,
+          label: 'Nome do veículo',
+          onChanged: (v) => controller.veiculo.modelo = v,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFieldCustom(
+                controller: _marcaController,
+                label: 'Marca',
+                onChanged: (v) => controller.veiculo.marca = v,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextFieldCustom(
+                controller: _anoController,
+                label: 'Ano',
+                onlyNumbers: true,
+                validator: (value) {
+                  final ano = int.tryParse(value);
+                  if (ano == null || ano < 1900 || ano > 2026) {
+                    return 'Ano inválido (1900 – 2026)';
+                  }
+                  return null;
+                },
+                onChanged: (v) => controller.veiculo.ano = int.tryParse(v) ?? 0,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFieldCustom(
+                controller: _placaController,
+                label: 'Placa',
+                toUpperCase: true,
+                onChanged: (v) => controller.veiculo.placa = v,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(7),
+                ],
+                validator: (value) {
+                  if (value.trim().isEmpty) {
+                    return 'Campo obrigatório';
+                  }
+                  if (value.length != 7) {
+                    return 'Deve conter 7 caracteres';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextFieldCustom(
+                controller: _quilometragemController,
+                label: 'Quilometragem',
+                keyboardType: TextInputType.number,
+                onChanged: (v) {
+                  String numericString = v.replaceAll(RegExp(r'[^\d]'), '');
+                  controller.veiculo.quilometragem = int.tryParse(numericString) ?? 0;
+                },
+                inputFormatters: [
+                  KmInputFormatter(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Observer(
+          builder: (_) => DropdownButtonFormField2<String>(
+            value: controller.veiculo.tipoCombustivel,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey[200],
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            style: textTheme.bodyMedium,
+            dropdownStyleData: DropdownStyleData(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              offset: const Offset(0, -2),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              maxHeight: 200,
+            ),
+            buttonStyleData: const ButtonStyleData(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              height: 40,
+              width: double.infinity,
+            ),
+            items: fuelTypes
+                .map(
+                  (fuel) => DropdownMenuItem<String>(
+                    value: fuel,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(fuel),
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) => controller.veiculo.tipoCombustivel = value!,
+          ),
+        ),
+        const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(8),
           ),
-          margin: const EdgeInsets.only(bottom: 16),
           child: TextField(
-            controller: _modeloController,
-            onChanged: (v) => controller.veiculo.modelo = v,
+            controller: _observacoesController,
+            maxLines: 4,
+            onChanged: (v) => controller.veiculo.observacoes = v,
             decoration: InputDecoration(
-              labelText: 'Nome do veículo',
+              labelText: 'Observações',
               labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
               filled: true,
               fillColor: Colors.grey[200],
@@ -246,123 +361,11 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              alignLabelWithHint: true,
             ),
           ),
         ),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.only(bottom: 16, right: 8),
-                child: TextField(
-                  controller: _marcaController,
-                  onChanged: (v) => controller.veiculo.marca = v,
-                  decoration: InputDecoration(
-                    labelText: 'Marca',
-                    labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.only(bottom: 16, left: 8),
-                child: TextField(
-                  controller: _anoController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => controller.veiculo.ano = int.tryParse(v) ?? 0,
-                  decoration: InputDecoration(
-                    labelText: 'Ano',
-                    labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.only(bottom: 16, right: 8),
-                child: TextField(
-                  controller: _placaController,
-                  onChanged: (v) => controller.veiculo.placa = v,
-                  decoration: InputDecoration(
-                    labelText: 'Placa',
-                    labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.only(bottom: 16, left: 8),
-                child: TextField(
-                  controller: _quilometragemController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [KmInputFormatter()],
-                  onChanged: (v) {
-                    String numericString = v.replaceAll(RegExp(r'[^\d]'), '');
-                    controller.veiculo.quilometragem = int.tryParse(numericString) ?? 0;
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Quilometragem',
-                    labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        _buildFuelTypeDropdown(),
-        const SizedBox(height: 16),
-        _buildObservationsField(),
         const SizedBox(height: 16),
       ],
     );
@@ -448,7 +451,7 @@ class _EditarVeiculoScreenState extends State<EditarVeiculoScreen> with ThemeMix
   Widget _buildSaveButton() {
     return Observer(
       builder: (_) {
-        final isValid = _modeloController.text.isNotEmpty && _marcaController.text.isNotEmpty && _placaController.text.isNotEmpty && _quilometragemController.text.isNotEmpty && _anoController.text.isNotEmpty && controller.veiculo.tipoCombustivel.isNotEmpty;
+        final isValid = controller.isFormValid;
 
         return FilledButton(
           style: FilledButton.styleFrom(
