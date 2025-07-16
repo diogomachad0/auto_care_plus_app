@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -60,7 +59,6 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
 
   void _showOverlay() {
     _removeOverlay();
-
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         width: MediaQuery.of(context).size.width - 32,
@@ -80,59 +78,56 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
               ),
               child: _isLoading
                   ? const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
                   : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _suggestions.length,
-                      itemBuilder: (context, index) {
-                        final place = _suggestions[index];
-                        return ListTile(
-                          leading: const Icon(Icons.location_on),
-                          title: Text(
-                            place.placeName,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          subtitle: Text(
-                            place.context,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          onTap: () {
-                            widget.controller.text = place.placeName;
-                            widget.onPlaceSelected?.call(
-                              place.placeName,
-                              place.latitude,
-                              place.longitude,
-                            );
-                            _removeOverlay();
-                            _focusNode.unfocus();
-                            setState(() {
-                              _suggestions.clear();
-                            });
-                          },
-                        );
-                      },
+                shrinkWrap: true,
+                itemCount: _suggestions.length,
+                itemBuilder: (context, index) {
+                  final place = _suggestions[index];
+                  return ListTile(
+                    leading: const Icon(Icons.location_on),
+                    title: Text(
+                      place.placeName,
+                      style: const TextStyle(fontSize: 14),
                     ),
+                    subtitle: Text(
+                      place.context,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    onTap: () {
+                      widget.controller.text = place.placeName;
+                      widget.onPlaceSelected?.call(
+                        place.placeName,
+                        place.latitude,
+                        place.longitude,
+                      );
+                      _removeOverlay();
+                      _focusNode.unfocus();
+                      setState(() {
+                        _suggestions.clear();
+                      });
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ),
       ),
     );
-
     Overlay.of(context).insert(_overlayEntry!);
   }
 
   void _onSearchChanged(String query) {
     widget.onChanged?.call(query);
-
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (query.length > 2) {
         _searchPlaces(query);
@@ -149,7 +144,6 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
     setState(() {
       _isLoading = true;
     });
-
     try {
       final encodedQuery = Uri.encodeComponent(query);
       final url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/$encodedQuery.json'
@@ -157,19 +151,15 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
           '&country=BR'
           '&language=pt'
           '&limit=5';
-
       final response = await http.get(Uri.parse(url));
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final features = data['features'] as List;
-
         setState(() {
           _suggestions = features.map((feature) {
             final coordinates = feature['center'] as List;
             final placeName = feature['place_name'] as String;
             final context = feature['context'] != null ? (feature['context'] as List).map((c) => c['text']).join(', ') : '';
-
             return MapboxPlace(
               placeName: placeName,
               latitude: coordinates[1].toDouble(),
@@ -179,7 +169,6 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
           }).toList();
           _isLoading = false;
         });
-
         if (_suggestions.isNotEmpty && _focusNode.hasFocus) {
           _showOverlay();
         } else {
@@ -217,16 +206,16 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             suffixIcon: _isLoading
                 ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
+              padding: EdgeInsets.all(12),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
                 : const Icon(Icons.search),
           ),
         ),
