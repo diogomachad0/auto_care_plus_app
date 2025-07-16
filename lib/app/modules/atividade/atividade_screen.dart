@@ -591,18 +591,18 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             isExpanded: true,
             focusNode: _veiculoDropdownFocusNode,
             decoration: InputDecoration(
-              labelText: 'Selecione o veículo',
+              labelText: 'Selecione um veículo',
               labelStyle: textTheme.bodyMedium?.copyWith(
                 color: _veiculoDropdownFocusNode.hasFocus || selectedVeiculoId != null ? colorScheme.primary : Colors.grey,
               ),
               filled: true,
               fillColor: Colors.grey[200],
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: colorScheme.primary, width: 1),
               ),
               contentPadding: const EdgeInsets.only(right: 8, left: 8),
@@ -914,7 +914,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         return fuelTypes.map((value) {
           return Row(
             children: [
-              const SizedBox(width: 10),
+              const SizedBox(width: 4),
               Text(
                 value,
                 style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
@@ -927,11 +927,9 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         final isSelected = value == selectedFuelType;
         return DropdownMenuItem<String>(
           value: value,
-          child: Text(
-            value,
-            style: textTheme.bodyMedium?.copyWith(
-              color: isSelected ? colorScheme.primary : colorScheme.secondary,
-            ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(value),
           ),
         );
       }).toList(),
