@@ -94,8 +94,11 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
                     }
 
                     if (_controller.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                      return Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.primary,
+                        ),
                       );
                     }
 
@@ -268,7 +271,7 @@ class _ContaScreenState extends State<ContaScreen> with ThemeMixin {
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                            color: colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: 8),
