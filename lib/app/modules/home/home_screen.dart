@@ -3,12 +3,12 @@ import 'dart:ui';
 import 'package:auto_care_plus_app/app/modules/home/home_controller.dart';
 import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
 import 'package:auto_care_plus_app/app/shared/services/notification_service/notification_service.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 import '../lembrete/lembrete_controller.dart';
 
@@ -57,7 +57,10 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
             child: Observer(
               builder: (_) {
                 if (_controller.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colorScheme.primary,
+                  ));
                 }
                 return RefreshIndicator(
                   onRefresh: _loadData,
@@ -253,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(right: 8, top: 8),
+          padding: const EdgeInsets.only(right: 8, top: 6),
           child: Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
@@ -263,11 +266,11 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                 });
               },
               child: Card(
+                elevation: 4,
                 color: Colors.grey[200],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Stack(
@@ -308,6 +311,8 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
           ),
         ),
         Card(
+          color: Colors.grey[200],
+          elevation: 4,
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -335,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
                       ],
                     ),
                     Text(
-                      'Relatório de gastos registrados',
+                      'Relatórios de despesas do veículo',
                       style: textTheme.bodySmall?.copyWith(
                         color: Colors.grey,
                         fontWeight: FontWeight.w300,
@@ -525,6 +530,20 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
   }
 
   Widget _buildExpenseChart(List<ExpenseCategory> expenses, double totalExpense) {
+    // Verifica se não há gastos ou se todos os gastos são zero
+    final nonZeroExpenses = expenses.where((e) => e.value > 0).toList();
+
+    if (nonZeroExpenses.isEmpty || totalExpense == 0) {
+      return Center(
+        child: Text(
+          'Nenhum gasto registrado',
+          style: textTheme.bodyMedium?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+      );
+    }
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -553,7 +572,6 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
       ],
     );
   }
-
   List<PieChartSectionData> _getChartSections(List<ExpenseCategory> expenses) {
     final nonZeroExpenses = expenses.where((e) => e.value > 0).toList();
     if (nonZeroExpenses.isEmpty) {
@@ -606,13 +624,16 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
     final List<String> tipImages = [
       'assets/img/dicas/dicas1.png',
       'assets/img/dicas/dicas2.png',
+      'assets/img/dicas/dicas3.png',
+      'assets/img/dicas/dicas4.png',
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.only(top: 16, left: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Text(
             'DICAS',
             style: textTheme.titleSmall?.copyWith(
@@ -621,46 +642,68 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
             ),
           ),
         ),
-        CarouselSlider.builder(
-          itemCount: tipImages.length,
-          itemBuilder: (BuildContext context, int index, int realIndex) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+        Card(
+          elevation: 4,
+          color: Colors.grey[200],
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dicas para o seu automóvel',
+                  style: textTheme.titleMedium,
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    tipImages[index],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
+                Text(
+                  'Dicas úteis para cuidar do seu veículo',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
-              ),
-            );
-          },
-          options: CarouselOptions(
-            height: 200,
-            autoPlay: true,
-            enlargeCenterPage: true,
-            aspectRatio: 16 / 9,
-
-            viewportFraction: 1,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentTipIndex = index;
-              });
-            },
+                const SizedBox(height: 8),
+                CarouselSlider.builder(
+                  itemCount: tipImages.length,
+                  itemBuilder: (BuildContext context, int index, int realIndex) {
+                    return Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          tipImages[index],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
+                    );
+                  },
+                  options: CarouselOptions(
+                    height: 200,
+                    autoPlay: true,
+                    autoPlayInterval: const Duration(seconds: 5),
+                    enlargeCenterPage: true,
+                    aspectRatio: 16 / 9,
+                    viewportFraction: 1,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        _currentTipIndex = index;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(tipImages.length, (index) => _buildTipPageIndicator(index)),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(tipImages.length, (index) => _buildTipPageIndicator(index)),
         ),
       ],
     );
@@ -772,7 +815,6 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        elevation: 0,
         backgroundColor: Colors.white,
         child: Container(
           width: MediaQuery.of(context).size.width * 0.9,
@@ -801,13 +843,13 @@ class _NotificacoesDialogState extends State<_NotificacoesDialog> with ThemeMixi
                 child: notificacoes.isEmpty
                     ? _buildEmptyState()
                     : ListView.separated(
-                  itemCount: notificacoes.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final lembrete = notificacoes[index];
-                    return _buildNotificacaoItem(lembrete);
-                  },
-                ),
+                        itemCount: notificacoes.length,
+                        separatorBuilder: (context, index) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final lembrete = notificacoes[index];
+                          return _buildNotificacaoItem(lembrete);
+                        },
+                      ),
               ),
               if (notificacoes.isNotEmpty) ...[
                 const SizedBox(height: 16),
