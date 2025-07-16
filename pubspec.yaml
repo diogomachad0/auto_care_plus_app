@@ -104,6 +104,8 @@ flutter:
     - assets/img/banners/conta.png
     - assets/img/dicas/dicas1.png
     - assets/img/dicas/dicas2.png
+    - assets/img/dicas/dicas3.png
+    - assets/img/dicas/dicas4.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
