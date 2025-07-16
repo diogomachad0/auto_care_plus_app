@@ -27,21 +27,16 @@ class CurrencyInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
     if (numericString.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     double value = double.parse(numericString) / 100;
-
     if (value > 999999.99) {
       value = 999999.99;
     }
 
     String formattedValue = _formatter.format(value);
-
     return TextEditingValue(
       text: formattedValue,
       selection: TextSelection.collapsed(offset: formattedValue.length),
@@ -58,21 +53,15 @@ class KmInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue;
     }
-
     String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
     if (numericString.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     int value = int.tryParse(numericString) ?? 0;
-
     if (value > 999999) {
       value = 999999;
     }
-
     String formattedValue = NumberFormat('#,###', 'pt_BR').format(value);
-
     return TextEditingValue(
       text: formattedValue,
       selection: TextSelection.collapsed(offset: formattedValue.length),
@@ -89,25 +78,18 @@ class LitrosInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue;
     }
-
     String cleanText = newValue.text.replaceAll(RegExp(r'[^\d,.]'), '');
-
     if (cleanText.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     String normalizedText = cleanText.replaceAll(',', '.');
-
     double? value = double.tryParse(normalizedText);
-
     if (value == null) {
       return oldValue;
     }
-
     if (value > 500) {
       value = 500;
     }
-
     String formattedValue;
     if (value == value.toInt()) {
       formattedValue = value.toInt().toString();
@@ -115,7 +97,6 @@ class LitrosInputFormatter extends TextInputFormatter {
       formattedValue = value.toStringAsFixed(2).replaceAll('.', ',');
       formattedValue = formattedValue.replaceAll(RegExp(r',?0+$'), '');
     }
-
     return TextEditingValue(
       text: formattedValue,
       selection: TextSelection.collapsed(offset: formattedValue.length),
@@ -138,21 +119,15 @@ class PrecoLitroInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
     if (numericString.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     double value = double.parse(numericString) / 1000;
-
     if (value > 99.999) {
       value = 99.999;
     }
-
     String formattedValue = _formatter.format(value);
-
     return TextEditingValue(
       text: formattedValue,
       selection: TextSelection.collapsed(offset: formattedValue.length),
@@ -169,19 +144,14 @@ class ParcelaInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue;
     }
-
     String numericString = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
     if (numericString.isEmpty) {
       return newValue.copyWith(text: '');
     }
-
     int value = int.tryParse(numericString) ?? 0;
-
     if (value > 120) {
       value = 120;
     }
-
     return TextEditingValue(
       text: value.toString(),
       selection: TextSelection.collapsed(offset: value.toString().length),
@@ -207,12 +177,13 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   final TextEditingController _estabelecimentoController = TextEditingController();
   final TextEditingController _numeroParcelaController = TextEditingController();
   final TextEditingController _observacoesController = TextEditingController();
-
   final AtividadeController _controller = Modular.get<AtividadeController>();
-
   String selectedActivityType = 'Abastecimento';
   String selectedFuelType = 'Gasolina';
   String? selectedVeiculoId;
+
+  final FocusNode _observacoesFocusNode = FocusNode();
+  final FocusNode _veiculoDropdownFocusNode = FocusNode();
 
   final List<String> activityTypes = [
     'Abastecimento',
@@ -225,7 +196,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     'Impostos',
     'Outros',
   ];
-
   final List<String> fuelTypes = [
     'Gasolina',
     'Etanol',
@@ -237,9 +207,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
   @override
   void initState() {
     super.initState();
-
     _controller.loadVeiculos();
-
     if (widget.atividadeId != null) {
       _loadAtividade();
     } else {
@@ -247,6 +215,12 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         _resetFormCompletely();
       });
     }
+    _observacoesFocusNode.addListener(() {
+      setState(() {});
+    });
+    _veiculoDropdownFocusNode.addListener(() {
+      setState(() {});
+    });
   }
 
   void _resetFormCompletely() {
@@ -258,13 +232,11 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _estabelecimentoController.clear();
     _numeroParcelaController.clear();
     _observacoesController.clear();
-
     setState(() {
       selectedActivityType = 'Abastecimento';
       selectedFuelType = 'Gasolina';
       selectedVeiculoId = null;
     });
-
     _controller.resetForm();
   }
 
@@ -275,7 +247,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
   void _updateControllers() {
     final atividade = _controller.atividade;
-
     setState(() {
       selectedActivityType = atividade.tipoAtividade;
       selectedVeiculoId = atividade.veiculoId.isNotEmpty ? atividade.veiculoId : null;
@@ -295,24 +266,19 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     try {
       String litrosText = _litrosController.text.replaceAll(',', '.');
       String precoText = _precoLitroController.text.replaceAll(RegExp(r'[^\d,.]'), '').replaceAll(',', '.');
-
       double litros = double.tryParse(litrosText) ?? 0;
       double preco = double.tryParse(precoText) ?? 0;
-
       if (litros > 0 && preco > 0) {
         double total = litros * preco;
-
         String totalFormatado = NumberFormat.currency(
           locale: 'pt_BR',
           symbol: 'R\$ ',
           decimalDigits: 2,
         ).format(total);
-
         _totalPagoController.text = totalFormatado;
         _controller.atividade.totalPago = totalFormatado;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override
@@ -325,6 +291,8 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _estabelecimentoController.dispose();
     _numeroParcelaController.dispose();
     _observacoesController.dispose();
+    _observacoesFocusNode.dispose();
+    _veiculoDropdownFocusNode.dispose();
     super.dispose();
   }
 
@@ -501,7 +469,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _precoLitroController.clear();
     _estabelecimentoController.clear();
     _numeroParcelaController.clear();
-
     _controller.atividade.km = '';
     _controller.atividade.totalPago = '';
     _controller.atividade.litros = '';
@@ -510,9 +477,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     _controller.atividade.numeroParcela = '';
     _controller.atividade.latitude = '';
     _controller.atividade.longitude = '';
-
     _controller.atividade.tipoAtividade = selectedActivityType;
-
     setState(() {
       selectedFuelType = 'Gasolina';
     });
@@ -566,7 +531,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
     return Observer(
       builder: (_) {
         final veiculos = _controller.veiculos;
-
         if (veiculos.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(8),
@@ -617,7 +581,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
             ),
           );
         }
-
         return Container(
           decoration: BoxDecoration(
             color: Colors.grey[200],
@@ -626,25 +589,33 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           child: DropdownButtonFormField2<String>(
             value: selectedVeiculoId,
             isExpanded: true,
+            focusNode: _veiculoDropdownFocusNode,
             decoration: InputDecoration(
               labelText: 'Selecione o veículo',
-              labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
+              labelStyle: textTheme.bodyMedium?.copyWith(
+                color: _veiculoDropdownFocusNode.hasFocus || selectedVeiculoId != null ? colorScheme.primary : Colors.grey,
+              ),
               filled: true,
               fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.only(right: 8),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: colorScheme.primary, width: 1),
+              ),
+              contentPadding: const EdgeInsets.only(right: 8, left: 8),
             ),
             buttonStyleData: ButtonStyleData(
+              padding: EdgeInsets.zero,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             dropdownStyleData: DropdownStyleData(
-              offset: const Offset(0, -2),
+              offset: const Offset(0, -4),
               padding: const EdgeInsets.symmetric(vertical: 4),
               maxHeight: 200,
               decoration: BoxDecoration(
@@ -680,7 +651,7 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
 
   Widget _buildEstabelecimentoField() {
     return SizedBox(
-      height: 46,
+      height: 48,
       child: MapboxPlaceSearch(
         controller: _estabelecimentoController,
         label: 'Estabelecimento',
@@ -761,7 +732,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           const SizedBox(height: 16),
         ]);
         break;
-
       case 'Troca de óleo':
         fields.addAll([
           Row(
@@ -794,7 +764,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           _buildEstabelecimentoField(),
         ]);
         break;
-
       case 'Lavagem':
         fields.addAll([
           TextFieldCustom(
@@ -809,7 +778,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           _buildEstabelecimentoField(),
         ]);
         break;
-
       case 'Seguro':
         fields.addAll([
           TextFieldCustom(
@@ -823,7 +791,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           ),
         ]);
         break;
-
       case 'Serviço mecânico':
         fields.addAll([
           TextFieldCustom(
@@ -838,7 +805,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           _buildEstabelecimentoField(),
         ]);
         break;
-
       case 'Financiamento':
         fields.addAll([
           Row(
@@ -870,7 +836,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           ),
         ]);
         break;
-
       case 'Compras':
         fields.addAll([
           TextFieldCustom(
@@ -884,7 +849,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           ),
         ]);
         break;
-
       case 'Impostos':
         fields.addAll([
           TextFieldCustom(
@@ -898,7 +862,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
           ),
         ]);
         break;
-
       case 'Outros':
         fields.addAll([
           TextFieldCustom(
@@ -914,7 +877,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         ]);
         break;
     }
-
     return fields;
   }
 
@@ -990,18 +952,33 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
       ),
       child: TextField(
         controller: _observacoesController,
+        focusNode: _observacoesFocusNode,
         maxLines: 4,
         onChanged: (value) {
           _controller.atividade.observacoes = value;
         },
         decoration: InputDecoration(
           labelText: 'Observações',
-          labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          labelStyle: textTheme.bodyMedium?.copyWith(
+            color: _observacoesFocusNode.hasFocus || _observacoesController.text.isNotEmpty ? colorScheme.primary : Colors.grey,
+          ),
           filled: true,
           fillColor: Colors.grey[200],
-          border: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: colorScheme.error, width: 1),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           alignLabelWithHint: true,
@@ -1068,7 +1045,6 @@ class _AtividadeScreenState extends State<AtividadeScreen> with ThemeMixin {
         );
       },
     );
-
     if (picked != null) {
       setState(() {
         _dataController.text = "${picked.day.toString().padLeft(2, '0')}/"
