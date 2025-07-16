@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:auto_care_plus_app/app/shared/mixin/theme_mixin.dart';
+import 'package:auto_care_plus_app/app/shared/widgets/dialog_custom/dialog_error.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZGlvZ29tYWNoYWRvIiwiYSI6ImNtYjc2dXkwaDA3NGUyam4wMnJ4cHJyc2MifQ.UCZ3qN_mb80hb82sa6jmog';
@@ -23,9 +27,10 @@ class MapboxPlaceSearch extends StatefulWidget {
   State<MapboxPlaceSearch> createState() => _MapboxPlaceSearchState();
 }
 
-class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
+class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> with ThemeMixin {
   List<MapboxPlace> _suggestions = [];
   bool _isLoading = false;
+  bool _isLocating = false;
   Timer? _debounce;
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
@@ -35,12 +40,18 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
   void initState() {
     super.initState();
     _focusNode.addListener(_onFocusChange);
+    _focusNode.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
     _focusNode.removeListener(_onFocusChange);
+    _focusNode.removeListener(() {
+      setState(() {});
+    });
     _focusNode.dispose();
     _removeOverlay();
     super.dispose();
@@ -78,45 +89,45 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
               ),
               child: _isLoading
                   ? const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              )
-                  : ListView.builder(
-                shrinkWrap: true,
-                itemCount: _suggestions.length,
-                itemBuilder: (context, index) {
-                  final place = _suggestions[index];
-                  return ListTile(
-                    leading: const Icon(Icons.location_on),
-                    title: Text(
-                      place.placeName,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    subtitle: Text(
-                      place.context,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(),
                       ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _suggestions.length,
+                      itemBuilder: (context, index) {
+                        final place = _suggestions[index];
+                        return ListTile(
+                          leading: const Icon(Icons.location_on),
+                          title: Text(
+                            place.placeName,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          subtitle: Text(
+                            place.context,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          onTap: () {
+                            widget.controller.text = place.placeName;
+                            widget.onPlaceSelected?.call(
+                              place.placeName,
+                              place.latitude,
+                              place.longitude,
+                            );
+                            _removeOverlay();
+                            _focusNode.unfocus();
+                            setState(() {
+                              _suggestions.clear();
+                            });
+                          },
+                        );
+                      },
                     ),
-                    onTap: () {
-                      widget.controller.text = place.placeName;
-                      widget.onPlaceSelected?.call(
-                        place.placeName,
-                        place.latitude,
-                        place.longitude,
-                      );
-                      _removeOverlay();
-                      _focusNode.unfocus();
-                      setState(() {
-                        _suggestions.clear();
-                      });
-                    },
-                  );
-                },
-              ),
             ),
           ),
         ),
@@ -151,6 +162,7 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
           '&country=BR'
           '&language=pt'
           '&limit=5';
+
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -174,14 +186,114 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
         } else {
           _removeOverlay();
         }
+      } else {
+        if (mounted) {
+          DialogError.show(context, 'Erro na API Mapbox: ${response.statusCode} - ${response.body}', StackTrace.current);
+        }
+        setState(() {
+          _suggestions.clear();
+          _isLoading = false;
+        });
+        _removeOverlay();
       }
-    } catch (e) {
+    } catch (e, s) {
+      if (mounted) {
+        DialogError.show(context, 'Erro na busca Mapbox: ${e.toString()}', s);
+      }
       setState(() {
         _isLoading = false;
         _suggestions.clear();
       });
       _removeOverlay();
     }
+  }
+
+  Future<void> _getCurrentLocationAndReverseGeocode() async {
+    if (_isLocating || _isLoading) return;
+
+    setState(() {
+      _isLocating = true;
+      _removeOverlay();
+    });
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          DialogError.show(context, 'Serviços de localização desabilitados. Por favor, habilite-os.', StackTrace.current);
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            DialogError.show(context, 'Permissão de localização negada. Não é possível obter a localização.', StackTrace.current);
+          }
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          DialogError.show(context, 'Permissão de localização negada permanentemente. Vá para as configurações do aplicativo para habilitar.', StackTrace.current);
+        }
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      double lat = position.latitude;
+      double lng = position.longitude;
+
+      final address = await _reverseGeocode(lat, lng);
+
+      if (address != null) {
+        widget.controller.text = address;
+        widget.onPlaceSelected?.call(address, lat, lng);
+        _focusNode.unfocus();
+      } else {
+        if (mounted) {
+          DialogError.show(context, 'Não foi possível encontrar o endereço para a localização atual.', StackTrace.current);
+        }
+      }
+    } catch (e, s) {
+      if (mounted) {
+        DialogError.show(context, 'Erro ao obter localização: ${e.toString()}. Verifique as permissões e o GPS.', s);
+      }
+    } finally {
+      setState(() {
+        _isLocating = false;
+      });
+    }
+  }
+
+  Future<String?> _reverseGeocode(double lat, double lng) async {
+    try {
+      final url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/$lng,$lat.json'
+          '?access_token=$MAPBOX_ACCESS_TOKEN'
+          '&country=BR'
+          '&language=pt'
+          '&limit=1';
+
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final features = data['features'] as List;
+        if (features.isNotEmpty) {
+          return features[0]['place_name'] as String;
+        }
+      } else {
+        if (mounted) {
+          DialogError.show(context, 'Erro na API de Geocodificação Reversa Mapbox: ${response.statusCode} - ${response.body}', StackTrace.current);
+        }
+      }
+    } catch (e, s) {
+      if (mounted) {
+        DialogError.show(context, 'Erro na geocodificação reversa: ${e.toString()}', s);
+      }
+    }
+    return null;
   }
 
   @override
@@ -199,24 +311,35 @@ class _MapboxPlaceSearchState extends State<MapboxPlaceSearch> {
           onChanged: _onSearchChanged,
           decoration: InputDecoration(
             labelText: widget.label,
-            labelStyle: TextStyle(color: Colors.grey[600]),
+            labelStyle: TextStyle(
+              color: _focusNode.hasFocus || widget.controller.text.isNotEmpty ? colorScheme.primary : Colors.grey[600],
+            ),
             filled: true,
             fillColor: Colors.grey[200],
-            border: OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
             ),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: colorScheme.primary, width: 1)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            suffixIcon: _isLoading
-                ? const Padding(
-              padding: EdgeInsets.all(12),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-                : const Icon(Icons.search),
+            suffixIcon: _isLoading || _isLocating
+                ? Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.secondary,
+                      ),
+                    ),
+                  )
+                : _focusNode.hasFocus
+                    ? IconButton(
+                        icon: const Icon(Icons.my_location_sharp),
+                        onPressed: _getCurrentLocationAndReverseGeocode,
+                      )
+                    : const Icon(Icons.search),
           ),
         ),
       ),
