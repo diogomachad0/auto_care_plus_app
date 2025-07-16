@@ -652,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> with ThemeMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Dicas para o seu automóvel',
+                  'Dicas para o seu veículo',
                   style: textTheme.titleMedium,
                 ),
                 Text(
