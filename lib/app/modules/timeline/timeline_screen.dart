@@ -425,52 +425,67 @@ class _TimelineScreenState extends State<TimelineScreen> with ThemeMixin {
         final veiculoNome = _controller.nomeVeiculoSelecionado;
 
         return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                hasActiveFilters ? Icons.filter_list_off : Icons.timeline,
-                size: 64,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                hasActiveFilters ? 'Nenhuma atividade encontrada com os filtros aplicados' : 'Nenhuma atividade encontrada',
-                style: textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  hasActiveFilters ? Icons.filter_list_off : Icons.timeline,
+                  size: 64,
+                  color: Colors.grey[400],
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                hasActiveFilters
-                    ? 'Tente ajustar os filtros para ver mais resultados'
-                    : isFiltered
-                        ? 'Não há atividades para o veículo $veiculoNome'
-                        : 'Adicione sua primeira atividade para começar!',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
+                const SizedBox(height: 16),
+                Text(
+                  hasActiveFilters ? 'Nenhuma atividade encontrada com os filtros aplicados' : 'Nenhuma atividade encontrada',
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              if (hasActiveFilters)
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _filtroAtivo = null;
-                    });
-                  },
-                  child: const Text('Limpar Filtros'),
-                )
-              else if (isFiltered)
-                TextButton(
-                  onPressed: () {
-                    _controller.setVeiculoSelecionado(null);
-                  },
-                  child: const Text('Ver todas as atividades'),
+                Text(
+                  hasActiveFilters
+                      ? 'Tente ajustar os filtros para ver mais resultados'
+                      : isFiltered
+                          ? 'Não há atividades para o veículo $veiculoNome'
+                          : 'Adicione sua primeira atividade para começar!',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[500],
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-            ],
+                const SizedBox(height: 16),
+                if (hasActiveFilters)
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(100, 46),
+                      backgroundColor: colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _filtroAtivo = null;
+                      });
+                    },
+                    child: Text(
+                      'Limpar filtro',
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                  )
+                else if (isFiltered)
+                  TextButton(
+                    onPressed: () {
+                      _controller.setVeiculoSelecionado(null);
+                    },
+                    child: const Text('Ver todas as atividades'),
+                  ),
+              ],
+            ),
           ),
         );
       },
