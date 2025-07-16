@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:latlong2/latlong.dart';
 
 import 'mapa_controller.dart';
 import 'widgets/simple_map_marker.dart';
@@ -20,18 +19,39 @@ class MapaScreen extends StatefulWidget {
   State<MapaScreen> createState() => _MapaScreenState();
 }
 
-class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
+class _MapaScreenState extends State<MapaScreen> with ThemeMixin, TickerProviderStateMixin {
   final MapaController controller = Modular.get<MapaController>();
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
     controller.mapaController();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _animationController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   double _getResponsiveIconSize(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
     if (screenWidth < 360) {
       return 24.0;
     } else if (screenWidth < 600) {
@@ -109,7 +129,6 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           child: Observer(
             builder: (_) {
               final veiculos = controller.veiculos;
-
               return DropdownButtonFormField2<String?>(
                 isExpanded: true,
                 value: controller.veiculoSelecionadoId,
@@ -160,16 +179,16 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
                     ),
                     ...veiculos.map((veiculo) {
                       return Row(
-                          children: [
+                        children: [
                           const Icon(Icons.directions_car),
-                      SizedBox(width: 10),
-                      Expanded(
-                      child: Text(
-                      '${veiculo.modelo} - ${veiculo.placa}',
-                      overflow: TextOverflow.ellipsis,
-                      ),
-                      ),
-                      ]
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '${veiculo.modelo} - ${veiculo.placa}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       );
                     }).toList(),
                   ];
@@ -239,11 +258,8 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
         }
 
         List<Marker> markers = [];
-
-        // Usa atividades agrupadas ao invés de individuais
         for (var grupo in controller.atividadesAgrupadas) {
           final priceText = 'R\$ ${grupo.valorTotal.toStringAsFixed(2).replaceAll('.', ',')}';
-
           markers.add(
             Marker(
               width: 90,
@@ -262,26 +278,83 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
           );
         }
 
-        return FlutterMap(
-          options: MapOptions(
-            center: controller.myPosition,
-            minZoom: 5,
-            zoom: 18,
-            maxZoom: 20,
-            interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-          ),
-          nonRotatedChildren: [
-            TileLayer(
-              urlTemplate: 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
-              additionalOptions: const {
-                'accessToken': MAPBOX_ACCESS_TOKEN,
-                'id': 'mapbox/streets-v12',
-              },
+        return Stack(
+          children: [
+            FlutterMap(
+              options: MapOptions(
+                center: controller.myPosition,
+                minZoom: 5,
+                zoom: 18,
+                maxZoom: 20,
+                interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              ),
+              nonRotatedChildren: [
+                TileLayer(
+                  urlTemplate: 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
+                  additionalOptions: const {
+                    'accessToken': MAPBOX_ACCESS_TOKEN,
+                    'id': 'mapbox/streets-v12',
+                  },
+                ),
+                MarkerLayer(markers: markers),
+              ],
             ),
-            MarkerLayer(markers: markers),
+            if (controller.atividadesAgrupadas.isEmpty)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () {
+                    _showEmptyMapDialog(context);
+                  },
+                  child: AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: _animation.value,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.warning_rounded,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
           ],
         );
       },
+    );
+  }
+
+  void _showEmptyMapDialog(BuildContext context) {
+    const String message = '''Ops! Seu mapa está vazio.
+Parece que você ainda não registrou nenhuma atividade com localização. Que tal começar a documentar suas aventuras automotivas?''';
+
+    DialogInfo.show(
+      context,
+      'Você está sem atividades registradas!',
+      message,
     );
   }
 
@@ -289,28 +362,22 @@ class _MapaScreenState extends State<MapaScreen> with ThemeMixin {
     String message = 'Estabelecimento: ${grupo.estabelecimento}\n';
     message += 'Total de atividades: ${grupo.atividades.length}\n';
     message += 'Valor total: R\$ ${grupo.valorTotal.toStringAsFixed(2).replaceAll('.', ',')}\n\n';
-
     message += 'Detalhes das atividades:\n';
-
     for (int i = 0; i < grupo.atividades.length; i++) {
       final atividade = grupo.atividades[i];
       message += '${i + 1}. ${atividade.tipoAtividade}\n';
       message += '   Data: ${atividade.data}\n';
-
       if (atividade.totalPago.isNotEmpty) {
         final valor = CurrencyParser.parseToDouble(atividade.totalPago);
         message += '   Valor: R\$ ${valor.toStringAsFixed(2).replaceAll('.', ',')}\n';
       }
-
       if (atividade.km.isNotEmpty) {
         message += '   Km: ${atividade.km}\n';
       }
-
       if (i < grupo.atividades.length - 1) {
         message += '\n';
       }
     }
-
     DialogInfo.show(
       context,
       'Atividades no local',
