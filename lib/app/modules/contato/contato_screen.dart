@@ -170,7 +170,7 @@ class _ContatoScreenState extends State<ContatoScreen> with ThemeMixin {
                             height: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                              color: colorScheme.primary,
                             ),
                           ),
                           const SizedBox(width: 8),
